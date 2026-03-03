@@ -20,28 +20,24 @@ export class UserService {
     mezonUserId: string;
     username: string;
     avatar?: string | null;
+    email: string;
   }): Promise<User> {
-    const { mezonUserId, username, avatar } = params;
+    const { mezonUserId, username, avatar, email } = params;
 
-    const existing = await this.findByMezonUserId(mezonUserId);
-    if (existing) {
-      return this.prisma.user.update({
-        where: { mezonUserId },
-        data: {
-          username,
-          avatar: avatar ?? existing.avatar,
-        },
-      });
-    }
-
-    return this.prisma.user.create({
-      data: {
+    return this.prisma.user.upsert({
+      where: { mezonUserId },
+      update: {
+        username,
+        avatar: avatar ?? '',
+        email,
+      },
+      create: {
         mezonUserId,
         username,
         avatar: avatar ?? '',
         role: 'student',
+        email,
       },
     });
   }
 }
-

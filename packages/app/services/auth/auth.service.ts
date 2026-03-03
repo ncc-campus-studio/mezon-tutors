@@ -1,4 +1,4 @@
-import { getApiBaseUrl } from '../api';
+import { apiClient } from '@mezon-tutors/app/services/api-client';
 
 export type AuthTokens = {
   accessToken: string;
@@ -24,58 +24,28 @@ export type MeResponse = {
   avatar?: string | null;
 };
 
-class AuthService {
-  private get baseUrl() {
-    return getApiBaseUrl();
-  }
+type AuthUrlResponse = {
+  url: string;
+};
 
+class AuthService {
   async getAuthUrl(): Promise<string> {
-    const res = await fetch(`${this.baseUrl}/auth/url`);
-    if (!res.ok) throw new Error('Failed to fetch auth url');
-    const raw = await res.json();
-    const url = raw?.url ?? raw?.data?.url;
-    if (!url) throw new Error('Invalid auth URL response');
-    return url;
+    const res = await apiClient.get<AuthUrlResponse>(`/auth/url`);
+    return res.url;
   }
 
   async exchangeCode(code: string, state?: string): Promise<ExchangeResponse> {
-    const res = await fetch(`${this.baseUrl}/auth/mezon/exchange`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, state }),
-    });
-    const raw = await res.json();
-    const data = raw?.data != null ? raw.data : raw;
-
-    if (!res.ok) {
-      const message = data?.message ?? raw?.message ?? 'Failed to complete login.';
-      throw new Error(message);
-    }
-
-    if (!data?.tokens?.accessToken) {
-      throw new Error('API response missing tokens.accessToken');
-    }
-
-    return {
-      user: data.user,
-      tokens: data.tokens,
-    };
+    const data = await apiClient.post<ExchangeResponse>('/auth/mezon/exchange', { code, state });
+    return data;
   }
 
-  async getMe(accessToken: string): Promise<MeResponse> {
-    const res = await fetch(`${this.baseUrl}/auth/me`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (!res.ok) throw new Error('Invalid token');
-    const raw = await res.json();
-    return raw?.data != null ? raw.data : raw;
+  async getMe(): Promise<MeResponse> {
+    const res = await apiClient.get<MeResponse>('/auth/me');
+    return res;
   }
 
-  async logout(accessToken: string): Promise<void> {
-    await fetch(`${this.baseUrl}/auth/logout`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+  async logout(): Promise<void> {
+    await apiClient.post('/auth/logout');
   }
 }
 

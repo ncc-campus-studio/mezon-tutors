@@ -5,6 +5,7 @@ CREATE TABLE "users" (
     "username" TEXT NOT NULL,
     "avatar" TEXT NOT NULL,
     "role" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")

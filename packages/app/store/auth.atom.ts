@@ -29,7 +29,7 @@ export const initAuthAtom = atom(null, async (get, set) => {
   }
 
   try {
-    const data = await authService.getMe(token);
+    const data = await authService.getMe();
 
     set(userAtom, {
       id: data.sub ?? data.id ?? '',
@@ -49,7 +49,7 @@ export const loginAtom = atom(null, async (_, set, { accessToken }: { accessToke
   set(accessTokenAtom, accessToken);
 
   try {
-    const data = await authService.getMe(accessToken);
+    const data = await authService.getMe();
 
     set(userAtom, {
       id: data.sub ?? data.id ?? '',
@@ -73,7 +73,7 @@ export const logoutAtom = atom(null, async (get, set) => {
 
   if (token) {
     try {
-      await authService.logout(token);
+      await authService.logout();
     } catch {}
   }
 });

@@ -1,5 +1,5 @@
-import CallbackComponent from '@mezon-tutors/app/components/auth/CallbackComponent';
+import CallbackPage from '@mezon-tutors/app/components/auth/CallbackPage';
 
 export default function Page() {
-  return <CallbackComponent />;
+  return <CallbackPage />;
 }

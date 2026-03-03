@@ -52,8 +52,6 @@ export function LoginButton() {
           return;
         }
 
-        window.localStorage.setItem('accessToken', tokens.accessToken);
-
         if (tokens.refreshToken) {
           window.localStorage.setItem('refreshToken', tokens.refreshToken);
         }
