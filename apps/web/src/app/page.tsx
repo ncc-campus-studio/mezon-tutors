@@ -1,8 +1,8 @@
-import { Header, Hero, Stats } from "src/components";
+import { Header, Hero, Stats } from 'src/components';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <Header />
       <main>
         <Hero />

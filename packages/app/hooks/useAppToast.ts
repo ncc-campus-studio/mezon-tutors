@@ -11,18 +11,28 @@ export function useAppToast() {
     show: (title: string, message?: string) => {
       toast.show(title, { message });
     },
+
     success: (title: string, message?: string) => {
       toast.show(title, {
         message,
-        type: 'success', // Assuming the toast component can handle types or styles accordingly
+        type: 'success',
       });
     },
+
     error: (title: string, message?: string) => {
       toast.show(title, {
         message,
         type: 'error',
       });
     },
+
+    info: (title: string, message?: string) => {
+      toast.show(title, {
+        message,
+        type: 'info',
+      });
+    },
+
     hide: () => {
       toast.hide();
     },

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { AppProviders } from './providers';
 import AuthInitializer from '@mezon-tutors/app/components/AuthInitializer';
+import { ToastViewport } from '@mezon-tutors/app/ui';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,10 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressHydrationWarning
+    >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AuthInitializer />
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <AuthInitializer />
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

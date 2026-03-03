@@ -1,3 +1,5 @@
+import { themes } from './../theme/theme';
+import { tokens } from './../theme/token';
 import { defaultConfig } from '@tamagui/config/v4';
 import { createTamagui } from 'tamagui';
 import { bodyFont, headingFont } from './fonts';
@@ -40,43 +42,7 @@ export const config = createTamagui({
     body: bodyFont,
     heading: headingFont,
   },
-  // Extend tokens with global brand design tokens.
-  tokens: {
-    ...defaultConfig.tokens,
-    color: {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      ...(defaultConfig.tokens as any).color,
-      // Global page background (≈ Tailwind gray-50)
-      appBackground: '#f9fafb',
-      // Primary brand color (#4d49fc)
-      appPrimary: '#4d49fc',
-      // Secondary brand accent
-      appSecondary: '#6366f1',
-      // Primary text color used in designs (#272a3c)
-      appText: '#272a3c',
-      // Subtle gray border for inputs and secondary buttons
-      appBorderSubtle: 'rgba(39,42,60,0.08)',
-      // Strong border / outline
-      appBorderEmphasis: '#4d49fc',
-      // Success states
-      appSuccess: '#13e17a',
-      appSuccessBackground: '#f0fdf4',
-      // Neutral subtle backgrounds
-      appPillBackground: '#f3f4f5',
-      // Selection states
-      appSelectedBackground: '#F1F1FF',
-      appUnselectedBackground: '#F4F5F7',
-      // Transparent helpers
-      appWhiteSubtle: 'rgba(255,255,255,0.7)',
-      appShadow: 'rgba(0,0,0,0.06)',
-      appIconSubtle: 'rgba(39,42,60,0.5)',
-    },
-    radius: {
-      ...defaultConfig.tokens.radius,
-      appCard: 24,
-      appPill: 999,
-    },
-  },
+  tokens,
   media: {
     xs: { maxWidth: 660 },
     sm: { maxWidth: 800 },
@@ -97,4 +63,5 @@ export const config = createTamagui({
     ...defaultConfig.settings,
     onlyAllowShorthands: false,
   },
+  themes,
 });
