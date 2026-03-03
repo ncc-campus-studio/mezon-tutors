@@ -2,6 +2,7 @@
 export * from './types/user';
 export * from './types/pagination';
 export * from './types/api-response';
+export * from './types/auth';
 
 // Constants
 export * from './constants/routes';

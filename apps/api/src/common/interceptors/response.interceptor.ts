@@ -11,11 +11,17 @@ export class ResponseInterceptor<T>
     context: ExecutionContext,
     next: CallHandler
   ): Observable<ApiResponse<T> | PaginatedResponse<T>> {
+    const request = context
+      .switchToHttp()
+      .getRequest<{ originalUrl?: string; url?: string; path?: string }>();
+
     return next.handle().pipe(
-      map((data) => ({
-        data,
-        error: null,
-      }))
+      map((data) => {
+        return {
+          data,
+          error: null,
+        };
+      })
     );
   }
 }

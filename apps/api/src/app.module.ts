@@ -5,6 +5,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SharedModule } from './shared/shared.module';
 import { HealthController } from './health.controller';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     }),
     SharedModule,
     PrismaModule,
+    AuthModule,
   ],
   controllers: [HealthController],
   providers: [

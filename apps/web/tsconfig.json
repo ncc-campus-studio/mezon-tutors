@@ -1,16 +1,10 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
     "paths": {
-      "react-native": [
-        "react-native-web"
-      ]
+      "react-native": ["react-native-web"]
     },
     "allowJs": true,
     "skipLibCheck": true,
@@ -35,11 +29,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "src/postcss.config.mjs"
   ],
-  "exclude": [
-    "node_modules",
-    ".next",
-    ".tamagui"
-  ]
+  "exclude": ["node_modules", ".next", ".tamagui"]
 }

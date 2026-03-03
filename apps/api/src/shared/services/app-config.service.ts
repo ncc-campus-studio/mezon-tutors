@@ -17,6 +17,22 @@ const envSchema = z.object({
 
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+
+  // Auth / JWT
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+  JWT_REFRESH_SECRET: z.string().optional(),
+
+  // OAuth (Mezon)
+  MEZON_OAUTH_URL: z
+    .string()
+    .url('MEZON_OAUTH_URL must be a valid URL')
+    .min(1, 'MEZON_OAUTH_URL is required'),
+  CLIENT_ID: z.string().min(1, 'CLIENT_ID is required'),
+  CLIENT_SECRET: z.string().min(1, 'CLIENT_SECRET is required'),
+  REDIRECT_URI: z
+    .string()
+    .url('REDIRECT_URI must be a valid URL')
+    .min(1, 'REDIRECT_URI is required'),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
@@ -33,6 +49,12 @@ export class AppConfigService {
       CORS_ORIGINS: this.configService.get('CORS_ORIGINS'),
       FRONTEND_URL: this.configService.get('FRONTEND_URL'),
       DATABASE_URL: this.configService.get('DATABASE_URL'),
+      JWT_SECRET: this.configService.get('JWT_SECRET'),
+      JWT_REFRESH_SECRET: this.configService.get('JWT_REFRESH_SECRET'),
+      MEZON_OAUTH_URL: this.configService.get('MEZON_OAUTH_URL'),
+      CLIENT_ID: this.configService.get('CLIENT_ID'),
+      CLIENT_SECRET: this.configService.get('CLIENT_SECRET'),
+      REDIRECT_URI: this.configService.get('REDIRECT_URI'),
     };
 
     try {
@@ -68,6 +90,30 @@ export class AppConfigService {
 
   get databaseUrl(): string {
     return this.env.DATABASE_URL;
+  }
+
+  get jwtSecret(): string {
+    return this.env.JWT_SECRET;
+  }
+
+  get jwtRefreshSecret(): string {
+    return this.env.JWT_REFRESH_SECRET || this.env.JWT_SECRET;
+  }
+
+  get jwtConfig() {
+    return {
+      secret: this.jwtSecret,
+      refreshSecret: this.jwtRefreshSecret,
+    };
+  }
+
+  get oauthConfig() {
+    return {
+      baseUri: this.env.MEZON_OAUTH_URL,
+      clientId: this.env.CLIENT_ID,
+      clientSecret: this.env.CLIENT_SECRET,
+      redirectUri: this.env.REDIRECT_URI,
+    };
   }
 
   get vercelEnv(): string {

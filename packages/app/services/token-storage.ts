@@ -11,7 +11,8 @@ export const tokenStorage = {
   },
 
   async getAccessToken(): Promise<string | null> {
-    return await storage.getItem(ACCESS_TOKEN_KEY);
+    const raw = localStorage.getItem('accessToken');
+    return raw ? JSON.parse(raw) : null;
   },
 
   async setRefreshToken(token: string): Promise<void> {
