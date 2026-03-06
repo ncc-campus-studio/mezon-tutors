@@ -2,16 +2,16 @@
 
 import { atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
+import type { SubmitTutorProfileDto } from '@mezon-tutors/shared';
+import { DAY_KEYS } from '@mezon-tutors/shared';
 
-// Availability (merged from availability.atom.ts)
+// Availability: 24h format "HH:mm", no AM/PM
 export type TimeSlot = {
   startTime: string;
-  startAmPm: 'AM' | 'PM';
   endTime: string;
-  endAmPm: 'AM' | 'PM';
 };
 
-export const DAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+export { DAY_KEYS };
 
 export const selectedDayIndexAtom = atomWithStorage<number>('tutorProfile.selectedDayIndex', 0);
 
@@ -28,9 +28,7 @@ export function getDayKey(index: number): string {
 
 export const defaultSlot: TimeSlot = {
   startTime: '09:00',
-  startAmPm: 'AM',
-  endTime: '12:00',
-  endAmPm: 'PM',
+  endTime: '17:00',
 };
 
 // Profile steps
@@ -197,9 +195,61 @@ export const tutorProfileStateAtom = atom<TutorProfileState>((get) => ({
   },
 }));
 
-export const submitTutorProfileAtom = atom(null, (get, set) => {
-  const _profile = get(tutorProfileStateAtom);
-  // TODO: call API with _profile when backend is ready
+/** Build submit payload from current tutor profile state. */
+export function buildSubmitTutorProfilePayload(state: TutorProfileState): SubmitTutorProfileDto {
+  const { introStep, photoStep, certificationStep, videoStep, availabilityStep } = state;
+
+  const languages = (() => {
+    const langList = introStep.languages ? introStep.languages.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    const profList = introStep.proficiencies ? introStep.proficiencies.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    return langList.map((languageCode, i) => ({
+      languageCode,
+      proficiency: profList[i] ?? '',
+    }));
+  })();
+
+  const availability: SubmitTutorProfileDto['availability'] = [];
+  DAY_KEYS.forEach((_, dayIndex) => {
+    const slots = availabilityStep.slotsByDay[DAY_KEYS[dayIndex]] ?? [];
+    for (const slot of slots) {
+      availability.push({
+        dayOfWeek: dayIndex,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+      });
+    }
+  });
+
+  const pricePerHour = parseFloat(availabilityStep.hourlyRate) || 0;
+
+  return {
+    firstName: introStep.firstName,
+    lastName: introStep.lastName,
+    email: introStep.email,
+    country: introStep.country,
+    phone: introStep.phone,
+    subject: introStep.subject,
+    languages,
+    avatar: photoStep.dataUrl ?? undefined,
+    headline: photoStep.headline,
+    motivate: photoStep.motivate,
+    introduce: photoStep.introduce,
+    teachingCertificateName: certificationStep.teachingCertificateName,
+    teachingYear: certificationStep.teachingYear,
+    university: certificationStep.university,
+    degree: certificationStep.degree,
+    specialization: certificationStep.specialization,
+    videoUrl: videoStep.videoLink,
+    pricePerHour,
+    availability,
+  };
+}
+
+export const submitTutorProfileAtom = atom(null, async (get, set) => {
+  const state = get(tutorProfileStateAtom);
+  const payload = buildSubmitTutorProfilePayload(state);
+  const { submitTutorProfile } = await import('@mezon-tutors/app/services/tutor-profile.service');
+  await submitTutorProfile(payload);
 
   // Reset intro / photo / certification / video state
   set(tutorProfileAboutAtom, defaultAboutState);

@@ -119,7 +119,13 @@ export function TutorProfileAvailabilityScreen() {
           $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
+          <Container
+            padded
+            maxWidth={960}
+            width="100%"
+            gap="$5"
+            $xs={{ gap: '$4' }}
+          >
             <TutorProfileHeader
               draftSavedLabel={draftSavedLabel}
               saveExitLabel={t('saveExit')}
@@ -301,27 +307,18 @@ export function TutorProfileAvailabilityScreen() {
                       >
                         {t('availability.from')}
                       </Label>
-                      <XStack
-                        gap="$1"
-                        alignItems="center"
-                      >
-                        <Input
-                          flex={1}
-                          value={slot.startTime}
-                          onChangeText={(v) => updateSlot(index, { startTime: v })}
-                          placeholder="09:00"
-                          backgroundColor="$fieldBackground"
-                          borderColor="$borderSubtle"
-                          color="$color"
-                          paddingHorizontal="$3"
-                          height={44}
-                          borderRadius="$3"
-                        />
-                        <AmPmButtons
-                          value={slot.startAmPm}
-                          onChange={(v) => updateSlot(index, { startAmPm: v })}
-                        />
-                      </XStack>
+                      <Input
+                        flex={1}
+                        value={slot.startTime}
+                        onChangeText={(v) => updateSlot(index, { startTime: v })}
+                        placeholder="09:00"
+                        backgroundColor="$fieldBackground"
+                        borderColor="$borderSubtle"
+                        color="$color"
+                        paddingHorizontal="$3"
+                        height={44}
+                        borderRadius="$3"
+                      />
                     </YStack>
                     <Text>
                       <ArrowRightIcon size={25} />
@@ -338,27 +335,18 @@ export function TutorProfileAvailabilityScreen() {
                       >
                         {t('availability.to')}
                       </Label>
-                      <XStack
-                        gap="$1"
-                        alignItems="center"
-                      >
-                        <Input
-                          flex={1}
-                          value={slot.endTime}
-                          onChangeText={(v) => updateSlot(index, { endTime: v })}
-                          placeholder="12:00"
-                          backgroundColor="$fieldBackground"
-                          borderColor="$borderSubtle"
-                          color="$color"
-                          paddingHorizontal="$3"
-                          height={44}
-                          borderRadius="$3"
-                        />
-                        <AmPmButtons
-                          value={slot.endAmPm}
-                          onChange={(v) => updateSlot(index, { endAmPm: v })}
-                        />
-                      </XStack>
+                      <Input
+                        flex={1}
+                        value={slot.endTime}
+                        onChangeText={(v) => updateSlot(index, { endTime: v })}
+                        placeholder="17:00"
+                        backgroundColor="$fieldBackground"
+                        borderColor="$borderSubtle"
+                        color="$color"
+                        paddingHorizontal="$3"
+                        height={44}
+                        borderRadius="$3"
+                      />
                     </YStack>
                     <Button
                       variant="ghost"
@@ -431,32 +419,5 @@ export function TutorProfileAvailabilityScreen() {
         </YStack>
       </ScrollView>
     </Screen>
-  );
-}
-
-function AmPmButtons({
-  value,
-  onChange,
-}: {
-  value: 'AM' | 'PM';
-  onChange: (v: 'AM' | 'PM') => void;
-}) {
-  return (
-    <XStack gap="$1">
-      <Button
-        size="$2"
-        variant={value === 'AM' ? 'primary' : 'ghost'}
-        onPress={() => onChange('AM')}
-      >
-        AM
-      </Button>
-      <Button
-        size="$2"
-        variant={value === 'PM' ? 'primary' : 'ghost'}
-        onPress={() => onChange('PM')}
-      >
-        PM
-      </Button>
-    </XStack>
   );
 }

@@ -66,6 +66,14 @@ export function joinProficienciesArray(proficiencies: string[]): string {
   return proficiencies.filter(Boolean).join(', ');
 }
 
+/** Day keys for availability (Mon..Sun), index 0 = Monday. */
+export const DAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+/** Get day key by index (0 = Mon, 6 = Sun). */
+export function getDayKey(index: number): string {
+  return DAY_KEYS[index] ?? 'Mon';
+}
+
 /** Language proficiency levels (English labels). */
 export const ABOUT_PROFICIENCY_LEVELS = [
   'Native',
