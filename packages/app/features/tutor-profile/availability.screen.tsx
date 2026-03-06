@@ -1,8 +1,10 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, Input, Label } from '@mezon-tutors/app/ui';
 import { WalletIcon, CalendarIcon, TrashIcon, PlusCircleIcon, ArrowRightIcon } from '@mezon-tutors/app/ui/icons';
 import {
@@ -21,6 +23,10 @@ import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profi
 const ICON_COLOR = '#1253D5';
 const CURRENT_STEP = 5;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
+
+type AvailabilityFormValues = {
+  hourlyRate: string;
+};
 
 function formatLastSavedTime(iso: string) {
   try {
@@ -45,6 +51,19 @@ export function TutorProfileAvailabilityScreen() {
   const submitProfile = useSetAtom(submitTutorProfileAtom);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+
+  const form = useForm<AvailabilityFormValues>({
+    defaultValues: {
+      hourlyRate: hourlyRate ?? '',
+    },
+    mode: 'onChange',
+  });
+
+  const { control, handleSubmit, reset } = form;
+
+  useEffect(() => {
+    reset({ hourlyRate: hourlyRate ?? '' });
+  }, [hourlyRate, reset]);
 
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
@@ -96,9 +115,11 @@ export function TutorProfileAvailabilityScreen() {
         <YStack
           flex={1}
           paddingVertical="$5"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container padded maxWidth={960} width="100%" gap="$5">
+          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
             <TutorProfileHeader
               draftSavedLabel={draftSavedLabel}
               saveExitLabel={t('saveExit')}
@@ -127,6 +148,7 @@ export function TutorProfileAvailabilityScreen() {
               gap="$4"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$4' }}
             >
               <XStack
                 alignItems="center"
@@ -170,16 +192,25 @@ export function TutorProfileAvailabilityScreen() {
                     >
                       $
                     </Text>
-                    <Input
-                      flex={1}
-                      placeholder="0.00"
-                      value={hourlyRate}
-                      onChangeText={setHourlyRateValue}
-                      backgroundColor="transparent"
-                      borderWidth={0}
-                      color="$color"
-                      paddingHorizontal="$2"
-                      height={48}
+                    <Controller
+                      control={control}
+                      name="hourlyRate"
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          flex={1}
+                          placeholder="0.00"
+                          value={value}
+                          onChangeText={(v) => {
+                            onChange(v);
+                            setHourlyRateValue(v);
+                          }}
+                          backgroundColor="transparent"
+                          borderWidth={0}
+                          color="$color"
+                          paddingHorizontal="$2"
+                          height={48}
+                        />
+                      )}
                     />
                   </XStack>
                   <YStack
@@ -216,6 +247,7 @@ export function TutorProfileAvailabilityScreen() {
               gap="$4"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$4' }}
             >
               <XStack
                 alignItems="center"
@@ -256,6 +288,7 @@ export function TutorProfileAvailabilityScreen() {
                     gap="$2"
                     alignItems="flex-end"
                     flexWrap="wrap"
+                    $xs={{ flexDirection: 'column', alignItems: 'stretch' }}
                   >
                     <YStack
                       gap="$1"
@@ -386,10 +419,10 @@ export function TutorProfileAvailabilityScreen() {
               </Button>
               <Button
                 variant="primary"
-                onPress={() => {
+                onPress={handleSubmit(() => {
                   submitProfile();
                   router.push('/become-tutor/final');
-                }}
+                })}
               >
                 {t('continue')}
               </Button>

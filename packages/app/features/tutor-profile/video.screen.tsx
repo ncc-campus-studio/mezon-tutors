@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Container, Paragraph, Screen, StatusCard, Text, XStack, YStack, ScrollView, Input } from '@mezon-tutors/app/ui';
 import { CheckCircleIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
@@ -19,6 +20,10 @@ const VIDEO_PREVIEW_WIDTH = 420;
 
 const CURRENT_STEP = 4;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
+
+type VideoFormValues = {
+  videoLink: string;
+};
 
 function formatLastSavedTime(iso: string) {
   try {
@@ -57,6 +62,15 @@ export function TutorProfileVideoScreen() {
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
+  const form = useForm<VideoFormValues>({
+    defaultValues: {
+      videoLink: videoLink ?? '',
+    },
+    mode: 'onChange',
+  });
+
+  const { control, handleSubmit } = form;
+
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
@@ -68,11 +82,11 @@ export function TutorProfileVideoScreen() {
   const bestPractices = t.raw('bestPractices') as string[];
   const avoidItems = t.raw('avoidItems') as string[];
 
-  const handleAddLink = async () => {
+  const handleAddLink = async (values: VideoFormValues) => {
     setDurationError(null);
     setVideoDuration(null);
 
-    const trimmed = videoLink.trim();
+    const trimmed = (values.videoLink ?? '').trim();
     if (!trimmed) {
       setDurationError(t('errors.emptyLink'));
       return;
@@ -92,7 +106,7 @@ export function TutorProfileVideoScreen() {
 
     if (!nextId) {
       setDurationError(t('errors.invalidLink'));
-      setVideoState((prev) => ({ ...prev, videoId: null }));
+      setVideoState((prev) => ({ ...prev, videoLink: trimmed, videoId: null }));
       return;
     }
 
@@ -109,7 +123,7 @@ export function TutorProfileVideoScreen() {
           setVideoDuration(durationSeconds);
           if (durationSeconds > 120) {
             setDurationError(t('errors.tooLong'));
-            setVideoState((prev) => ({ ...prev, videoId: null }));
+            setVideoState((prev) => ({ ...prev, videoLink: trimmed, videoId: null }));
             return;
           }
         }
@@ -117,7 +131,7 @@ export function TutorProfileVideoScreen() {
     } catch {
     }
 
-    setVideoState((prev) => ({ ...prev, videoId: nextId }));
+    setVideoState((prev) => ({ ...prev, videoLink: trimmed, videoId: nextId }));
     setLastSavedAt(new Date().toISOString());
   };
 
@@ -145,9 +159,11 @@ export function TutorProfileVideoScreen() {
         <YStack
           flex={1}
           paddingVertical="$5"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container padded maxWidth={960} width="100%" gap="$5">
+          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
             <TutorProfileHeader
               draftSavedLabel={draftSavedLabel}
               saveExitLabel={t('saveExit')}
@@ -174,6 +190,7 @@ export function TutorProfileVideoScreen() {
             <XStack
               gap="$4"
               flexWrap="wrap"
+              $xs={{ flexDirection: 'column' }}
             >
               {/* Left column: video preview + link input (cùng width) */}
               <YStack
@@ -245,23 +262,27 @@ export function TutorProfileVideoScreen() {
                       flexDirection: 'column',
                     }}
                   >
-                    <Input
-                      flex={1}
-                      placeholder={t('link.placeholder')}
-                      value={videoLink}
-                      onChangeText={(value) =>
-                        setVideoState((prev) => ({ ...prev, videoLink: value }))
-                      }
-                      backgroundColor="$fieldBackground"
-                      borderColor="$borderSubtle"
-                      color="$color"
-                      paddingHorizontal="$4"
-                      height={48}
-                      borderRadius="$5"
+                    <Controller
+                      control={control}
+                      name="videoLink"
+                      render={({ field: { value, onChange } }) => (
+                        <Input
+                          flex={1}
+                          placeholder={t('link.placeholder')}
+                          value={value}
+                          onChangeText={onChange}
+                          backgroundColor="$fieldBackground"
+                          borderColor="$borderSubtle"
+                          color="$color"
+                          paddingHorizontal="$4"
+                          height={48}
+                          borderRadius="$5"
+                        />
+                      )}
                     />
                     <Button
                       variant="primary"
-                      onPress={handleAddLink}
+                      onPress={handleSubmit(handleAddLink)}
                     >
                       {t('link.addButton')}
                     </Button>

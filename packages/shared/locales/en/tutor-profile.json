@@ -23,14 +23,31 @@
       "subjectPlaceholder": "Select a subject",
       "subjectHelper": "You can add more subjects later in your profile settings.",
       "languagesLabel": "Languages spoken",
-      "languagesPlaceholder": "English",
+      "languageLabel": "Language",
+      "languagesPlaceholder": "Select language",
       "proficiencyLabel": "Proficiency",
-      "proficiencyPlaceholder": "Native"
+      "proficiencyPlaceholder": "Choose your proficiency ..."
     },
     "addAnother": "Add another",
+    "addAnotherLanguage": "Add another language",
+    "removeLanguage": "Remove",
     "continue": "Continue to Step 2",
     "privacyTitle": "Your privacy is our priority",
-    "privacyDescription": "We don't share your private contact information with students until you've accepted a lesson request. Your email and phone number are kept secure."
+    "privacyDescription": "We don't share your private contact information with students until you've accepted a lesson request. Your email and phone number are kept secure.",
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "emailInvalid": "Invalid email address",
+      "countryRequired": "Country is required",
+      "countryFromList": "Please select a country from the list",
+      "phoneRequired": "Phone is required",
+      "subjectRequired": "Subject is required",
+      "subjectFromList": "Please select a subject from the list",
+      "languagesRequired": "Languages are required",
+      "languagesFromList": "Please select a language from the list",
+      "proficiencyRequired": "Proficiency is required",
+      "proficiencyFromList": "Please select a proficiency level from the list"
+    }
   },
   "Photo": {
     "headerTitle": "Tutor Registration",
@@ -41,6 +58,8 @@
     "nextLabel": "Next: Certification & Education",
     "title": "Upload your profile photo",
     "subtitle": "A professional, friendly photo helps you get up to 5x more students and builds immediate trust.",
+    "cardTitle": "Tell us about yourself",
+    "cardSubtitle": "Add a headline and a short intro so students can get to know you better. This information will be visible on your public profile.",
     "avatarPlaceholder": "IMG",
     "uploadButton": "Upload Photo",
     "uploadHint": "Supported formats: JPG, PNG. Max size: 5MB.",
@@ -106,7 +125,15 @@
       "uploadPrompt": "Click to upload diploma copy"
     },
     "back": "Back",
-    "continue": "Continue to Video Step"
+    "continue": "Continue to Video Step",
+    "validation": {
+      "certificateRequired": "Certificate is required",
+      "yearRequired": "Year is required",
+      "yearInvalid": "Year must be YYYY",
+      "universityRequired": "University is required",
+      "degreeRequired": "Degree is required",
+      "specializationRequired": "Specialization is required"
+    }
   },
   "Video": {
     "headerTitle": "Tutor Registration",

@@ -29,10 +29,12 @@ export function TutorProfileCompletionScreen() {
         <YStack
           flex={1}
           paddingVertical="$6"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
           justifyContent="center"
         >
-          <Container padded maxWidth={960} width="100%" gap="$6">
+          <Container padded maxWidth={960} width="100%" gap="$6" $xs={{ gap: '$4' }}>
             <YStack alignItems="center" gap="$4">
               <YStack
                 width={112}
@@ -105,6 +107,7 @@ export function TutorProfileCompletionScreen() {
                 gap="$3"
                 flexWrap="wrap"
                 justifyContent="center"
+                $xs={{ flexDirection: 'column', alignItems: 'stretch' }}
               >
                 <Button
                   variant="primary"

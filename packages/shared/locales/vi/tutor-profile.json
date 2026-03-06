@@ -23,14 +23,31 @@
       "subjectPlaceholder": "Chọn một môn học",
       "subjectHelper": "Bạn có thể thêm nhiều môn khác sau trong phần cài đặt hồ sơ.",
       "languagesLabel": "Ngôn ngữ sử dụng",
-      "languagesPlaceholder": "Tiếng Anh",
+      "languageLabel": "Ngôn ngữ",
+      "languagesPlaceholder": "Chọn ngôn ngữ",
       "proficiencyLabel": "Trình độ",
-      "proficiencyPlaceholder": "Bản ngữ"
+      "proficiencyPlaceholder": "Chọn trình độ của bạn ..."
     },
-    "addAnother": "Thêm ngôn ngữ khác",
+    "addAnother": "Thêm",
+    "addAnotherLanguage": "Thêm ngôn ngữ",
+    "removeLanguage": "Xóa",
     "continue": "Tiếp tục tới bước 2",
     "privacyTitle": "Chúng tôi luôn bảo vệ quyền riêng tư của bạn",
-    "privacyDescription": "Chúng tôi không chia sẻ thông tin liên hệ riêng tư của bạn với học viên cho đến khi bạn chấp nhận một yêu cầu học. Email và số điện thoại của bạn luôn được bảo mật."
+    "privacyDescription": "Chúng tôi không chia sẻ thông tin liên hệ riêng tư của bạn với học viên cho đến khi bạn chấp nhận một yêu cầu học. Email và số điện thoại của bạn luôn được bảo mật.",
+    "validation": {
+      "firstNameRequired": "Vui lòng nhập tên",
+      "lastNameRequired": "Vui lòng nhập họ",
+      "emailInvalid": "Email không hợp lệ",
+      "countryRequired": "Vui lòng chọn quốc gia",
+      "countryFromList": "Vui lòng chọn quốc gia từ danh sách",
+      "phoneRequired": "Vui lòng nhập số điện thoại",
+      "subjectRequired": "Vui lòng chọn môn dạy",
+      "subjectFromList": "Vui lòng chọn môn từ danh sách",
+      "languagesRequired": "Vui lòng chọn ngôn ngữ",
+      "languagesFromList": "Vui lòng chọn ngôn ngữ từ danh sách",
+      "proficiencyRequired": "Vui lòng chọn trình độ",
+      "proficiencyFromList": "Vui lòng chọn trình độ từ danh sách"
+    }
   },
   "Photo": {
     "headerTitle": "Đăng ký gia sư",
@@ -41,6 +58,8 @@
     "nextLabel": "Tiếp theo: Chứng chỉ & Học vấn",
     "title": "Tải lên ảnh hồ sơ của bạn",
     "subtitle": "Một bức ảnh chuyên nghiệp, thân thiện có thể giúp bạn thu hút nhiều học viên hơn và tạo dựng niềm tin ngay lập tức.",
+    "cardTitle": "Hãy giới thiệu về bản thân",
+    "cardSubtitle": "Thêm tiêu đề và vài dòng giới thiệu để học viên hiểu rõ hơn về bạn. Thông tin này sẽ hiển thị trên hồ sơ công khai.",
     "avatarPlaceholder": "Ảnh",
     "uploadButton": "Tải ảnh lên",
     "uploadHint": "Định dạng hỗ trợ: JPG, PNG. Dung lượng tối đa: 5MB.",
@@ -106,7 +125,15 @@
       "uploadPrompt": "Nhấn để tải bản sao bằng tốt nghiệp"
     },
     "back": "Quay lại",
-    "continue": "Tiếp tục tới bước video"
+    "continue": "Tiếp tục tới bước video",
+    "validation": {
+      "certificateRequired": "Vui lòng nhập chứng chỉ",
+      "yearRequired": "Vui lòng nhập năm",
+      "yearInvalid": "Năm phải đúng định dạng YYYY",
+      "universityRequired": "Vui lòng nhập trường đại học",
+      "degreeRequired": "Vui lòng chọn loại bằng",
+      "specializationRequired": "Vui lòng nhập chuyên ngành"
+    }
   },
   "Video": {
     "headerTitle": "Đăng ký gia sư",

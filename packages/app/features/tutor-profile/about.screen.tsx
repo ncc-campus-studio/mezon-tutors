@@ -1,13 +1,22 @@
 'use client';
 
+import { useEffect, useMemo } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, InputField } from '@mezon-tutors/app/ui';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, InputField, SelectInputField } from '@mezon-tutors/app/ui';
 import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
+import {
+  ABOUT_COUNTRIES,
+  ABOUT_LANGUAGES,
+  ABOUT_PROFICIENCY_LEVELS,
+  ABOUT_SUBJECTS,
+  joinLanguagesArray,
+  parseLanguagesString,
+} from '@mezon-tutors/shared';
 import {
   tutorProfileAboutAtom,
   markStepCompletedAtom,
@@ -20,18 +29,14 @@ import { z } from 'zod';
 const CURRENT_STEP = 1;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 
-const aboutSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Invalid email address'),
-  country: z.string().min(1, 'Country is required'),
-  phone: z.string().min(1, 'Phone is required'),
-  subject: z.string().min(1, 'Subject is required'),
-  languages: z.string().min(1, 'Languages are required'),
-  proficiency: z.string().min(1, 'Proficiency is required'),
-});
+function parseProficienciesString(value: string): string[] {
+  if (!value || !value.trim()) return [];
+  return value.split(',').map((s) => s.trim()).filter(Boolean);
+}
 
-type AboutFormValues = z.infer<typeof aboutSchema>;
+function joinProficienciesArray(proficiencies: string[]): string {
+  return proficiencies.filter(Boolean).join(', ');
+}
 
 function formatLastSavedTime(iso: string) {
   try {
@@ -52,21 +57,120 @@ export function TutorProfileAboutScreen() {
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
+  const aboutSchema = useMemo(
+    () =>
+      z.object({
+        firstName: z.string().min(1, t('validation.firstNameRequired')),
+        lastName: z.string().min(1, t('validation.lastNameRequired')),
+        email: z.string().email(t('validation.emailInvalid')),
+        country: z
+          .string()
+          .min(1, t('validation.countryRequired'))
+          .refine((v) => (ABOUT_COUNTRIES as readonly string[]).includes(v), {
+            message: t('validation.countryFromList'),
+          }),
+        phone: z.string().min(1, t('validation.phoneRequired')),
+        subject: z
+          .string()
+          .min(1, t('validation.subjectRequired'))
+          .refine((v) => (ABOUT_SUBJECTS as readonly string[]).includes(v), {
+            message: t('validation.subjectFromList'),
+          }),
+        languageEntries: z
+          .array(
+            z.object({
+              language: z.string().refine((v) => !v || (ABOUT_LANGUAGES as readonly string[]).includes(v), {
+                message: t('validation.languagesFromList'),
+              }),
+              proficiency: z.string().refine((v) => !v || (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(v), {
+                message: t('validation.proficiencyFromList'),
+              }),
+            })
+          )
+          .refine((arr) => arr.filter((e) => e.language && e.proficiency).length >= 1, {
+            message: t('validation.languagesRequired'),
+          }),
+      }),
+    [t]
+  );
+
+  type AboutFormValues = z.infer<typeof aboutSchema>;
+
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
       : '';
 
+  const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : [];
+  const parsedProfs = about.proficiencies?.trim() ? parseProficienciesString(about.proficiencies) : [];
+  const fallbackProficiency = about.proficiency?.trim() || '';
+  const initialEntries: { language: string; proficiency: string }[] =
+    parsedLangs.length > 0
+      ? parsedLangs.map((lang, i) => ({
+          language: lang,
+          proficiency: parsedProfs[i] ?? fallbackProficiency,
+        }))
+      : [{ language: '', proficiency: fallbackProficiency }];
+
   const form = useForm<AboutFormValues>({
-    defaultValues: about,
+    defaultValues: {
+      firstName: about.firstName,
+      lastName: about.lastName,
+      email: about.email,
+      country: about.country,
+      phone: about.phone,
+      subject: about.subject,
+      languageEntries: initialEntries,
+    },
     resolver: zodResolver(aboutSchema),
     mode: 'onChange',
   });
 
   const { control, handleSubmit } = form;
+  const { fields, append, remove } = useFieldArray({ control, name: 'languageEntries' });
+
+  // Sync form when atom updates (e.g. rehydration from storage or navigate back)
+  useEffect(() => {
+    const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : [];
+    const parsedProfs = about.proficiencies?.trim() ? parseProficienciesString(about.proficiencies) : [];
+    const fallback = about.proficiency?.trim() || '';
+    const entries =
+      parsedLangs.length > 0
+        ? parsedLangs.map((lang, i) => ({
+            language: lang,
+            proficiency: parsedProfs[i] ?? fallback,
+          }))
+        : [{ language: '', proficiency: fallback }];
+    form.reset({
+      firstName: about.firstName,
+      lastName: about.lastName,
+      email: about.email,
+      country: about.country,
+      phone: about.phone,
+      subject: about.subject,
+      languageEntries: entries,
+    });
+  }, [
+    about.firstName,
+    about.lastName,
+    about.email,
+    about.country,
+    about.phone,
+    about.subject,
+    about.languages,
+    about.proficiencies,
+    about.proficiency,
+  ]);
 
   const onSubmit = (values: AboutFormValues) => {
-    setAbout(values);
+    const entries = values.languageEntries.filter((e) => e.language && e.proficiency);
+    const { languageEntries: _e, ...rest } = values;
+    setAbout({
+      ...rest,
+      languages: joinLanguagesArray(entries.map((e) => e.language)),
+      proficiencies: joinProficienciesArray(entries.map((e) => e.proficiency)),
+      proficiency: entries[0]?.proficiency ?? '',
+    });
     setLastSavedAt(new Date().toISOString());
     markStepCompleted(CURRENT_STEP);
     router.push('/become-tutor/photo');
@@ -83,9 +187,11 @@ export function TutorProfileAboutScreen() {
         <YStack
           flex={1}
           paddingVertical="$5"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container padded maxWidth={960} width="100%" gap="$5">
+          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
             <TutorProfileHeader draftSavedLabel={draftSavedLabel} saveExitLabel={t('saveExit')} />
 
             <TutorProfileProgress
@@ -102,6 +208,7 @@ export function TutorProfileAboutScreen() {
               gap="$5"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$4', gap: '$4' }}
             >
               <YStack gap="$2">
                 <Paragraph
@@ -154,6 +261,7 @@ export function TutorProfileAboutScreen() {
                     name="country"
                     label={t('fields.countryLabel')}
                     placeholder={t('fields.countryPlaceholder')}
+                    suggestions={ABOUT_COUNTRIES}
                     flex={1}
                   />
                   <InputField
@@ -171,36 +279,76 @@ export function TutorProfileAboutScreen() {
                   label={t('fields.subjectLabel')}
                   placeholder={t('fields.subjectPlaceholder')}
                   helperText={t('fields.subjectHelper')}
+                  suggestions={ABOUT_SUBJECTS}
                 />
 
                 <YStack gap="$3">
                   <XStack
-                    gap="$4"
-                    alignItems="flex-end"
-                    $xs={{
-                      flexDirection: 'column',
-                      alignItems: 'stretch',
-                    }}
+                    alignItems="center"
+                    justifyContent="space-between"
+                    flexWrap="wrap"
+                    gap="$2"
                   >
-                    <InputField
-                      control={control}
-                      name="languages"
-                      label={t('fields.languagesLabel')}
-                      placeholder={t('fields.languagesPlaceholder')}
-                      flex={1}
-                    />
-                    <InputField
-                      control={control}
-                      name="proficiency"
-                      label={t('fields.proficiencyLabel')}
-                      placeholder={t('fields.proficiencyPlaceholder')}
-                      flex={1}
-                    />
+                    <Text
+                      color="$colorMuted"
+                      fontSize={13}
+                    >
+                      {t('fields.languagesLabel')}
+                    </Text>
+                    <XStack
+                      cursor="pointer"
+                      onPress={() => append({ language: '', proficiency: '' })}
+                      alignItems="center"
+                      gap="$1"
+                      hoverStyle={{ opacity: 0.8 }}
+                    >
+                      <Text fontSize={14} color="$appPrimary">
+                        + {t('addAnotherLanguage')}
+                      </Text>
+                    </XStack>
                   </XStack>
+                  {fields.map((field, index) => (
+                    <XStack
+                      key={field.id}
+                      gap="$3"
+                      alignItems="flex-end"
+                      $xs={{
+                        flexDirection: 'column',
+                        alignItems: 'stretch',
+                      }}
+                    >
+                      <SelectInputField
+                        control={control}
+                        name={`languageEntries.${index}.language`}
+                        label={t('fields.languageLabel')}
+                        placeholder={t('fields.languagesPlaceholder')}
+                        options={[...ABOUT_LANGUAGES]}
+                        flex={1}
+                      />
+                      <SelectInputField
+                        control={control}
+                        name={`languageEntries.${index}.proficiency`}
+                        label={t('fields.proficiencyLabel')}
+                        placeholder={t('fields.proficiencyPlaceholder')}
+                        options={[...ABOUT_PROFICIENCY_LEVELS]}
+                        flex={1}
+                      />
+                      {fields.length > 1 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onPress={() => remove(index)}
+                          $xs={{ alignSelf: 'flex-start' }}
+                        >
+                          {t('removeLanguage')}
+                        </Button>
+                      ) : null}
+                    </XStack>
+                  ))}
                 </YStack>
               </YStack>
 
-              <XStack justifyContent="flex-end">
+              <XStack justifyContent="flex-end" $xs={{ width: '100%' }}>
                 <Button
                   variant="primary"
                   onPress={handleSubmit(onSubmit)}
@@ -221,10 +369,12 @@ export function TutorProfileAboutScreen() {
               padding="$4"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$3' }}
             >
               <XStack
                 alignItems="center"
                 gap="$3"
+                $xs={{ flexDirection: 'column', alignItems: 'flex-start' }}
               >
                 <ShieldCheckIcon
                   size={60}

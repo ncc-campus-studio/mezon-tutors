@@ -1,9 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect, useRef, useState } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import {
   Button,
   Container,
@@ -14,6 +17,7 @@ import {
   YStack,
   ScrollView,
   Card,
+  InputField,
 } from '@mezon-tutors/app/ui';
 import {
   UserIcon,
@@ -26,11 +30,22 @@ import {
   GraduationCapIcon,
 } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
-import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
+import {
+  tutorProfileLastSavedAtAtom,
+  tutorProfilePhotoAtom,
+} from '@mezon-tutors/app/store/tutor-profile.atom';
 
 const CURRENT_STEP = 2;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 const MAX_SIZE_MB = 5;
+
+const photoTextSchema = z.object({
+  introduce: z.string(),
+  headline: z.string(),
+  motivate: z.string(),
+});
+
+type PhotoTextFormValues = z.infer<typeof photoTextSchema>;
 
 function formatLastSavedTime(iso: string) {
   try {
@@ -47,18 +62,54 @@ export function TutorProfilePhotoScreen() {
   const t = useTranslations('TutorProfile.Photo');
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [photo, setPhoto] = useAtom(tutorProfilePhotoAtom);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(photo.dataUrl);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+
+  const form = useForm<PhotoTextFormValues>({
+    defaultValues: {
+      introduce: photo.introduce,
+      headline: photo.headline,
+      motivate: photo.motivate,
+    },
+    resolver: zodResolver(photoTextSchema),
+    mode: 'onChange',
+  });
+
+  const { control, handleSubmit } = form;
+
+  useEffect(() => {
+    setPreviewUrl(photo.dataUrl);
+  }, [photo.dataUrl]);
+
+  useEffect(() => {
+    form.reset({
+      introduce: photo.introduce,
+      headline: photo.headline,
+      motivate: photo.motivate,
+    });
+  }, [photo.introduce, photo.headline, photo.motivate]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
     if (file.size > MAX_SIZE_MB * 1024 * 1024) return;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(URL.createObjectURL(file));
-    setLastSavedAt(new Date().toISOString());
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPhoto((prev) => ({ ...prev, dataUrl }));
+      setPreviewUrl(dataUrl);
+      setLastSavedAt(new Date().toISOString());
+    };
+    reader.readAsDataURL(file);
     e.target.value = '';
+  };
+
+  const onSaveContinue = (values: PhotoTextFormValues) => {
+    setPhoto((prev) => ({ ...prev, ...values }));
+    setLastSavedAt(new Date().toISOString());
+    router.push('/become-tutor/certification');
   };
 
   const draftSavedLabel =
@@ -77,6 +128,8 @@ export function TutorProfilePhotoScreen() {
         <YStack
           flex={1}
           paddingVertical="$5"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
           <Container
@@ -84,6 +137,7 @@ export function TutorProfilePhotoScreen() {
             maxWidth={960}
             width="100%"
             gap="$5"
+            $xs={{ gap: '$4' }}
           >
             {/* Top bar */}
             <XStack
@@ -354,6 +408,57 @@ export function TutorProfilePhotoScreen() {
               </XStack>
             </YStack>
 
+            {/* Tell us about yourself - card with introduce, headline, motivate */}
+            <YStack
+              backgroundColor="$backgroundCard"
+              borderRadius="$10"
+              padding="$6"
+              gap="$5"
+              borderWidth={1}
+              borderColor="$borderSubtle"
+            >
+              <YStack gap="$2">
+                <Paragraph
+                  fontSize={24}
+                  fontWeight="700"
+                >
+                  {t('cardTitle')}
+                </Paragraph>
+                <Text variant="muted">{t('cardSubtitle')}</Text>
+              </YStack>
+
+              <YStack gap="$4">
+                <XStack
+                  gap="$4"
+                  $xs={{
+                    flexDirection: 'column',
+                  }}
+                >
+                  <InputField
+                    control={control}
+                    name="headline"
+                    label={t('fields.headlineLabel')}
+                    placeholder={t('fields.headlinePlaceholder')}
+                    flex={1}
+                  />
+                  <InputField
+                    control={control}
+                    name="motivate"
+                    label={t('fields.motivateLabel')}
+                    placeholder={t('fields.motivatePlaceholder')}
+                    flex={1}
+                  />
+                </XStack>
+
+                <InputField
+                  control={control}
+                  name="introduce"
+                  label={t('fields.introduceLabel')}
+                  placeholder={t('fields.introducePlaceholder')}
+                />
+              </YStack>
+            </YStack>
+
             {/* Navigation buttons */}
             <XStack
               justifyContent="space-between"
@@ -373,7 +478,7 @@ export function TutorProfilePhotoScreen() {
               </Button>
               <Button
                 variant="primary"
-                onPress={() => router.push('/become-tutor/certification')}
+                onPress={handleSubmit(onSaveContinue)}
               >
                 {t('saveContinue')}
               </Button>

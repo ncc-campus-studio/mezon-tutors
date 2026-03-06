@@ -7,3 +7,4 @@ export * from './types/auth';
 // Constants
 export * from './constants/routes';
 export * from './constants/layout';
+export * from './constants/tutor-profile';

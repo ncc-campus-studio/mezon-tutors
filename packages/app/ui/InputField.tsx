@@ -13,6 +13,7 @@ export type InputFieldProps<TFieldValues extends FieldValues = FieldValues> = {
   rules?: RegisterOptions;
   flex?: number;
   id?: string;
+  suggestions?: readonly string[];
 };
 
 export function InputField<TFieldValues extends FieldValues = FieldValues>({
@@ -24,6 +25,7 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
   rules,
   flex,
   id,
+  suggestions,
 }: InputFieldProps<TFieldValues>) {
   return (
     <Controller
@@ -40,9 +42,9 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
           value={value as string}
           onChangeText={onChange}
           error={error?.message}
+          suggestions={suggestions}
         />
       )}
     />
   );
 }
-

@@ -42,6 +42,9 @@ export type TutorProfileAboutState = {
   phone: string;
   subject: string;
   languages: string;
+  /** Comma-separated proficiencies, one per language (same order as languages). */
+  proficiencies: string;
+  /** @deprecated Use proficiencies; kept for backward compat, synced from first entry. */
   proficiency: string;
 };
 
@@ -53,6 +56,7 @@ export const defaultAboutState: TutorProfileAboutState = {
   phone: '',
   subject: '',
   languages: '',
+  proficiencies: '',
   proficiency: '',
 };
 

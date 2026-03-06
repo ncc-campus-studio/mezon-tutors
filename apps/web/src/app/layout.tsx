@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import './globals.css';
 import { AppProviders } from './providers';
 import AuthInitializer from '@mezon-tutors/app/components/AuthInitializer';
+import { DEFAULT_THEME } from '@mezon-tutors/app';
 import { getLocale } from 'next-intl/server';
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
+      data-theme={DEFAULT_THEME}
     >
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider locale={locale}>

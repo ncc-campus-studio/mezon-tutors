@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -20,18 +20,6 @@ import { z } from 'zod';
 const CURRENT_STEP = 3;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 
-const certificationSchema = z.object({
-  teachingCertificateName: z.string().min(1, 'Certificate is required'),
-  teachingYear: z
-    .string()
-    .min(4, 'Year is required')
-    .regex(/^\d{4}$/, 'Year must be YYYY'),
-  university: z.string().min(1, 'University is required'),
-  degree: z.string().min(1, 'Degree is required'),
-  specialization: z.string().min(1, 'Specialization is required'),
-});
-
-type CertificationFormValues = z.infer<typeof certificationSchema>;
 const MAX_FILE_SIZE_MB = 5;
 const ACCEPT_CERT = '.pdf,.jpg,.jpeg,.png';
 
@@ -58,6 +46,23 @@ export function TutorProfileCertificationScreen() {
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
+  const certificationSchema = useMemo(
+    () =>
+      z.object({
+        teachingCertificateName: z.string().min(1, t('validation.certificateRequired')),
+        teachingYear: z
+          .string()
+          .min(4, t('validation.yearRequired'))
+          .regex(/^\d{4}$/, t('validation.yearInvalid')),
+        university: z.string().min(1, t('validation.universityRequired')),
+        degree: z.string().min(1, t('validation.degreeRequired')),
+        specialization: z.string().min(1, t('validation.specializationRequired')),
+      }),
+    [t]
+  );
+
+  type CertificationFormValues = z.infer<typeof certificationSchema>;
+
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
@@ -70,6 +75,16 @@ export function TutorProfileCertificationScreen() {
   });
 
   const { control, handleSubmit } = form;
+
+  useEffect(() => {
+    form.reset(certification);
+  }, [
+    certification.teachingCertificateName,
+    certification.teachingYear,
+    certification.university,
+    certification.degree,
+    certification.specialization,
+  ]);
 
   const onSubmit = (values: CertificationFormValues) => {
     setCertification(values);
@@ -112,9 +127,11 @@ export function TutorProfileCertificationScreen() {
         <YStack
           flex={1}
           paddingVertical="$5"
+          paddingHorizontal="$0"
+          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container padded maxWidth={960} width="100%" gap="$5">
+          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
             <TutorProfileHeader draftSavedLabel={draftSavedLabel} saveExitLabel={t('saveExit')} />
 
             <TutorProfileProgress
@@ -132,6 +149,7 @@ export function TutorProfileCertificationScreen() {
               gap="$5"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$4', gap: '$4' }}
             >
               <XStack
                 alignItems="center"
@@ -274,6 +292,7 @@ export function TutorProfileCertificationScreen() {
               gap="$5"
               borderWidth={1}
               borderColor="$borderSubtle"
+              $xs={{ padding: '$4', gap: '$4' }}
             >
               <XStack
                 alignItems="center"

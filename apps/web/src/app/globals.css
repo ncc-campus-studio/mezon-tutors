@@ -1,3 +1,26 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Browser autofill: scope by theme so light theme is not affected */
+[data-theme='dark'] input:-webkit-autofill,
+[data-theme='dark'] input:-webkit-autofill:hover,
+[data-theme='dark'] input:-webkit-autofill:focus,
+[data-theme='dark'] input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0 1000px #334155 inset;
+  box-shadow: 0 0 0 1000px #334155 inset;
+  caret-color: #ffffff;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
+}
+
+[data-theme='light'] input:-webkit-autofill,
+[data-theme='light'] input:-webkit-autofill:hover,
+[data-theme='light'] input:-webkit-autofill:focus,
+[data-theme='light'] input:-webkit-autofill:active {
+  -webkit-text-fill-color: #111827;
+  -webkit-box-shadow: 0 0 0 1000px #f1f5f9 inset;
+  box-shadow: 0 0 0 1000px #f1f5f9 inset;
+  caret-color: #111827;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
+}
