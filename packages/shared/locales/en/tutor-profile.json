@@ -91,7 +91,12 @@
       }
     },
     "back": "Back",
-    "saveContinue": "Save and Continue"
+    "saveContinue": "Save and Continue",
+    "validation": {
+      "headlineRequired": "Profile headline is required",
+      "motivateRequired": "What motivates you is required",
+      "introduceRequired": "Introduction is required"
+    }
   },
   "Certification": {
     "headerTitle": "Tutor Registration",

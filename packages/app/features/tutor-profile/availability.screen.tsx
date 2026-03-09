@@ -18,6 +18,7 @@ import {
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
+import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
 
 const ICON_COLOR = '#1253D5';
@@ -106,12 +107,14 @@ export function TutorProfileAvailabilityScreen() {
 
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -401,35 +404,28 @@ export function TutorProfileAvailabilityScreen() {
               </YStack>
             </YStack>
 
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginTop="$4"
-              $xs={{
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: '$3',
-              }}
-            >
-              <Button
-                variant="outline"
-                onPress={() => router.push('/become-tutor/video')}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleSubmit(() => {
-                  submitProfile();
-                  router.push('/become-tutor/final');
-                })}
-              >
-                {t('continue')}
-              </Button>
-            </XStack>
+            {/* Navigation - moved to sticky bar */}
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/become-tutor/video')}
+        >
+          {t('back')}
+        </Button>
+        <Button
+          variant="primary"
+          onPress={handleSubmit(() => {
+            submitProfile();
+            router.push('/become-tutor/final');
+          })}
+        >
+          {t('continue')}
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   );
 }

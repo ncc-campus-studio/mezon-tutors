@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ import { Button, Container, Paragraph, Screen, StatusCard, Text, XStack, YStack,
 import { CheckCircleIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
+import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
 import {
   tutorProfileVideoAtom,
   markStepCompletedAtom,
@@ -59,6 +60,7 @@ export function TutorProfileVideoScreen() {
   const { videoLink, videoId } = videoState;
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [durationError, setDurationError] = useState<string | null>(null);
+  const videoInputSectionRef = useRef<HTMLDivElement>(null);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
@@ -138,6 +140,7 @@ export function TutorProfileVideoScreen() {
   const handleContinue = () => {
     if (!videoId) {
       setDurationError(t('errors.missingBeforeContinue'));
+      videoInputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     if (videoDuration !== null && videoDuration > 120) {
@@ -150,12 +153,14 @@ export function TutorProfileVideoScreen() {
 
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -194,6 +199,7 @@ export function TutorProfileVideoScreen() {
             >
               {/* Left column: video preview + link input (cùng width) */}
               <YStack
+                ref={videoInputSectionRef as React.RefObject<unknown>}
                 width={VIDEO_PREVIEW_WIDTH}
                 gap="$4"
                 $xs={{ width: '100%' }}
@@ -397,33 +403,25 @@ export function TutorProfileVideoScreen() {
               </YStack>
             </XStack>
 
-            {/* Navigation buttons */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginTop="$4"
-              $xs={{
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: '$3',
-              }}
-            >
-              <Button
-                variant="outline"
-                onPress={() => router.push('/become-tutor/certification')}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleContinue}
-              >
-                {t('continue')}
-              </Button>
-            </XStack>
+            {/* Navigation - moved to sticky bar */}
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/become-tutor/certification')}
+        >
+          {t('back')}
+        </Button>
+        <Button
+          variant="primary"
+          onPress={handleContinue}
+        >
+          {t('continue')}
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   );
 }

@@ -89,7 +89,7 @@ export function Field({
         />
       )}
       {error ? (
-        <Text size="sm" color="$red10">
+        <Text size="sm" color="$red10" fontWeight="500">
           {error}
         </Text>
       ) : helperText ? (

@@ -91,7 +91,12 @@
       }
     },
     "back": "Quay lại",
-    "saveContinue": "Lưu và tiếp tục"
+    "saveContinue": "Lưu và tiếp tục",
+    "validation": {
+      "headlineRequired": "Vui lòng nhập tiêu đề hồ sơ",
+      "motivateRequired": "Vui lòng nhập điều thúc đẩy bạn dạy học",
+      "introduceRequired": "Vui lòng nhập phần giới thiệu bản thân"
+    }
   },
   "Certification": {
     "headerTitle": "Đăng ký gia sư",
