@@ -124,6 +124,7 @@ export function SelectField({
         <Text
           size="sm"
           color="$red10"
+          fontWeight="500"
         >
           {error}
         </Text>

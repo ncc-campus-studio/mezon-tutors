@@ -10,6 +10,7 @@ import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView,
 import { VerifiedIcon, InfoIcon, UploadIcon, WalletIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
+import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
 import {
   tutorProfileCertificationAtom,
   markStepCompletedAtom,
@@ -74,7 +75,9 @@ export function TutorProfileCertificationScreen() {
     mode: 'onChange',
   });
 
-  const { control, handleSubmit } = form;
+  const { control, handleSubmit, setFocus } = form;
+  const teachingCardRef = useRef<HTMLDivElement>(null);
+  const educationCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     form.reset(certification);
@@ -91,6 +94,18 @@ export function TutorProfileCertificationScreen() {
     setLastSavedAt(new Date().toISOString());
     markStepCompleted(CURRENT_STEP);
     router.push('/become-tutor/video');
+  };
+
+  const teachingFields = ['teachingCertificateName', 'teachingYear'];
+  const onValidationError = (errors: Partial<Record<keyof CertificationFormValues, { message?: string }>>) => {
+    const firstError = (Object.keys(errors) as (keyof CertificationFormValues)[])[0];
+    if (!firstError) return;
+    if (teachingFields.includes(firstError)) {
+      teachingCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      educationCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setFocus(firstError);
   };
 
   const handleCertChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,12 +133,14 @@ export function TutorProfileCertificationScreen() {
 
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -286,6 +303,7 @@ export function TutorProfileCertificationScreen() {
             </YStack>
 
             <YStack
+              ref={educationCardRef as React.RefObject<unknown>}
               backgroundColor="$backgroundCard"
               borderRadius="$4"
               padding="$6"
@@ -395,32 +413,25 @@ export function TutorProfileCertificationScreen() {
               </YStack>
             </YStack>
 
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginTop="$4"
-              $xs={{
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: '$3',
-              }}
-            >
-              <Button
-                variant="outline"
-                onPress={() => router.push('/become-tutor/photo')}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleSubmit(onSubmit)}
-              >
-                {t('continue')}
-              </Button>
-            </XStack>
+            {/* Navigation - moved to sticky bar */}
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/become-tutor/photo')}
+        >
+          {t('back')}
+        </Button>
+        <Button
+          variant="primary"
+          onPress={handleSubmit(onSubmit, onValidationError)}
+        >
+          {t('continue')}
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   );
 }

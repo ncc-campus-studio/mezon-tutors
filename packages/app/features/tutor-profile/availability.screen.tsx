@@ -170,12 +170,14 @@ export function TutorProfileAvailabilityScreen() {
 
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -418,6 +420,24 @@ export function TutorProfileAvailabilityScreen() {
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/become-tutor/video')}
+        >
+          {t('back')}
+        </Button>
+        <Button
+          variant="primary"
+          onPress={handleSubmit(() => {
+            submitProfile();
+            router.push('/become-tutor/final');
+          })}
+        >
+          {t('continue')}
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   )
 }

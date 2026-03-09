@@ -1,25 +1,14 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useFieldArray, useForm } from 'react-hook-form'
-import {
-  Button,
-  Container,
-  Paragraph,
-  Screen,
-  Text,
-  XStack,
-  YStack,
-  ScrollView,
-  InputField,
-  SelectInputField,
-} from '@mezon-tutors/app/ui'
-import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon'
-import { TutorProfileProgress } from './components/tutor-profile-progress'
+import { useEffect, useMemo, useRef } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, InputField, SelectInputField } from '@mezon-tutors/app/ui';
+import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon';
+import { TutorProfileProgress } from './components/tutor-profile-progress';
 import {
   ABOUT_COUNTRIES,
   ABOUT_LANGUAGES,
@@ -31,11 +20,12 @@ import {
 import {
   tutorProfileAboutAtom,
   markStepCompletedAtom,
-} from '@mezon-tutors/app/store/tutor-profile.atom'
-import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom'
-import { ArrowRightIcon } from '@mezon-tutors/app/ui/icons'
-import { TutorProfileHeader } from './components/tutor-profile-header'
-import { z } from 'zod'
+} from '@mezon-tutors/app/store/tutor-profile.atom';
+import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
+import { ArrowRightIcon } from '@mezon-tutors/app/ui/icons';
+import { TutorProfileHeader } from './components/tutor-profile-header';
+import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
+import { z } from 'zod';
 
 const CURRENT_STEP = 1
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20
@@ -146,8 +136,9 @@ export function TutorProfileAboutScreen() {
     mode: 'onChange',
   })
 
-  const { control, handleSubmit } = form
-  const { fields, append, remove } = useFieldArray({ control, name: 'languageEntries' })
+  const { control, handleSubmit, setFocus } = form;
+  const { fields, append, remove } = useFieldArray({ control, name: 'languageEntries' });
+  const formCardRef = useRef<HTMLDivElement>(null);
 
   // Sync form when atom updates (e.g. rehydration from storage or navigate back)
   useEffect(() => {
@@ -195,14 +186,22 @@ export function TutorProfileAboutScreen() {
     router.push('/become-tutor/photo')
   }
 
+  const onValidationError = (errors: Record<string, unknown>) => {
+    formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const firstError = Object.keys(errors)[0] as keyof AboutFormValues | undefined;
+    if (firstError) setFocus(firstError);
+  };
+
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -221,6 +220,7 @@ export function TutorProfileAboutScreen() {
             />
 
             <YStack
+              ref={formCardRef as React.RefObject<unknown>}
               backgroundColor="$backgroundCard"
               borderRadius="$10"
               padding="$6"
@@ -359,13 +359,6 @@ export function TutorProfileAboutScreen() {
                   ))}
                 </YStack>
               </YStack>
-
-              <XStack justifyContent="flex-end" $xs={{ width: '100%' }}>
-                <Button variant="primary" onPress={handleSubmit(onSubmit)}>
-                  {t('continue')}
-                  <ArrowRightIcon size={15} primary="rgba(17,82,212,0.2)" color="#ffffff" />
-                </Button>
-              </XStack>
             </YStack>
 
             <YStack
@@ -397,6 +390,21 @@ export function TutorProfileAboutScreen() {
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <XStack flex={1} />
+        <Button
+          variant="primary"
+          onPress={handleSubmit(onSubmit, onValidationError)}
+        >
+          {t('continue')}
+          <ArrowRightIcon
+            size={15}
+            primary="rgba(17,82,212,0.2)"
+            color="#ffffff"
+          />
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   )
 }

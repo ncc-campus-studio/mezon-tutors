@@ -43,6 +43,7 @@ export const tokens = createTokens({
     red6: '#dc2626',
     red8: '#b91c1c',
     red9: '#991b1b',
+    red10: '#dc2626', // validation/error text
     red11: '#7f1d1d',
     red12: '#450a0a',
 

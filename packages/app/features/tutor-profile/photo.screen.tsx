@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
@@ -30,6 +30,7 @@ import {
   GraduationCapIcon,
 } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
+import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
 import {
   tutorProfileLastSavedAtAtom,
   tutorProfilePhotoAtom,
@@ -39,13 +40,11 @@ const CURRENT_STEP = 2;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 const MAX_SIZE_MB = 5;
 
-const photoTextSchema = z.object({
-  introduce: z.string(),
-  headline: z.string(),
-  motivate: z.string(),
-});
-
-type PhotoTextFormValues = z.infer<typeof photoTextSchema>;
+type PhotoTextFormValues = {
+  introduce: string;
+  headline: string;
+  motivate: string;
+};
 
 function formatLastSavedTime(iso: string) {
   try {
@@ -62,10 +61,21 @@ export function TutorProfilePhotoScreen() {
   const t = useTranslations('TutorProfile.Photo');
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
   const [photo, setPhoto] = useAtom(tutorProfilePhotoAtom);
   const [previewUrl, setPreviewUrl] = useState<string | null>(photo.dataUrl);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+
+  const photoTextSchema = useMemo(
+    () =>
+      z.object({
+        introduce: z.string().min(1, t('validation.introduceRequired')),
+        headline: z.string().min(1, t('validation.headlineRequired')),
+        motivate: z.string().min(1, t('validation.motivateRequired')),
+      }),
+    [t]
+  );
 
   const form = useForm<PhotoTextFormValues>({
     defaultValues: {
@@ -77,7 +87,7 @@ export function TutorProfilePhotoScreen() {
     mode: 'onChange',
   });
 
-  const { control, handleSubmit } = form;
+  const { control, handleSubmit, setFocus } = form;
 
   useEffect(() => {
     setPreviewUrl(photo.dataUrl);
@@ -112,6 +122,12 @@ export function TutorProfilePhotoScreen() {
     router.push('/become-tutor/certification');
   };
 
+  const onValidationError = (errors: Partial<Record<keyof PhotoTextFormValues, { message?: string }>>) => {
+    formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const firstError = (Object.keys(errors) as (keyof PhotoTextFormValues)[])[0];
+    if (firstError) setFocus(firstError);
+  };
+
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
@@ -119,12 +135,14 @@ export function TutorProfilePhotoScreen() {
 
   return (
     <Screen backgroundColor="$background">
-      <ScrollView
-        flex={1}
-        contentContainerStyle={{
-          flexGrow: 1,
-        }}
-      >
+      <YStack flex={1}>
+        <ScrollView
+          flex={1}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 100,
+          }}
+        >
         <YStack
           flex={1}
           paddingVertical="$5"
@@ -410,6 +428,7 @@ export function TutorProfilePhotoScreen() {
 
             {/* Tell us about yourself - card with introduce, headline, motivate */}
             <YStack
+              ref={formCardRef as React.RefObject<unknown>}
               backgroundColor="$backgroundCard"
               borderRadius="$10"
               padding="$6"
@@ -459,33 +478,25 @@ export function TutorProfilePhotoScreen() {
               </YStack>
             </YStack>
 
-            {/* Navigation buttons */}
-            <XStack
-              justifyContent="space-between"
-              alignItems="center"
-              marginTop="$4"
-              $xs={{
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                gap: '$3',
-              }}
-            >
-              <Button
-                variant="outline"
-                onPress={() => router.push('/become-tutor')}
-              >
-                {t('back')}
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleSubmit(onSaveContinue)}
-              >
-                {t('saveContinue')}
-              </Button>
-            </XStack>
+            {/* Navigation buttons - moved to sticky bar */}
           </Container>
         </YStack>
       </ScrollView>
+      <TutorProfileStickyActions>
+        <Button
+          variant="outline"
+          onPress={() => router.push('/become-tutor')}
+        >
+          {t('back')}
+        </Button>
+        <Button
+          variant="primary"
+          onPress={handleSubmit(onSaveContinue, onValidationError)}
+        >
+          {t('saveContinue')}
+        </Button>
+      </TutorProfileStickyActions>
+      </YStack>
     </Screen>
   );
 }
