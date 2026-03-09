@@ -2,16 +2,13 @@
 
 import { atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
-import type { SubmitTutorProfileDto } from '@mezon-tutors/shared';
-import { DAY_KEYS } from '@mezon-tutors/shared';
+import { DAY_KEYS, type SubmitTutorProfileDto } from '@mezon-tutors/shared';
+import { submitTutorProfile } from '@mezon-tutors/app/services/tutor-profile.service';
 
-// Availability: 24h format "HH:mm", no AM/PM
 export type TimeSlot = {
   startTime: string;
   endTime: string;
 };
-
-export { DAY_KEYS };
 
 export const selectedDayIndexAtom = atomWithStorage<number>('tutorProfile.selectedDayIndex', 0);
 
@@ -22,16 +19,11 @@ export const slotsByDayAtom = atomWithStorage<Record<string, TimeSlot[]>>(
   Object.fromEntries(DAY_KEYS.map((d) => [d, []]))
 );
 
-export function getDayKey(index: number): string {
-  return DAY_KEYS[index] ?? 'Mon';
-}
-
 export const defaultSlot: TimeSlot = {
   startTime: '09:00',
   endTime: '17:00',
 };
 
-// Profile steps
 export type TutorProfileAboutState = {
   firstName: string;
   lastName: string;
@@ -40,10 +32,7 @@ export type TutorProfileAboutState = {
   phone: string;
   subject: string;
   languages: string;
-  /** Comma-separated proficiencies, one per language (same order as languages). */
   proficiencies: string;
-  /** @deprecated Use proficiencies; kept for backward compat, synced from first entry. */
-  proficiency: string;
 };
 
 export const defaultAboutState: TutorProfileAboutState = {
@@ -55,7 +44,6 @@ export const defaultAboutState: TutorProfileAboutState = {
   subject: '',
   languages: '',
   proficiencies: '',
-  proficiency: '',
 };
 
 export const tutorProfileAboutAtom = atomWithStorage<TutorProfileAboutState>(
@@ -139,35 +127,29 @@ export const tutorProfileCurrentStepAtom = atomWithStorage<TutorProfileStepId>(
 
 export const tutorProfileStepStatusesAtom = atomWithStorage<
   Record<TutorProfileStepId, TutorProfileStepStatus>
->(
-  'tutorProfile.stepStatuses',
-  {
-    1: 'in_progress',
-    2: 'idle',
-    3: 'idle',
-    4: 'idle',
-    5: 'idle',
-  } as Record<TutorProfileStepId, TutorProfileStepStatus>
-);
+>('tutorProfile.stepStatuses', {
+  1: 'in_progress',
+  2: 'idle',
+  3: 'idle',
+  4: 'idle',
+  5: 'idle',
+} as Record<TutorProfileStepId, TutorProfileStepStatus>);
 
-export const markStepCompletedAtom = atom(
-  null,
-  (get, set, stepId: TutorProfileStepId) => {
-    const statuses = get(tutorProfileStepStatusesAtom);
-    const next: Record<TutorProfileStepId, TutorProfileStepStatus> = {
-      ...statuses,
-      [stepId]: 'completed',
-    };
-    const nextStep = (stepId + 1) as TutorProfileStepId;
+export const markStepCompletedAtom = atom(null, (get, set, stepId: TutorProfileStepId) => {
+  const statuses = get(tutorProfileStepStatusesAtom);
+  const next: Record<TutorProfileStepId, TutorProfileStepStatus> = {
+    ...statuses,
+    [stepId]: 'completed',
+  };
+  const nextStep = (stepId + 1) as TutorProfileStepId;
 
-    if (nextStep <= 5) {
-      next[nextStep] = 'in_progress';
-      set(tutorProfileCurrentStepAtom, nextStep);
-    }
-
-    set(tutorProfileStepStatusesAtom, next);
+  if (nextStep <= 5) {
+    next[nextStep] = 'in_progress';
+    set(tutorProfileCurrentStepAtom, nextStep);
   }
-);
+
+  set(tutorProfileStepStatusesAtom, next);
+});
 
 export type TutorProfileAvailabilityState = {
   selectedDayIndex: number;
@@ -175,33 +157,51 @@ export type TutorProfileAvailabilityState = {
   slotsByDay: Record<string, TimeSlot[]>;
 };
 
-export type TutorProfileState = {
-  introStep: TutorProfileAboutState;
-  photoStep: TutorProfilePhotoState;
-  certificationStep: TutorProfileCertificationState;
-  videoStep: TutorProfileVideoState;
-  availabilityStep: TutorProfileAvailabilityState;
+export type TutorProfileFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  country: string;
+  phone: string;
+  subject: string;
+  languages: string;
+  proficiencies: string;
+
+  avatar?: string | null;
+  headline: string;
+  motivate: string;
+  introduce: string;
+
+  teachingCertificateName: string;
+  teachingYear: string;
+  university: string;
+  degree: string;
+  specialization: string;
+
+  videoUrl: string;
+
+  hourlyRate: string;
+  slotsByDay: Record<string, TimeSlot[]>;
 };
 
-export const tutorProfileStateAtom = atom<TutorProfileState>((get) => ({
-  introStep: get(tutorProfileAboutAtom),
-  photoStep: get(tutorProfilePhotoAtom),
-  certificationStep: get(tutorProfileCertificationAtom),
-  videoStep: get(tutorProfileVideoAtom),
-  availabilityStep: {
-    selectedDayIndex: get(selectedDayIndexAtom),
-    hourlyRate: get(hourlyRateAtom),
-    slotsByDay: get(slotsByDayAtom),
-  },
-}));
-
-/** Build submit payload from current tutor profile state. */
-export function buildSubmitTutorProfilePayload(state: TutorProfileState): SubmitTutorProfileDto {
-  const { introStep, photoStep, certificationStep, videoStep, availabilityStep } = state;
-
+export function buildSubmitTutorProfilePayload(
+  values: TutorProfileFormValues
+): SubmitTutorProfileDto {
   const languages = (() => {
-    const langList = introStep.languages ? introStep.languages.split(',').map((s) => s.trim()).filter(Boolean) : [];
-    const profList = introStep.proficiencies ? introStep.proficiencies.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    const langList = values.languages
+      ? values.languages
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+    const profList = values.proficiencies
+      ? values.proficiencies
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
     return langList.map((languageCode, i) => ({
       languageCode,
       proficiency: profList[i] ?? '',
@@ -209,8 +209,10 @@ export function buildSubmitTutorProfilePayload(state: TutorProfileState): Submit
   })();
 
   const availability: SubmitTutorProfileDto['availability'] = [];
+
   DAY_KEYS.forEach((_, dayIndex) => {
-    const slots = availabilityStep.slotsByDay[DAY_KEYS[dayIndex]] ?? [];
+    const slots = values.slotsByDay?.[DAY_KEYS[dayIndex]] ?? [];
+
     for (const slot of slots) {
       availability.push({
         dayOfWeek: dayIndex,
@@ -220,53 +222,50 @@ export function buildSubmitTutorProfilePayload(state: TutorProfileState): Submit
     }
   });
 
-  const pricePerHour = parseFloat(availabilityStep.hourlyRate) || 0;
+  const pricePerHour = Number.parseFloat(values.hourlyRate) || 0;
 
   return {
-    firstName: introStep.firstName,
-    lastName: introStep.lastName,
-    email: introStep.email,
-    country: introStep.country,
-    phone: introStep.phone,
-    subject: introStep.subject,
+    firstName: values.firstName,
+    lastName: values.lastName,
+    email: values.email,
+    country: values.country,
+    phone: values.phone,
+    subject: values.subject,
+
     languages,
-    avatar: photoStep.dataUrl ?? undefined,
-    headline: photoStep.headline,
-    motivate: photoStep.motivate,
-    introduce: photoStep.introduce,
-    teachingCertificateName: certificationStep.teachingCertificateName,
-    teachingYear: certificationStep.teachingYear,
-    university: certificationStep.university,
-    degree: certificationStep.degree,
-    specialization: certificationStep.specialization,
-    videoUrl: videoStep.videoLink,
+
+    avatar: values.avatar ?? undefined,
+    headline: values.headline,
+    motivate: values.motivate,
+    introduce: values.introduce,
+
+    teachingCertificateName: values.teachingCertificateName,
+    teachingYear: values.teachingYear,
+    university: values.university,
+    degree: values.degree,
+    specialization: values.specialization,
+
+    videoUrl: values.videoUrl,
+
     pricePerHour,
     availability,
   };
 }
 
-export const submitTutorProfileAtom = atom(null, async (get, set) => {
-  const state = get(tutorProfileStateAtom);
-  const payload = buildSubmitTutorProfilePayload(state);
-  const { submitTutorProfile } = await import('@mezon-tutors/app/services/tutor-profile.service');
+export const submitTutorProfileAtom = atom(null, async (_, set, payload: SubmitTutorProfileDto) => {
+  console.log('submit payload', payload);
   await submitTutorProfile(payload);
 
-  // Reset intro / photo / certification / video state
   set(tutorProfileAboutAtom, defaultAboutState);
   set(tutorProfilePhotoAtom, defaultPhotoState);
   set(tutorProfileCertificationAtom, defaultCertificationState);
   set(tutorProfileVideoAtom, defaultVideoState);
   set(tutorProfileLastSavedAtAtom, null);
 
-  // Reset availability state
   set(selectedDayIndexAtom, 0);
   set(hourlyRateAtom, '');
-  set(
-    slotsByDayAtom,
-    Object.fromEntries(DAY_KEYS.map((d) => [d, [] as TimeSlot[]]))
-  );
+  set(slotsByDayAtom, Object.fromEntries(DAY_KEYS.map((d) => [d, [] as TimeSlot[]])));
 
-  // Reset step tracking
   set(tutorProfileCurrentStepAtom, 1);
   set(tutorProfileStepStatusesAtom, {
     1: 'in_progress',
@@ -276,4 +275,3 @@ export const submitTutorProfileAtom = atom(null, async (get, set) => {
     5: 'idle',
   });
 });
-

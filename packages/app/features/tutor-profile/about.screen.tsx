@@ -1,14 +1,25 @@
-'use client';
+'use client'
 
-import { useEffect, useMemo } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, InputField, SelectInputField } from '@mezon-tutors/app/ui';
-import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon';
-import { TutorProfileProgress } from './components/tutor-profile-progress';
+import { useEffect, useMemo } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useFieldArray, useForm } from 'react-hook-form'
+import {
+  Button,
+  Container,
+  Paragraph,
+  Screen,
+  Text,
+  XStack,
+  YStack,
+  ScrollView,
+  InputField,
+  SelectInputField,
+} from '@mezon-tutors/app/ui'
+import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon'
+import { TutorProfileProgress } from './components/tutor-profile-progress'
 import {
   ABOUT_COUNTRIES,
   ABOUT_LANGUAGES,
@@ -16,26 +27,29 @@ import {
   ABOUT_SUBJECTS,
   joinLanguagesArray,
   parseLanguagesString,
-} from '@mezon-tutors/shared';
+} from '@mezon-tutors/shared'
 import {
   tutorProfileAboutAtom,
   markStepCompletedAtom,
-} from '@mezon-tutors/app/store/tutor-profile.atom';
-import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { ArrowRightIcon } from '@mezon-tutors/app/ui/icons';
-import { TutorProfileHeader } from './components/tutor-profile-header';
-import { z } from 'zod';
+} from '@mezon-tutors/app/store/tutor-profile.atom'
+import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom'
+import { ArrowRightIcon } from '@mezon-tutors/app/ui/icons'
+import { TutorProfileHeader } from './components/tutor-profile-header'
+import { z } from 'zod'
 
-const CURRENT_STEP = 1;
-const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
+const CURRENT_STEP = 1
+const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20
 
 function parseProficienciesString(value: string): string[] {
-  if (!value || !value.trim()) return [];
-  return value.split(',').map((s) => s.trim()).filter(Boolean);
+  if (!value || !value.trim()) return []
+  return value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 }
 
 function joinProficienciesArray(proficiencies: string[]): string {
-  return proficiencies.filter(Boolean).join(', ');
+  return proficiencies.filter(Boolean).join(', ')
 }
 
 function formatLastSavedTime(iso: string) {
@@ -43,19 +57,19 @@ function formatLastSavedTime(iso: string) {
     return new Date(iso).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-    });
+    })
   } catch {
-    return '';
+    return ''
   }
 }
 
 export function TutorProfileAboutScreen() {
-  const t = useTranslations('TutorProfile.About');
-  const router = useRouter();
-  const [about, setAbout] = useAtom(tutorProfileAboutAtom);
-  const [, markStepCompleted] = useAtom(markStepCompletedAtom);
-  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
-  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+  const t = useTranslations('TutorProfile.About')
+  const router = useRouter()
+  const [about, setAbout] = useAtom(tutorProfileAboutAtom)
+  const [, markStepCompleted] = useAtom(markStepCompletedAtom)
+  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom)
+  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom)
 
   const aboutSchema = useMemo(
     () =>
@@ -79,12 +93,16 @@ export function TutorProfileAboutScreen() {
         languageEntries: z
           .array(
             z.object({
-              language: z.string().refine((v) => !v || (ABOUT_LANGUAGES as readonly string[]).includes(v), {
-                message: t('validation.languagesFromList'),
-              }),
-              proficiency: z.string().refine((v) => !v || (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(v), {
-                message: t('validation.proficiencyFromList'),
-              }),
+              language: z
+                .string()
+                .refine((v) => !v || (ABOUT_LANGUAGES as readonly string[]).includes(v), {
+                  message: t('validation.languagesFromList'),
+                }),
+              proficiency: z
+                .string()
+                .refine((v) => !v || (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(v), {
+                  message: t('validation.proficiencyFromList'),
+                }),
             })
           )
           .refine((arr) => arr.filter((e) => e.language && e.proficiency).length >= 1, {
@@ -92,25 +110,27 @@ export function TutorProfileAboutScreen() {
           }),
       }),
     [t]
-  );
+  )
 
-  type AboutFormValues = z.infer<typeof aboutSchema>;
+  type AboutFormValues = z.infer<typeof aboutSchema>
 
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
-      : '';
+      : ''
 
-  const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : [];
-  const parsedProfs = about.proficiencies?.trim() ? parseProficienciesString(about.proficiencies) : [];
-  const fallbackProficiency = about.proficiency?.trim() || '';
+  const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : []
+  const parsedProfs = about.proficiencies?.trim()
+    ? parseProficienciesString(about.proficiencies)
+    : []
+
   const initialEntries: { language: string; proficiency: string }[] =
     parsedLangs.length > 0
       ? parsedLangs.map((lang, i) => ({
           language: lang,
-          proficiency: parsedProfs[i] ?? fallbackProficiency,
+          proficiency: parsedProfs[i] ?? '',
         }))
-      : [{ language: '', proficiency: fallbackProficiency }];
+      : [{ language: '', proficiency: '' }]
 
   const form = useForm<AboutFormValues>({
     defaultValues: {
@@ -124,23 +144,24 @@ export function TutorProfileAboutScreen() {
     },
     resolver: zodResolver(aboutSchema),
     mode: 'onChange',
-  });
+  })
 
-  const { control, handleSubmit } = form;
-  const { fields, append, remove } = useFieldArray({ control, name: 'languageEntries' });
+  const { control, handleSubmit } = form
+  const { fields, append, remove } = useFieldArray({ control, name: 'languageEntries' })
 
   // Sync form when atom updates (e.g. rehydration from storage or navigate back)
   useEffect(() => {
-    const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : [];
-    const parsedProfs = about.proficiencies?.trim() ? parseProficienciesString(about.proficiencies) : [];
-    const fallback = about.proficiency?.trim() || '';
+    const parsedLangs = about.languages?.trim() ? parseLanguagesString(about.languages) : []
+    const parsedProfs = about.proficiencies?.trim()
+      ? parseProficienciesString(about.proficiencies)
+      : []
     const entries =
       parsedLangs.length > 0
         ? parsedLangs.map((lang, i) => ({
             language: lang,
-            proficiency: parsedProfs[i] ?? fallback,
+            proficiency: parsedProfs[i] ?? '',
           }))
-        : [{ language: '', proficiency: fallback }];
+        : [{ language: '', proficiency: '' }]
     form.reset({
       firstName: about.firstName,
       lastName: about.lastName,
@@ -149,7 +170,7 @@ export function TutorProfileAboutScreen() {
       phone: about.phone,
       subject: about.subject,
       languageEntries: entries,
-    });
+    })
   }, [
     about.firstName,
     about.lastName,
@@ -159,22 +180,20 @@ export function TutorProfileAboutScreen() {
     about.subject,
     about.languages,
     about.proficiencies,
-    about.proficiency,
-  ]);
+  ])
 
   const onSubmit = (values: AboutFormValues) => {
-    const entries = values.languageEntries.filter((e) => e.language && e.proficiency);
-    const { languageEntries: _e, ...rest } = values;
+    const entries = values.languageEntries.filter((e) => e.language && e.proficiency)
+    const { languageEntries: _e, ...rest } = values
     setAbout({
       ...rest,
       languages: joinLanguagesArray(entries.map((e) => e.language)),
       proficiencies: joinProficienciesArray(entries.map((e) => e.proficiency)),
-      proficiency: entries[0]?.proficiency ?? '',
-    });
-    setLastSavedAt(new Date().toISOString());
-    markStepCompleted(CURRENT_STEP);
-    router.push('/become-tutor/photo');
-  };
+    })
+    setLastSavedAt(new Date().toISOString())
+    markStepCompleted(CURRENT_STEP)
+    router.push('/become-tutor/photo')
+  }
 
   return (
     <Screen backgroundColor="$background">
@@ -211,10 +230,7 @@ export function TutorProfileAboutScreen() {
               $xs={{ padding: '$4', gap: '$4' }}
             >
               <YStack gap="$2">
-                <Paragraph
-                  fontSize={24}
-                  fontWeight="700"
-                >
+                <Paragraph fontSize={24} fontWeight="700">
                   {t('title')}
                 </Paragraph>
                 <Text variant="muted">{t('subtitle')}</Text>
@@ -289,10 +305,7 @@ export function TutorProfileAboutScreen() {
                     flexWrap="wrap"
                     gap="$2"
                   >
-                    <Text
-                      color="$colorMuted"
-                      fontSize={13}
-                    >
+                    <Text color="$colorMuted" fontSize={13}>
                       {t('fields.languagesLabel')}
                     </Text>
                     <XStack
@@ -335,7 +348,6 @@ export function TutorProfileAboutScreen() {
                       />
                       {fields.length > 1 ? (
                         <Button
-                          type="button"
                           variant="outline"
                           onPress={() => remove(index)}
                           $xs={{ alignSelf: 'flex-start' }}
@@ -349,16 +361,9 @@ export function TutorProfileAboutScreen() {
               </YStack>
 
               <XStack justifyContent="flex-end" $xs={{ width: '100%' }}>
-                <Button
-                  variant="primary"
-                  onPress={handleSubmit(onSubmit)}
-                >
+                <Button variant="primary" onPress={handleSubmit(onSubmit)}>
                   {t('continue')}
-                  <ArrowRightIcon
-                    size={15}
-                    primary="rgba(17,82,212,0.2)"
-                    color="#ffffff"
-                  />
+                  <ArrowRightIcon size={15} primary="rgba(17,82,212,0.2)" color="#ffffff" />
                 </Button>
               </XStack>
             </YStack>
@@ -381,14 +386,8 @@ export function TutorProfileAboutScreen() {
                   primary="rgba(17,82,212,0.2)"
                   color="rgba(17,82,212,1)"
                 />
-                <YStack
-                  gap="$1"
-                  flex={1}
-                >
-                  <Paragraph
-                    fontWeight="600"
-                    fontSize={16}
-                  >
+                <YStack gap="$1" flex={1}>
+                  <Paragraph fontWeight="600" fontSize={16}>
                     {t('privacyTitle')}
                   </Paragraph>
                   <Text variant="muted">{t('privacyDescription')}</Text>
@@ -399,5 +398,5 @@ export function TutorProfileAboutScreen() {
         </YStack>
       </ScrollView>
     </Screen>
-  );
+  )
 }

@@ -135,7 +135,7 @@ export function TutorProfileVideoScreen() {
     setLastSavedAt(new Date().toISOString());
   };
 
-  const handleContinue = () => {
+  const handleContinue = (values: VideoFormValues) => {
     if (!videoId) {
       setDurationError(t('errors.missingBeforeContinue'));
       return;
@@ -416,7 +416,7 @@ export function TutorProfileVideoScreen() {
               </Button>
               <Button
                 variant="primary"
-                onPress={handleContinue}
+                onPress={handleSubmit(handleContinue)}
               >
                 {t('continue')}
               </Button>

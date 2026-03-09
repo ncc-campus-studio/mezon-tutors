@@ -1,108 +1,172 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, Input, Label } from '@mezon-tutors/app/ui';
-import { WalletIcon, CalendarIcon, TrashIcon, PlusCircleIcon, ArrowRightIcon } from '@mezon-tutors/app/ui/icons';
+import { useEffect } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useForm, Controller } from 'react-hook-form'
+import {
+  Button,
+  Container,
+  Paragraph,
+  Screen,
+  Text,
+  XStack,
+  YStack,
+  ScrollView,
+  Input,
+  Label,
+} from '@mezon-tutors/app/ui'
+import {
+  WalletIcon,
+  CalendarIcon,
+  TrashIcon,
+  PlusCircleIcon,
+  ArrowRightIcon,
+} from '@mezon-tutors/app/ui/icons'
 import {
   selectedDayIndexAtom,
   hourlyRateAtom,
   slotsByDayAtom,
-  getDayKey,
   defaultSlot,
   type TimeSlot,
   submitTutorProfileAtom,
-} from '@mezon-tutors/app/store/tutor-profile.atom';
-import { TutorProfileProgress } from './components/tutor-profile-progress';
-import { TutorProfileHeader } from './components/tutor-profile-header';
-import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
+  buildSubmitTutorProfilePayload,
+  tutorProfileAboutAtom,
+  tutorProfilePhotoAtom,
+  tutorProfileCertificationAtom,
+  tutorProfileVideoAtom,
+} from '@mezon-tutors/app/store/tutor-profile.atom'
+import { TutorProfileProgress } from './components/tutor-profile-progress'
+import { TutorProfileHeader } from './components/tutor-profile-header'
+import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom'
+import { DAY_KEYS, getDayKey } from '@mezon-tutors/shared'
 
-const ICON_COLOR = '#1253D5';
-const CURRENT_STEP = 5;
-const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
+const ICON_COLOR = '#1253D5'
+const CURRENT_STEP = 5
+const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20
 
 type AvailabilityFormValues = {
-  hourlyRate: string;
-};
+  hourlyRate: string
+  slotsByDay: Record<string, TimeSlot[]>
+}
 
 function formatLastSavedTime(iso: string) {
   try {
     return new Date(iso).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
-    });
+    })
   } catch {
-    return '';
+    return ''
   }
 }
 
 export function TutorProfileAvailabilityScreen() {
-  const t = useTranslations('TutorProfile.Availability');
-  const router = useRouter();
-  const selectedDayIndex = useAtomValue(selectedDayIndexAtom);
-  const setSelectedDayIndex = useSetAtom(selectedDayIndexAtom);
-  const hourlyRate = useAtomValue(hourlyRateAtom);
-  const setHourlyRate = useSetAtom(hourlyRateAtom);
-  const slotsByDay = useAtomValue(slotsByDayAtom);
-  const setSlotsByDay = useSetAtom(slotsByDayAtom);
-  const submitProfile = useSetAtom(submitTutorProfileAtom);
-  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
-  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+  const t = useTranslations('TutorProfile.Availability')
+  const router = useRouter()
+  const about = useAtomValue(tutorProfileAboutAtom)
+  const photo = useAtomValue(tutorProfilePhotoAtom)
+  const certification = useAtomValue(tutorProfileCertificationAtom)
+  const video = useAtomValue(tutorProfileVideoAtom)
+  const selectedDayIndex = useAtomValue(selectedDayIndexAtom)
+  const setSelectedDayIndex = useSetAtom(selectedDayIndexAtom)
+  const initialHourlyRate = useAtomValue(hourlyRateAtom)
+  const initialSlotsByDay = useAtomValue(slotsByDayAtom)
+  const setHourlyRate = useSetAtom(hourlyRateAtom)
+  const setSlotsByDay = useSetAtom(slotsByDayAtom)
+  const submitProfile = useSetAtom(submitTutorProfileAtom)
+  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom)
+  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom)
 
   const form = useForm<AvailabilityFormValues>({
     defaultValues: {
-      hourlyRate: hourlyRate ?? '',
+      hourlyRate: initialHourlyRate ?? '',
+      slotsByDay: initialSlotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
     },
     mode: 'onChange',
-  });
+  })
 
-  const { control, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset, watch, setValue } = form
 
   useEffect(() => {
-    reset({ hourlyRate: hourlyRate ?? '' });
-  }, [hourlyRate, reset]);
+    reset({
+      hourlyRate: initialHourlyRate ?? '',
+      slotsByDay:
+        initialSlotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const dayKey = getDayKey(selectedDayIndex)
+  const slotsByDayForm = watch('slotsByDay')
+  const slots = slotsByDayForm?.[dayKey] ?? []
+
+  const onSaveExit = () => {
+    form.handleSubmit((values) => {
+      const payload = buildSubmitTutorProfilePayload({
+        ...about,
+        ...photo,
+        ...certification,
+        videoUrl: video.videoLink,
+        hourlyRate: values.hourlyRate,
+        slotsByDay: values.slotsByDay,
+      })
+      submitProfile(payload)
+      router.push('/')
+    })()
+  }
+
+  const addSlot = () => {
+    const current = form.getValues('slotsByDay') ?? {}
+    const daySlots = current[dayKey] ?? []
+    setValue('slotsByDay', {
+      ...current,
+      [dayKey]: [...daySlots, { ...defaultSlot }],
+    })
+    setSlotsByDay((prev) => ({
+      ...prev,
+      [dayKey]: [...(prev[dayKey] ?? []), { ...defaultSlot }],
+    }))
+    setLastSavedAt(new Date().toISOString())
+  }
+
+  const removeSlot = (index: number) => {
+    const current = form.getValues('slotsByDay') ?? {}
+    const daySlots = (current[dayKey] ?? []).filter((_, i) => i !== index)
+    setValue('slotsByDay', { ...current, [dayKey]: daySlots })
+    setSlotsByDay((prev) => ({
+      ...prev,
+      [dayKey]: (prev[dayKey] ?? []).filter((_, i) => i !== index),
+    }))
+    setLastSavedAt(new Date().toISOString())
+  }
+
+  const updateSlot = (index: number, patch: Partial<TimeSlot>) => {
+    const current = form.getValues('slotsByDay') ?? {}
+    const list = [...(current[dayKey] ?? [])]
+    list[index] = { ...list[index], ...patch }
+    setValue('slotsByDay', { ...current, [dayKey]: list })
+    setSlotsByDay((prev) => {
+      const nextList = [...(prev[dayKey] ?? [])]
+      nextList[index] = { ...nextList[index], ...patch }
+      return { ...prev, [dayKey]: nextList }
+    })
+    setLastSavedAt(new Date().toISOString())
+  }
+
+  const handleHourlyRateChange = (value: string) => {
+    setValue('hourlyRate', value)
+    setHourlyRate(value)
+    setLastSavedAt(new Date().toISOString())
+  }
 
   const draftSavedLabel =
     lastSavedAt && formatLastSavedTime(lastSavedAt)
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
-      : '';
+      : ''
 
-  const dayTabs = t.raw('availability.tabs') as string[];
-  const dayKey = getDayKey(selectedDayIndex);
-  const slots = slotsByDay[dayKey] ?? [];
-
-  const addSlot = () => {
-    setSlotsByDay((prev) => ({
-      ...prev,
-      [dayKey]: [...(prev[dayKey] ?? []), { ...defaultSlot }],
-    }));
-    setLastSavedAt(new Date().toISOString());
-  };
-
-  const removeSlot = (index: number) => {
-    setSlotsByDay((prev) => ({
-      ...prev,
-      [dayKey]: (prev[dayKey] ?? []).filter((_, i) => i !== index),
-    }));
-    setLastSavedAt(new Date().toISOString());
-  };
-
-  const updateSlot = (index: number, patch: Partial<TimeSlot>) => {
-    setSlotsByDay((prev) => {
-      const list = [...(prev[dayKey] ?? [])];
-      list[index] = { ...list[index], ...patch };
-      return { ...prev, [dayKey]: list };
-    });
-    setLastSavedAt(new Date().toISOString());
-  };
-
-  const setHourlyRateValue = (value: string) => {
-    setHourlyRate(value);
-    setLastSavedAt(new Date().toISOString());
-  };
+  const dayTabs = t.raw('availability.tabs') as string[]
 
   return (
     <Screen backgroundColor="$background">
@@ -119,16 +183,11 @@ export function TutorProfileAvailabilityScreen() {
           $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
           backgroundColor="$background"
         >
-          <Container
-            padded
-            maxWidth={960}
-            width="100%"
-            gap="$5"
-            $xs={{ gap: '$4' }}
-          >
+          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
             <TutorProfileHeader
               draftSavedLabel={draftSavedLabel}
               saveExitLabel={t('saveExit')}
+              onSaveExit={onSaveExit}
             />
 
             <TutorProfileProgress
@@ -138,10 +197,7 @@ export function TutorProfileAvailabilityScreen() {
             />
 
             <YStack gap="$2">
-              <Paragraph
-                fontSize={24}
-                fontWeight="700"
-              >
+              <Paragraph fontSize={24} fontWeight="700">
                 {t('title')}
               </Paragraph>
               <Text variant="muted">{t('subtitle')}</Text>
@@ -156,32 +212,17 @@ export function TutorProfileAvailabilityScreen() {
               borderColor="$borderSubtle"
               $xs={{ padding: '$4' }}
             >
-              <XStack
-                alignItems="center"
-                gap="$2"
-              >
-                <WalletIcon
-                  size={24}
-                  color={ICON_COLOR}
-                />
-                <Paragraph
-                  fontWeight="700"
-                  fontSize={18}
-                >
+              <XStack alignItems="center" gap="$2">
+                <WalletIcon size={24} color={ICON_COLOR} />
+                <Paragraph fontWeight="700" fontSize={18}>
                   {t('rateCardTitle')}
                 </Paragraph>
               </XStack>
-              <Text
-                size="sm"
-                variant="muted"
-              >
+              <Text size="sm" variant="muted">
                 {t('rate.question')}
               </Text>
               <YStack gap="$2">
-                <XStack
-                  alignItems="stretch"
-                  gap="$2"
-                >
+                <XStack alignItems="stretch" gap="$2">
                   <XStack
                     flex={1}
                     alignItems="center"
@@ -192,10 +233,7 @@ export function TutorProfileAvailabilityScreen() {
                     backgroundColor="$fieldBackground"
                     paddingLeft="$4"
                   >
-                    <Text
-                      color="$colorMuted"
-                      marginRight="$2"
-                    >
+                    <Text color="$colorMuted" marginRight="$2">
                       $
                     </Text>
                     <Controller
@@ -207,8 +245,8 @@ export function TutorProfileAvailabilityScreen() {
                           placeholder="0.00"
                           value={value}
                           onChangeText={(v) => {
-                            onChange(v);
-                            setHourlyRateValue(v);
+                            onChange(v)
+                            handleHourlyRateChange(v)
                           }}
                           backgroundColor="transparent"
                           borderWidth={0}
@@ -229,18 +267,12 @@ export function TutorProfileAvailabilityScreen() {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Text
-                      size="sm"
-                      variant="muted"
-                    >
+                    <Text size="sm" variant="muted">
                       {t('rate.currencyLabel')}
                     </Text>
                   </YStack>
                 </XStack>
-                <Text
-                  size="sm"
-                  variant="muted"
-                >
+                <Text size="sm" variant="muted">
                   {t('rate.recommended')}
                 </Text>
               </YStack>
@@ -255,26 +287,14 @@ export function TutorProfileAvailabilityScreen() {
               borderColor="$borderSubtle"
               $xs={{ padding: '$4' }}
             >
-              <XStack
-                alignItems="center"
-                gap="$2"
-              >
-                <CalendarIcon
-                  size={24}
-                  color={ICON_COLOR}
-                />
-                <Paragraph
-                  fontWeight="700"
-                  fontSize={18}
-                >
+              <XStack alignItems="center" gap="$2">
+                <CalendarIcon size={24} color={ICON_COLOR} />
+                <Paragraph fontWeight="700" fontSize={18}>
                   {t('availabilityCardTitle')}
                 </Paragraph>
               </XStack>
 
-              <XStack
-                gap="$2"
-                flexWrap="wrap"
-              >
+              <XStack gap="$2" flexWrap="wrap">
                 {dayTabs.map((label, index) => (
                   <Button
                     key={label}
@@ -296,15 +316,8 @@ export function TutorProfileAvailabilityScreen() {
                     flexWrap="wrap"
                     $xs={{ flexDirection: 'column', alignItems: 'stretch' }}
                   >
-                    <YStack
-                      gap="$1"
-                      flex={1}
-                      minWidth={120}
-                    >
-                      <Label
-                        color="$colorMuted"
-                        fontSize={13}
-                      >
+                    <YStack gap="$1" flex={1} minWidth={120}>
+                      <Label color="$colorMuted" fontSize={13}>
                         {t('availability.from')}
                       </Label>
                       <Input
@@ -324,15 +337,8 @@ export function TutorProfileAvailabilityScreen() {
                       <ArrowRightIcon size={25} />
                     </Text>
 
-                    <YStack
-                      gap="$1"
-                      flex={1}
-                      minWidth={120}
-                    >
-                      <Label
-                        color="$colorMuted"
-                        fontSize={13}
-                      >
+                    <YStack gap="$1" flex={1} minWidth={120}>
+                      <Label color="$colorMuted" fontSize={13}>
                         {t('availability.to')}
                       </Label>
                       <Input
@@ -354,10 +360,7 @@ export function TutorProfileAvailabilityScreen() {
                       padding="$2"
                       onPress={() => removeSlot(index)}
                     >
-                      <TrashIcon
-                        size={18}
-                        color="#EF4444"
-                      />
+                      <TrashIcon size={18} color="#EF4444" />
                     </Button>
                   </XStack>
                 ))}
@@ -370,18 +373,9 @@ export function TutorProfileAvailabilityScreen() {
                   padding="$3"
                   onPress={addSlot}
                 >
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                  >
-                    <PlusCircleIcon
-                      size={20}
-                      color={ICON_COLOR}
-                    />
-                    <Text
-                      size="sm"
-                      variant="muted"
-                    >
+                  <XStack alignItems="center" gap="$2">
+                    <PlusCircleIcon size={20} color={ICON_COLOR} />
+                    <Text size="sm" variant="muted">
                       {t('availability.addSlot')}
                     </Text>
                   </XStack>
@@ -399,17 +393,23 @@ export function TutorProfileAvailabilityScreen() {
                 gap: '$3',
               }}
             >
-              <Button
-                variant="outline"
-                onPress={() => router.push('/become-tutor/video')}
-              >
+              <Button variant="outline" onPress={() => router.push('/become-tutor/video')}>
                 {t('back')}
               </Button>
               <Button
                 variant="primary"
-                onPress={handleSubmit(() => {
-                  submitProfile();
-                  router.push('/become-tutor/final');
+                onPress={handleSubmit((values) => {
+                  const payload = buildSubmitTutorProfilePayload({
+                    ...about,
+                    ...photo,
+                    ...certification,
+                    videoUrl: video.videoLink,
+                    hourlyRate: values.hourlyRate,
+                    slotsByDay: values.slotsByDay,
+                  })
+
+                  submitProfile(payload)
+                  router.push('/become-tutor/final')
                 })}
               >
                 {t('continue')}
@@ -419,5 +419,5 @@ export function TutorProfileAvailabilityScreen() {
         </YStack>
       </ScrollView>
     </Screen>
-  );
+  )
 }

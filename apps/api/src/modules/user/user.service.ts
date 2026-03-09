@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { User } from '@mezon-tutors/db';
+import { Role, type User } from '@mezon-tutors/db';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -35,7 +35,7 @@ export class UserService {
         mezonUserId,
         username,
         avatar: avatar ?? '',
-        role: 'student',
+        role: Role.STUDENT,
         email,
       },
     });
