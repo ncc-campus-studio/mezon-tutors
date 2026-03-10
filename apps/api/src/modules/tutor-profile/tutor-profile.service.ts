@@ -20,7 +20,7 @@ export class TutorProfileService {
       throw new Error('User not found');
     }
 
-    if (user.role !== Role.TUTOR) {
+    if (user.role === Role.TUTOR) {
       throw new Error('User is already tutor yet!');
     }
 
