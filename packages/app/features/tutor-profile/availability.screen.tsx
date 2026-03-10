@@ -41,6 +41,7 @@ import { TutorProfileProgress } from './components/tutor-profile-progress'
 import { TutorProfileHeader } from './components/tutor-profile-header'
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom'
 import { DAY_KEYS, getDayKey } from '@mezon-tutors/shared'
+import { TutorProfileStickyActions } from '@mezon-tutors/app/features/tutor-profile/components/tutor-profile-sticky-actions'
 
 const ICON_COLOR = '#1253D5'
 const CURRENT_STEP = 5
@@ -429,8 +430,17 @@ export function TutorProfileAvailabilityScreen() {
         </Button>
         <Button
           variant="primary"
-          onPress={handleSubmit(() => {
-            submitProfile();
+          onPress={handleSubmit((values) => {
+            const payload = buildSubmitTutorProfilePayload({
+              ...about,
+              ...photo,
+              ...certification,
+              videoUrl: video.videoLink,
+              hourlyRate: values.hourlyRate,
+              slotsByDay: values.slotsByDay,
+            })
+
+            submitProfile(payload);
             router.push('/become-tutor/final');
           })}
         >
