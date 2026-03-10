@@ -15,7 +15,7 @@ export class TutorProfileController {
   @Post()
   async HandleSubmitTutorProfile(@Req() req: Request, @Body() body: SubmitTutorProfileDto) {
     const user = req.user as AuthUserPayload;
-    await this.tutorProfileService.upsertByUserId(user.sub, body);
+    await this.tutorProfileService.createByUserId(user.sub, body);
     return { success: true };
   }
 }

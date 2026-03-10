@@ -36,6 +36,7 @@ model TutorProfile {
   avatar             String   @default("")
   videoUrl           String   @default("") @map("video_url")
   country            String
+  subject            String   @default("")
   introduce          String   @default("")
   experience         String   @default("")
   motivate           String   @default("")

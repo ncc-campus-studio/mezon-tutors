@@ -7,6 +7,7 @@ CREATE TABLE "tutor_profiles" (
     "avatar" TEXT NOT NULL DEFAULT '',
     "video_url" TEXT NOT NULL DEFAULT '',
     "country" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
     "introduce" TEXT NOT NULL DEFAULT '',
     "experience" TEXT NOT NULL DEFAULT '',
     "motivate" TEXT NOT NULL DEFAULT '',

@@ -20,7 +20,7 @@ export class TutorProfileService {
       throw new Error('User not found');
     }
 
-    if (user.role !== Role.TUTOR) {
+    if (user.role === Role.TUTOR) {
       throw new Error('User is already tutor yet!');
     }
 
@@ -32,6 +32,7 @@ export class TutorProfileService {
         avatar: dto.avatar ?? '',
         videoUrl: dto.videoUrl ?? '',
         country: dto.country,
+        subject: dto.subject,
         introduce: dto.introduce,
         experience: dto.specialization,
         motivate: dto.motivate,
@@ -76,6 +77,7 @@ export class TutorProfileService {
           avatar: dto.avatar ?? '',
           videoUrl: dto.videoUrl ?? '',
           country: dto.country,
+          subject: dto.subject,
           introduce: dto.introduce,
           experience: dto.specialization,
           motivate: dto.motivate,
