@@ -3,6 +3,7 @@ export * from './types/user';
 export * from './types/pagination';
 export * from './types/api-response';
 export * from './types/auth';
+export * from './types/tutor-profile';
 
 // Constants
 export * from './constants/routes';

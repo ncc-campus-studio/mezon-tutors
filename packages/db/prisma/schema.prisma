@@ -7,15 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
 /// Application users table mapped to `users`
 model User {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  mezonUserId String   @unique @map("mezon_user_id")
-  username    String
-  avatar      String
-  role        String
-  email       String
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mezonUserId  String        @unique @map("mezon_user_id")
+  username     String
+  avatar       String
+  role         Role          @default(STUDENT)
+  email        String
+  createdAt    DateTime      @default(now()) @map("created_at")
+  tutorProfile TutorProfile?
 
   @@map("users")
+}
+
+/// Tutor profile (1:1 with User)
+model TutorProfile {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @unique @map("user_id") @db.Uuid
+  firstName          String   @map("first_name")
+  lastName           String   @map("last_name")
+  avatar             String   @default("")
+  videoUrl           String   @default("") @map("video_url")
+  country            String
+  introduce          String   @default("")
+  experience         String   @default("")
+  motivate           String   @default("")
+  headline           String   @default("")
+  pricePerHour       Decimal  @map("price_per_hour") @db.Decimal(10, 2)
+  isProfessional     Boolean  @default(false) @map("is_professional")
+  verificationStatus String   @map("verification_status")
+  totalLessonsTaught Int      @default(0) @map("total_lessons_taught")
+  totalStudents      Int      @default(0) @map("total_students")
+  ratingCount        Int      @default(0) @map("rating_count")
+  ratingAverage      Decimal  @default(0) @map("rating_average") @db.Decimal(3, 2)
+  timezone           String   @default("UTC")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  languages    TutorLanguage[]
+  availability TutorAvailability[]
+
+  @@map("tutor_profiles")
+}
+
+/// Tutor spoken languages
+model TutorLanguage {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String @map("tutor_id") @db.Uuid
+  languageCode String @map("language_code")
+  proficiency  String
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@unique([tutorId, languageCode])
+  @@map("tutor_language")
+}
+
+/// Tutor weekly availability slots
+model TutorAvailability {
+  id        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId   String       @map("tutor_id") @db.Uuid
+  dayOfWeek Int          @map("day_of_week")
+  startTime String       @map("start_time")
+  endTime   String       @map("end_time")
+  isActive  Boolean      @default(true) @map("is_active")
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@unique([tutorId, dayOfWeek, startTime, endTime])
+  @@map("tutor_availability")
 }

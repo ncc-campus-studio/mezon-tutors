@@ -6,6 +6,7 @@ import { SharedModule } from './shared/shared.module';
 import { HealthController } from './health.controller';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { TutorProfileModule } from './modules/tutor-profile/tutor-profile.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
     SharedModule,
     PrismaModule,
     AuthModule,
+    TutorProfileModule,
   ],
   controllers: [HealthController],
   providers: [

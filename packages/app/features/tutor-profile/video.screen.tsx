@@ -137,7 +137,7 @@ export function TutorProfileVideoScreen() {
     setLastSavedAt(new Date().toISOString());
   };
 
-  const handleContinue = () => {
+  const handleContinue = (values: VideoFormValues) => {
     if (!videoId) {
       setDurationError(t('errors.missingBeforeContinue'));
       videoInputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
