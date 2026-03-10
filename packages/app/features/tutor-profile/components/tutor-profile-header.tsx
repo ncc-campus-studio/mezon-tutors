@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Paragraph, Text, XStack } from '@mezon-tutors/app/ui';
 import { GraduationCapIcon } from '@mezon-tutors/app/ui/icons/GraduationCapIcon';
 
@@ -17,6 +18,8 @@ export function TutorProfileHeader({
   onSaveExit,
   leftTitle,
 }: TutorProfileHeaderProps) {
+  const t = useTranslations('Common.Header');
+
   return (
     <XStack
       alignItems="center"
@@ -43,7 +46,7 @@ export function TutorProfileHeader({
             fontSize={18}
             letterSpacing={-0.3}
           >
-            TutorFlow
+            {t('title')}
           </Paragraph>
         )}
       </XStack>
@@ -76,4 +79,3 @@ export function TutorProfileHeader({
     </XStack>
   );
 }
-
