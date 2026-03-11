@@ -15,22 +15,21 @@ export class TutorApplicationsController {
 
   @Get()
   async getList() {
-    return this.tutorApplicationsService.getList();
+    return this.tutorApplicationsService.listApplications();
+  }
+
+  @Get('metrics')
+  async getMetrics() {
+    return this.tutorApplicationsService.getMetrics();
   }
 
   @Post(':id/approve')
-  async approve(
-    @Param('id') id: string,
-    @Body() body?: TutorApplicationApproveBodyDto
-  ) {
+  async approve(@Param('id') id: string, @Body() body?: TutorApplicationApproveBodyDto) {
     return this.tutorApplicationsService.approve(id, body);
   }
 
   @Post(':id/reject')
-  async reject(
-    @Param('id') id: string,
-    @Body() body?: TutorApplicationRejectBodyDto
-  ) {
+  async reject(@Param('id') id: string, @Body() body?: TutorApplicationRejectBodyDto) {
     return this.tutorApplicationsService.reject(id, body);
   }
 }

@@ -1,13 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role } from '@mezon-tutors/db';
-import type { TutorApplicationApiItem } from '@mezon-tutors/shared';
+import { Role, VerificationStatus } from '@mezon-tutors/db';
+import type { TutorApplicationApiItem, TutorApplicationMetricsApi } from '@mezon-tutors/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { toTutorApplicationApiItem } from './tutor-applications.mapper';
 
 @Injectable()
 export class TutorApplicationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getList(): Promise<TutorApplicationApiItem[]> {
+  async listApplications(): Promise<TutorApplicationApiItem[]> {
     const profiles = await this.prisma.tutorProfile.findMany({
       include: {
         languages: true,
@@ -16,13 +17,10 @@ export class TutorApplicationsService {
         createdAt: 'desc',
       },
     });
-    return profiles.map((p) => this.toApiItem(p));
+    return profiles.map(toTutorApplicationApiItem);
   }
 
-  async approve(
-    id: string,
-    _body?: { feedback?: string }
-  ): Promise<{ success: boolean }> {
+  async approve(id: string, body?: { feedback?: string }): Promise<{ success: boolean }> {
     const profile = await this.prisma.tutorProfile.findUnique({
       where: { id },
       select: { id: true, userId: true },
@@ -33,7 +31,10 @@ export class TutorApplicationsService {
     await this.prisma.$transaction([
       this.prisma.tutorProfile.update({
         where: { id },
-        data: { verificationStatus: 'approved' },
+        data: {
+          verificationStatus: VerificationStatus.APPROVED,
+          reviewFeedback: body?.feedback ?? '',
+        },
       }),
       this.prisma.user.update({
         where: { id: profile.userId },
@@ -43,10 +44,7 @@ export class TutorApplicationsService {
     return { success: true };
   }
 
-  async reject(
-    id: string,
-    _body?: { feedback?: string }
-  ): Promise<{ success: boolean }> {
+  async reject(id: string, body?: { feedback?: string }): Promise<{ success: boolean }> {
     const profile = await this.prisma.tutorProfile.findUnique({
       where: { id },
     });
@@ -55,46 +53,65 @@ export class TutorApplicationsService {
     }
     await this.prisma.tutorProfile.update({
       where: { id },
-      data: { verificationStatus: 'rejected' },
+      data: {
+        verificationStatus: VerificationStatus.REJECTED,
+        reviewFeedback: body?.feedback ?? '',
+      },
     });
     return { success: true };
   }
 
-  private toApiItem(
-    p: {
-      id: string;
-      userId: string;
-      firstName: string;
-      lastName: string;
-      avatar: string;
-      videoUrl: string;
-      country: string;
-      subject: string;
-      introduce: string;
-      experience: string;
-      motivate: string;
-      headline: string;
-      verificationStatus: string;
-      createdAt: Date;
-      languages?: { languageCode: string }[];
-    }
-  ): TutorApplicationApiItem {
+  async getMetrics(): Promise<TutorApplicationMetricsApi> {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
+    const [totalPending, approvedToday, approvedYesterday, reviewedProfiles] = await Promise.all([
+      this.prisma.tutorProfile.count({
+        where: { verificationStatus: VerificationStatus.PENDING },
+      }),
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+          updatedAt: { gte: startOfToday },
+        },
+      }),
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+          updatedAt: { gte: startOfYesterday, lt: startOfToday },
+        },
+      }),
+      this.prisma.tutorProfile.findMany({
+        where: {
+          verificationStatus: { in: [VerificationStatus.APPROVED, VerificationStatus.REJECTED] },
+        },
+        select: { createdAt: true, updatedAt: true },
+      }),
+    ]);
+
+    const avgReviewTimeHours =
+      reviewedProfiles.length > 0
+        ? reviewedProfiles.reduce((sum, p) => {
+            const hours = (p.updatedAt.getTime() - p.createdAt.getTime()) / (1000 * 60 * 60);
+            return sum + hours;
+          }, 0) / reviewedProfiles.length
+        : 0;
+
+    const approvedTodayChangePercent =
+      approvedYesterday > 0
+        ? Math.round(((approvedToday - approvedYesterday) / approvedYesterday) * 100)
+        : approvedToday > 0
+          ? 100
+          : 0;
+
     return {
-      id: p.id,
-      user_id: p.userId,
-      first_name: p.firstName,
-      last_name: p.lastName,
-      avatar: p.avatar,
-      video_url: p.videoUrl,
-      country: p.country,
-      subject: p.subject,
-      introduce: p.introduce,
-      experience: p.experience,
-      motivate: p.motivate,
-      headline: p.headline,
-      verification_status: p.verificationStatus,
-      created_at: p.createdAt.toISOString(),
-      languages: p.languages?.map((l) => ({ language_code: l.languageCode })) ?? [],
+      total_pending: totalPending,
+      approved_today: approvedToday,
+      avg_review_time_hours: Math.round(avgReviewTimeHours * 10) / 10,
+      total_pending_change_percent: 0,
+      approved_today_change_percent: approvedTodayChangePercent,
+      avg_review_time_change_percent: 0,
     };
   }
 }
