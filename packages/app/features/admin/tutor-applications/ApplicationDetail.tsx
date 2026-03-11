@@ -3,8 +3,9 @@ import { useTheme } from 'tamagui'
 import { useMemo, useState } from 'react'
 import { AppButton, Card, Text, Textarea, XStack, YStack } from '@mezon-tutors/app/ui'
 import { DocumentIcon } from '@mezon-tutors/app/ui/icons/DocumentIcon'
-import type { TutorApplication } from './types'
 import { VerifiedIcon } from '@mezon-tutors/app/ui/icons'
+import { YOUTUBE_EMBED_BASE_URL } from '@mezon-tutors/shared'
+import type { TutorApplication } from './types'
 
 export type TutorApplicationDetailProps = {
   application: TutorApplication | null
@@ -34,14 +35,14 @@ export function TutorApplicationDetail({
       if (host.includes('youtube.com')) {
         const videoId = url.searchParams.get('v')
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`
+          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`
         }
       }
 
       if (host.includes('youtu.be')) {
         const videoId = url.pathname.replace('/', '')
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`
+          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`
         }
       }
     } catch {
@@ -49,7 +50,7 @@ export function TutorApplicationDetail({
     }
 
     return null
-  }, [application?.introPreview])
+  }, [application?.videoUrl])
 
   const openInNewTab = (url: string) => {
     if (typeof window !== 'undefined') {
@@ -240,16 +241,5 @@ export function TutorApplicationDetail({
         </XStack>
       </YStack>
     </Card>
-  )
-}
-
-function TrianglePlayIcon() {
-  return (
-    <svg width="28" height="32" viewBox="0 0 28 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M26.25 13.4019C28.25 14.5566 28.25 17.4434 26.25 18.5981L5.25 30.7277C3.25 31.8824 0.75 30.439 0.75 28.1296L0.75 3.87039C0.75 1.561 3.25 0.1176 5.25 1.2723L26.25 13.4019Z"
-        fill="white"
-      />
-    </svg>
   )
 }

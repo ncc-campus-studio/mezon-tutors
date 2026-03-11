@@ -5,7 +5,7 @@ import type {
   TutorAvailabilitySlotDto,
   TutorLanguageDto,
 } from '@mezon-tutors/shared';
-import { Role } from '@mezon-tutors/db';
+import { Role, VerificationStatus } from '@mezon-tutors/db';
 
 @Injectable()
 export class TutorProfileService {
@@ -39,7 +39,7 @@ export class TutorProfileService {
         headline: dto.headline,
         pricePerHour: dto.pricePerHour,
         ratingAverage: 0,
-        verificationStatus: 'pending',
+        verificationStatus: VerificationStatus.PENDING,
       },
     });
 
@@ -84,7 +84,7 @@ export class TutorProfileService {
           headline: dto.headline,
           pricePerHour: dto.pricePerHour,
           isProfessional: !!dto.teachingCertificateName,
-          verificationStatus: 'pending',
+          verificationStatus: VerificationStatus.PENDING,
         },
       });
 

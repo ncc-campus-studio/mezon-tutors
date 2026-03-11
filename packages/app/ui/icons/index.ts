@@ -38,6 +38,7 @@ export * from './SearchIcon';
 export * from './TimerIcon';
 export * from './TrendDownIcon';
 export * from './TrendUpIcon';
+export * from './TrianglePlayIcon';
 export * from './UsersIcon';
 export * from './WalletIcon';
 

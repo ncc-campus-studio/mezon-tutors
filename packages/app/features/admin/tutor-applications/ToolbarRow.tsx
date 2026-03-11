@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Input, useTheme } from 'tamagui'
-import { XStack, YStack } from '@mezon-tutors/app/ui'
+import { useTheme } from 'tamagui'
+import { useForm } from 'react-hook-form'
+import { XStack, YStack, InputField } from '@mezon-tutors/app/ui'
 import { SearchIcon } from '@mezon-tutors/app/ui/icons'
 import { BellIcon } from '@mezon-tutors/app/ui/icons/BellIcon'
 import { SettingsIcon } from '@mezon-tutors/app/ui/icons/SettingIcon'
@@ -12,6 +14,8 @@ export type TutorApplicationsToolbarRowProps = {
   onSettingsPress?: () => void
 }
 
+type SearchFormValues = { search: string }
+
 export function TutorApplicationsToolbarRow({
   search,
   onSearchChange,
@@ -21,6 +25,20 @@ export function TutorApplicationsToolbarRow({
   const t = useTranslations('Admin.TutorApplications')
   const theme = useTheme()
   const colorMuted = theme.colorMuted?.val
+
+  const { control, setValue, watch } = useForm<SearchFormValues>({
+    defaultValues: { search },
+  })
+
+  const searchValue = watch('search')
+
+  useEffect(() => {
+    setValue('search', search)
+  }, [search, setValue])
+
+  useEffect(() => {
+    onSearchChange(searchValue ?? '')
+  }, [searchValue, onSearchChange])
 
   return (
     <XStack alignItems="center" gap={16} margin={10}>
@@ -33,24 +51,15 @@ export function TutorApplicationsToolbarRow({
         borderWidth={1}
         borderColor="$borderSubtle"
         gap={8}
-        height={44}
+        minHeight={44}
       >
         <SearchIcon size={18} color={colorMuted} />
-        <Input
-          flex={1}
+        <InputField
+          control={control}
+          name="search"
+          label=""
           placeholder={t('searchPlaceholder')}
-          backgroundColor="transparent"
-          borderWidth={0}
-          borderColor="transparent"
-          outlineWidth={0}
-          focusStyle={{
-            borderColor: 'transparent',
-            shadowColor: 'transparent',
-            outlineWidth: 0,
-          }}
-          color="$color"
-          value={search}
-          onChangeText={onSearchChange}
+          flex={1}
         />
       </XStack>
 

@@ -1,21 +1,24 @@
-export type MetricStatus = 'good' | 'warning' | 'bad'
+export type MetricStatus = 'good' | 'warning' | 'bad';
 
-export type MetricId = 'total-pending' | 'approved-today' | 'avg-review-time'
+export enum AdminMetric {
+  TotalPending = 'total-pending',
+  ApprovedToday = 'approved-today',
+  AvgReviewTime = 'avg-review-time',
+}
 
 export type MetricCard = {
-  id: MetricId
-  value: string
-  changePercent: number
-  betterWhen: 'higher' | 'lower'
-  titleKey: string
-  helperKey: string
-}
+  id: AdminMetric;
+  value: string;
+  changePercent: number;
+  betterWhen: 'higher' | 'lower';
+  titleKey: string;
+  helperKey: string;
+};
 
 // Re-export shared tutor application types for feature use
 export type {
-  TutorApplicationStatus,
   TutorCertificate,
   TutorApplication,
   TutorApplicationApproveBody,
   TutorApplicationRejectBody,
-} from '@mezon-tutors/shared'
+} from '@mezon-tutors/shared';

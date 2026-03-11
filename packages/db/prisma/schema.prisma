@@ -13,6 +13,12 @@ enum Role {
   ADMIN
 }
 
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 /// Application users table mapped to `users`
 model User {
   id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -29,28 +35,28 @@ model User {
 
 /// Tutor profile (1:1 with User)
 model TutorProfile {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId             String   @unique @map("user_id") @db.Uuid
-  firstName          String   @map("first_name")
-  lastName           String   @map("last_name")
-  avatar             String   @default("")
-  videoUrl           String   @default("") @map("video_url")
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String             @unique @map("user_id") @db.Uuid
+  firstName          String             @map("first_name")
+  lastName           String             @map("last_name")
+  avatar             String             @default("")
+  videoUrl           String             @default("") @map("video_url")
   country            String
-  subject            String   @default("")
-  introduce          String   @default("")
-  experience         String   @default("")
-  motivate           String   @default("")
-  headline           String   @default("")
-  pricePerHour       Decimal  @map("price_per_hour") @db.Decimal(10, 2)
-  isProfessional     Boolean  @default(false) @map("is_professional")
-  verificationStatus String   @map("verification_status")
-  totalLessonsTaught Int      @default(0) @map("total_lessons_taught")
-  totalStudents      Int      @default(0) @map("total_students")
-  ratingCount        Int      @default(0) @map("rating_count")
-  ratingAverage      Decimal  @default(0) @map("rating_average") @db.Decimal(3, 2)
-  timezone           String   @default("UTC")
-  createdAt          DateTime @default(now()) @map("created_at")
-  updatedAt          DateTime @updatedAt @map("updated_at")
+  subject            String             @default("")
+  introduce          String             @default("")
+  experience         String             @default("")
+  motivate           String             @default("")
+  headline           String             @default("")
+  pricePerHour       Decimal            @map("price_per_hour") @db.Decimal(10, 2)
+  isProfessional     Boolean            @default(false) @map("is_professional")
+  verificationStatus VerificationStatus @map("verification_status")
+  totalLessonsTaught Int                @default(0) @map("total_lessons_taught")
+  totalStudents      Int                @default(0) @map("total_students")
+  ratingCount        Int                @default(0) @map("rating_count")
+  ratingAverage      Decimal            @default(0) @map("rating_average") @db.Decimal(3, 2)
+  timezone           String             @default("UTC")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
 
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   languages    TutorLanguage[]

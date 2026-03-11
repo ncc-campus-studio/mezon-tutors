@@ -19,3 +19,15 @@ export type TutorApplicationApiItem = {
   created_at: string
   languages?: { language_code: string }[]
 }
+
+/**
+ * API response shape for GET /admin/tutor-applications/metrics.
+ */
+export type TutorApplicationMetricsApi = {
+  total_pending: number
+  approved_today: number
+  avg_review_time_hours: number
+  total_pending_change_percent?: number
+  approved_today_change_percent?: number
+  avg_review_time_change_percent?: number
+}
