@@ -61,26 +61,22 @@ export class TutorProfileService {
       throw new Error('User not found');
     }
 
-    const profile = await this.prisma.$transaction(async (tx) => {
-      const profile = await tx.tutorProfile.update({
-        where: { userId },
-        data: {
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          avatar: dto.avatar ?? '',
-          videoUrl: dto.videoUrl ?? '',
-          country: dto.country,
-          subject: dto.subject,
-          introduce: dto.introduce,
-          experience: dto.specialization,
-          motivate: dto.motivate,
-          headline: dto.headline,
-          pricePerHour: dto.pricePerHour,
-          isProfessional: !!dto.teachingCertificateName,
-        },
-      });
-
-      return profile;
+    const profile = await this.prisma.tutorProfile.update({
+      where: { userId },
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        avatar: dto.avatar ?? '',
+        videoUrl: dto.videoUrl ?? '',
+        country: dto.country,
+        subject: dto.subject,
+        introduce: dto.introduce,
+        experience: dto.specialization,
+        motivate: dto.motivate,
+        headline: dto.headline,
+        pricePerHour: dto.pricePerHour,
+        isProfessional: !!dto.teachingCertificateName,
+      },
     });
 
     if (dto.languages?.length && profile) {
