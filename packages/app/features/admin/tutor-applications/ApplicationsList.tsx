@@ -5,6 +5,7 @@ import {
   AdminTable,
   type AdminTableColumn,
   type AdminTableRow,
+  Text,
   YStack,
 } from '@mezon-tutors/app/ui';
 import type { TutorApplication } from './types';
@@ -88,10 +89,13 @@ export function TutorApplicationsList({
     );
 
     const dateCell = (
-      <ApplicationDateCell
+      <Text
         key="date"
-        date={app.date}
-      />
+        size="sm"
+        variant="muted"
+      >
+        {app.date}
+      </Text>
     );
 
     const actionsCell = (

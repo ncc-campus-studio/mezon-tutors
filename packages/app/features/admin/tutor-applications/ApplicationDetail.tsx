@@ -1,62 +1,55 @@
-import { useTranslations } from 'next-intl'
-import { useTheme } from 'tamagui'
-import { useMemo, useState } from 'react'
-import { AppButton, Card, Text, Textarea, XStack, YStack } from '@mezon-tutors/app/ui'
-import { DocumentIcon } from '@mezon-tutors/app/ui/icons/DocumentIcon'
-import { VerifiedIcon } from '@mezon-tutors/app/ui/icons'
-import { YOUTUBE_EMBED_BASE_URL } from '@mezon-tutors/shared'
-import type { TutorApplication } from './types'
+import { useTranslations } from 'next-intl';
+import { useTheme } from 'tamagui';
+import { useMemo, useState } from 'react';
+import { Card, Text, XStack, YStack } from '@mezon-tutors/app/ui';
+import { DocumentIcon } from '@mezon-tutors/app/ui/icons/DocumentIcon';
+import { VerifiedIcon } from '@mezon-tutors/app/ui/icons';
+import { YOUTUBE_EMBED_BASE_URL } from '@mezon-tutors/shared';
+import type { TutorApplication } from './types';
 
 export type TutorApplicationDetailProps = {
-  application: TutorApplication | null
-  onApprove: (id: string, feedback?: string) => void
-  onReject: (id: string, feedback?: string) => void
-}
+  application: TutorApplication | null;
+};
 
-export function TutorApplicationDetail({
-  application,
-  onApprove,
-  onReject,
-}: TutorApplicationDetailProps) {
-  const t = useTranslations('Admin.TutorApplications')
-  const theme = useTheme()
-  const primaryColor = theme.appPrimary?.val
-  const borderColor = theme.borderColor?.val
-  const [feedback, setFeedback] = useState('')
+export function TutorApplicationDetail({ application }: TutorApplicationDetailProps) {
+  const t = useTranslations('Admin.TutorApplications');
+  const theme = useTheme();
+  const primaryColor = theme.appPrimary?.val;
+  const borderColor = theme.borderColor?.val;
 
   const youtubeEmbedUrl = useMemo(() => {
-    const videoUrl = application?.videoUrl
-    if (!videoUrl) return null
+    const videoUrl = application?.videoUrl;
+    if (!videoUrl) return null;
 
     try {
-      const url = new URL(videoUrl)
-      const host = url.hostname.toLowerCase()
+      const url = new URL(videoUrl);
+      const host = url.hostname.toLowerCase();
 
       if (host.includes('youtube.com')) {
-        const videoId = url.searchParams.get('v')
+        const videoId = url.searchParams.get('v');
         if (videoId) {
-          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`
+          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`;
         }
       }
 
       if (host.includes('youtu.be')) {
-        const videoId = url.pathname.replace('/', '')
+        const videoId = url.pathname.replace('/', '');
         if (videoId) {
-          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`
+          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`;
         }
       }
     } catch {
-      return null
+      return null;
     }
 
-    return null
-  }, [application?.videoUrl])
+    return null;
+  }, [application?.videoUrl]);
 
   const openInNewTab = (url: string) => {
     if (typeof window !== 'undefined') {
-      window.open(url, '_blank', 'noopener,noreferrer')
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
-  }
+  };
 
   if (!application) {
     return (
@@ -69,7 +62,7 @@ export function TutorApplicationDetail({
       >
         <Text style={{ textDecoration: 'none' }}>{t('detail.noSelection')}</Text>
       </Card>
-    )
+    );
   }
 
   return (
@@ -92,16 +85,33 @@ export function TutorApplicationDetail({
         paddingBottom={12}
         gap={4}
       >
-        <Text fontSize={20} fontWeight="700" style={{ textDecoration: 'none' }} color={'#fff'}>
+        <Text
+          fontSize={20}
+          fontWeight="700"
+          style={{ textDecoration: 'none' }}
+          color={'#fff'}
+        >
           {t('detail.title')}
         </Text>
-        <Text size="sm" color={'#fff'} style={{ textDecoration: 'none' }}>
+        <Text
+          size="sm"
+          color={'#fff'}
+          style={{ textDecoration: 'none' }}
+        >
           {t('detail.applicationId')}: {application.id}
         </Text>
       </YStack>
 
-      <YStack padding={20} gap={16} flex={1}>
-        <XStack flexDirection="row" alignItems="center" gap={12}>
+      <YStack
+        padding={20}
+        gap={16}
+        flex={1}
+      >
+        <XStack
+          flexDirection="row"
+          alignItems="center"
+          gap={12}
+        >
           <YStack
             width={40}
             height={40}
@@ -110,16 +120,27 @@ export function TutorApplicationDetail({
             alignItems="center"
             justifyContent="center"
           >
-            <Text size="md" fontWeight="700">
+            <Text
+              size="md"
+              fontWeight="700"
+            >
               {application.name.charAt(0)}
             </Text>
           </YStack>
 
           <YStack gap={2}>
-            <Text fontWeight="600" variant="default" fontSize={20}>
+            <Text
+              fontWeight="600"
+              variant="default"
+              fontSize={20}
+            >
               {application.name}
             </Text>
-            <Text size="sm" variant="muted" style={{ textDecoration: 'none' }}>
+            <Text
+              size="sm"
+              variant="muted"
+              style={{ textDecoration: 'none' }}
+            >
               <VerifiedIcon size={12} />
               {t('detail.verifiedBadge')}
             </Text>
@@ -127,7 +148,12 @@ export function TutorApplicationDetail({
         </XStack>
 
         <YStack gap={8}>
-          <Text size="sm" fontWeight="600" variant="muted" fontSize={16}>
+          <Text
+            size="sm"
+            fontWeight="600"
+            variant="muted"
+            fontSize={16}
+          >
             {t('detail.introVideoTitle')}
           </Text>
           {youtubeEmbedUrl ? (
@@ -163,18 +189,29 @@ export function TutorApplicationDetail({
               />
             </YStack>
           ) : (
-            <Text size="sm" variant="muted">
+            <Text
+              size="sm"
+              variant="muted"
+            >
               {application.introPreview}
             </Text>
           )}
         </YStack>
 
         <YStack gap={10}>
-          <Text size="sm" fontWeight="600" variant="muted" fontSize={16}>
+          <Text
+            size="sm"
+            fontWeight="600"
+            variant="muted"
+            fontSize={16}
+          >
             {t('detail.certificatesTitle')}
           </Text>
 
-          <XStack gap={8} flexWrap="wrap">
+          <XStack
+            gap={8}
+            flexWrap="wrap"
+          >
             {application.certificates.map((cert) => (
               <XStack
                 key={cert.id}
@@ -189,13 +226,26 @@ export function TutorApplicationDetail({
                 gap={10}
                 flexBasis="48%"
               >
-                <XStack alignItems="center" gap={10}>
-                  <DocumentIcon size={22} color={primaryColor} />
+                <XStack
+                  alignItems="center"
+                  gap={10}
+                >
+                  <DocumentIcon
+                    size={22}
+                    color={primaryColor}
+                  />
                   <YStack gap={2}>
-                    <Text size="sm" fontWeight="500" variant="default">
+                    <Text
+                      size="sm"
+                      fontWeight="500"
+                      variant="default"
+                    >
                       {cert.name}
                     </Text>
-                    <Text size="sm" variant="muted">
+                    <Text
+                      size="sm"
+                      variant="muted"
+                    >
                       {cert.size}
                     </Text>
                   </YStack>
@@ -217,29 +267,7 @@ export function TutorApplicationDetail({
             ))}
           </XStack>
         </YStack>
-
-        <YStack gap={8}>
-          <Text size="sm" fontWeight="600" variant="muted" fontSize={16}>
-            {t('detail.reviewFeedbackTitle')}
-          </Text>
-          <Textarea
-            placeholder={t('detail.reviewFeedbackPlaceholder')}
-            multiline
-            textAlignVertical="top"
-            value={feedback}
-            onChangeText={setFeedback}
-          />
-        </YStack>
-
-        <XStack gap={12} justifyContent="flex-end">
-          <AppButton variant="secondary" onPress={() => onReject(application.id, feedback)}>
-            {t('actions.reject')}
-          </AppButton>
-          <AppButton variant="primary" onPress={() => onApprove(application.id, feedback)}>
-            {t('actions.approveTutor')}
-          </AppButton>
-        </XStack>
       </YStack>
     </Card>
-  )
+  );
 }
