@@ -62,13 +62,6 @@ export class TutorProfileService {
     }
 
     const profile = await this.prisma.$transaction(async (tx) => {
-      if (user.role !== Role.TUTOR) {
-        await tx.user.update({
-          where: { id: userId },
-          data: { role: Role.TUTOR },
-        });
-      }
-
       const profile = await tx.tutorProfile.update({
         where: { userId },
         data: {
@@ -84,7 +77,6 @@ export class TutorProfileService {
           headline: dto.headline,
           pricePerHour: dto.pricePerHour,
           isProfessional: !!dto.teachingCertificateName,
-          verificationStatus: VerificationStatus.PENDING,
         },
       });
 
