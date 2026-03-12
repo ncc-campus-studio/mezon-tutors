@@ -58,29 +58,6 @@ export function TutorApplicationsScreen() {
     return found ?? filteredApplications[0];
   }, [filteredApplications, selectedId]);
 
-  const removeFromList = (id: string) => {
-    setApplications((prev) => prev.filter((app) => app.id !== id));
-    setSelectedId((prev) => (prev === id ? null : prev));
-  };
-
-  const handleApprove = async (id: string, feedback?: string) => {
-    try {
-      await tutorApplicationService.approve(id, feedback ? { feedback } : undefined);
-      removeFromList(id);
-    } catch (err) {
-      console.error('Approve failed', err);
-    }
-  };
-
-  const handleReject = async (id: string, feedback?: string) => {
-    try {
-      await tutorApplicationService.reject(id, feedback ? { feedback } : undefined);
-      removeFromList(id);
-    } catch (err) {
-      console.error('Reject failed', err);
-    }
-  };
-
   const handleExportCsv = (apps: TutorApplication[]) => {
     if (typeof window === 'undefined' || !apps.length) return;
 
@@ -151,8 +128,6 @@ export function TutorApplicationsScreen() {
             applications={filteredApplications}
             selectedId={selectedApplication?.id ?? null}
             onSelect={setSelectedId}
-            onApprove={handleApprove}
-            onReject={handleReject}
             onFilterClick={() => {
               console.log('Filters button clicked');
             }}

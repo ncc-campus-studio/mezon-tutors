@@ -12,7 +12,6 @@ import type { TutorApplication } from './types';
 import {
   ApplicationNameCell,
   ApplicationSubjectCell,
-  ApplicationDateCell,
   ApplicationActionsCell,
   ApplicationsListHeader,
   ApplicationsListPagination,
@@ -22,8 +21,6 @@ export type TutorApplicationsListProps = {
   applications: TutorApplication[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
   onFilterClick?: () => void;
   onExportCsvClick?: () => void;
 };
@@ -32,8 +29,6 @@ export function TutorApplicationsList({
   applications,
   selectedId,
   onSelect,
-  onApprove,
-  onReject,
   onFilterClick,
   onExportCsvClick,
 }: TutorApplicationsListProps) {
@@ -103,8 +98,6 @@ export function TutorApplicationsList({
         key="actions"
         applicationId={app.id}
         isSelected={isSelected}
-        onApprove={onApprove}
-        onReject={onReject}
       />
     );
 
