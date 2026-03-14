@@ -8,6 +8,7 @@
 CREATE TYPE "VerificationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- AlterTable
+ALTER TABLE "tutor_profiles"
 ALTER COLUMN "subject" SET DEFAULT '',
 DROP COLUMN "verification_status",
 ADD COLUMN     "verification_status" "VerificationStatus" NOT NULL;
