@@ -19,6 +19,25 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ProfessionalDocumentStatus {
+  NEW
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProfessionalDocumentType {
+  DEGREE
+  CERTIFICATE
+  OTHER
+}
+
+enum IdentityVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 /// Application users table mapped to `users`
 model User {
   id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -42,6 +61,8 @@ model TutorProfile {
   avatar             String             @default("")
   videoUrl           String             @default("") @map("video_url")
   country            String
+  phone              String
+  email              String
   subject            String             @default("")
   introduce          String             @default("")
   experience         String             @default("")
@@ -62,7 +83,61 @@ model TutorProfile {
   languages    TutorLanguage[]
   availability TutorAvailability[]
 
+  adminNotes            TutorAdminNote[]
+  professionalDocuments ProfessionalDocument[]
+  identityVerification  IdentityVerification?
+
   @@map("tutor_profiles")
+}
+
+/// Tutor admin notes
+model TutorAdminNote {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String   @map("tutor_id") @db.Uuid
+  reviewerId   String   @map("reviewer_id")
+  reviewerName String   @map("reviewer_name")
+  content      String   @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("tutor_admin_notes")
+}
+
+/// Professional documents for tutors
+model ProfessionalDocument {
+  id             String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId        String                     @map("tutor_id") @db.Uuid
+  name           String
+  institution    String?
+  type           ProfessionalDocumentType
+  status         ProfessionalDocumentStatus @default(PENDING)
+  uploadedAt     DateTime                   @default(now()) @map("uploaded_at")
+  specialization String?
+  yearOfComplete Int?                       @map("year_of_complete")
+  fileKey        String                     @map("file_key")
+  reviewedAt     DateTime?                  @map("reviewed_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("professional_documents")
+}
+
+/// Identity verification record
+model IdentityVerification {
+  id           String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String                     @unique @map("tutor_id") @db.Uuid
+  status       IdentityVerificationStatus @default(PENDING)
+  nameMatch    Boolean                    @default(false) @map("name_match")
+  notExpired   Boolean                    @default(false) @map("not_expired")
+  photoClarity Boolean                    @default(false) @map("photo_clarity")
+  uploadedAt   DateTime                   @default(now()) @map("uploaded_at")
+  fileKey      String                     @map("file_key")
+  reviewedAt   DateTime?                  @map("reviewed_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("identity_verification")
 }
 
 /// Tutor spoken languages

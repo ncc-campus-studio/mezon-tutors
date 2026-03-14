@@ -29,4 +29,3 @@ export const Text = styled(Paragraph, {
 });
 
 export type TextProps = GetProps<typeof Text>;
-

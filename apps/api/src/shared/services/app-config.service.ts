@@ -33,6 +33,10 @@ const envSchema = z.object({
     .string()
     .url('REDIRECT_URI must be a valid URL')
     .min(1, 'REDIRECT_URI is required'),
+
+  // Email (Resend)
+  RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
+  RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
@@ -55,6 +59,8 @@ export class AppConfigService {
       CLIENT_ID: this.configService.get('CLIENT_ID'),
       CLIENT_SECRET: this.configService.get('CLIENT_SECRET'),
       REDIRECT_URI: this.configService.get('REDIRECT_URI'),
+      RESEND_API_KEY: this.configService.get('RESEND_API_KEY'),
+      RESEND_FROM_EMAIL: this.configService.get('RESEND_FROM_EMAIL'),
     };
 
     try {
@@ -118,6 +124,14 @@ export class AppConfigService {
 
   get vercelEnv(): string {
     return process.env.VERCEL_ENV || '';
+  }
+
+  get resendApiKey(): string {
+    return this.env.RESEND_API_KEY;
+  }
+
+  get resendFromEmail(): string {
+    return this.env.RESEND_FROM_EMAIL;
   }
 
   // Helper generic method if needed for other keys

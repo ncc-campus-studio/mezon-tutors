@@ -1,0 +1,161 @@
+{
+  "Detail": {
+    "breadcrumbs": "Quản trị / Đơn đăng ký / Xem chi tiết",
+    "status": {
+      "PENDING": "Đang chờ duyệt",
+      "APPROVED": "Đã chấp nhận",
+      "REJECTED": "Từ chối",
+      "WAITLISTED": "Danh sách chờ",
+      "NEW": "Mới"
+    },
+    "submittedAt": "Gửi ngày {date} · Mã: {id}",
+    "loading": "Đang tải...",
+    "error": "Lỗi khi tải chi tiết đơn đăng ký.",
+    "footer": "© 2026 Tutor Audit Administrative Dashboard. Chỉ sử dụng lưu hành nội bộ.",
+    "tabs": {
+      "fullApplication": "Hồ sơ đầy đủ",
+      "documents": "Tài liệu & Xác thực",
+      "identity": "Danh tính",
+      "assessment": "Kết quả đánh giá",
+      "messageHistory": "Lịch sử tin nhắn"
+    },
+    "actions": {
+      "reject": "Từ chối",
+      "waitlist": "Cho vào danh sách chờ",
+      "approve": "Chấp nhận"
+    },
+    "sections": {
+      "personalInfo": {
+        "title": "Thông tin cá nhân",
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "address": "Địa chỉ"
+      },
+      "videoBio": {
+        "title": "Video giới thiệu & Tiểu sử",
+        "videoPlaceholder": "Xem trước video",
+        "clickToPlay": "Nhấn để xem video",
+        "aboutLabel": "Giới thiệu về gia sư"
+      },
+      "education": {
+        "title": "Học vấn & Chứng chỉ",
+        "verifyCredential": "Xác thực bằng cấp"
+      },
+      "availability": {
+        "title": "Lịch dạy & Giá dạy",
+        "weeklySchedule": "Lịch dạy hàng tuần",
+        "requestedRate": "Mức giá đề xuất",
+        "recommendationPrefix": "Gợi ý hệ thống: ",
+        "recommendationSuffix": " dựa trên trình độ và khu vực.",
+        "perHour": "/ giờ",
+        "days": {
+          "0": "Chủ Nhật",
+          "1": "Thứ Hai",
+          "2": "Thứ Ba",
+          "3": "Thứ Tư",
+          "4": "Thứ Năm",
+          "5": "Thứ Sáu",
+          "6": "Thứ Bảy"
+        }
+      },
+      "documents": {
+        "identityVerification": {
+          "title": "Xác thực danh tính",
+          "subtitle": "Kiểm tra giấy tờ tuỳ thân của gia sư trước khi duyệt đơn đăng ký.",
+          "pending": "Đang chờ kiểm duyệt",
+          "uploadedAt": "Tải lên ngày {date}",
+          "approve": "Duyệt giấy tờ",
+          "reject": "Từ chối",
+          "download": "Tải xuống giấy tờ",
+          "idTypeLabel": "Hộ chiếu / Giấy tờ tuỳ thân",
+          "idPreviewPlaceholder": "Xem trước giấy tờ",
+          "noDocument": "Chưa tải lên giấy tờ tuỳ thân",
+          "checklist": {
+            "title": "Danh sách kiểm tra xác minh",
+            "nameMatchesProfile": "Tên khớp với hồ sơ",
+            "documentNotExpired": "Giấy tờ còn hiệu lực",
+            "photoClarity": "Kiểm tra độ rõ của ảnh"
+          }
+        },
+        "professionalDocuments": {
+          "title": "Tài liệu chuyên môn",
+          "subtitle": "Xem bằng cấp, chứng chỉ và điểm ngoại ngữ để xác thực trình độ.",
+          "headers": {
+            "documentName": "Tên tài liệu",
+            "type": "Loại",
+            "issueDate": "Ngày cấp",
+            "status": "Trạng thái",
+            "actions": "Hành động"
+          },
+          "status": {
+            "verified": "Đã xác thực",
+            "new": "Mới"
+          },
+          "actions": {
+            "approve": "Duyệt tài liệu",
+            "reject": "Từ chối"
+          }
+        }
+      }
+    },
+    "sidebar": {
+      "adminNotes": {
+        "title": "Ghi chú nội bộ",
+        "placeholder": "Thêm ghi chú nội bộ về ứng viên này...",
+        "save": "Lưu ghi chú",
+        "previousNotes": "Ghi chú trước đó"
+      },
+      "meta": {
+        "title": "Chi tiết đơn đăng ký",
+        "timezone": "Múi giờ & giờ địa phương của gia sư"
+      }
+    },
+    "modals": {
+      "defaultDocName": "tài liệu này",
+      "approve": {
+        "title": "Duyệt đơn đăng ký",
+        "description": "Bạn có chắc chắn muốn duyệt đơn đăng ký của {name}? Hành động này sẽ cấp quyền gia sư cho họ.",
+        "confirm": "Duyệt"
+      },
+      "reject": {
+        "title": "Từ chối đơn đăng ký",
+        "description": "Bạn có chắc chắn muốn từ chối đơn đăng ký của {name}? Hành động này không thể hoàn tác.",
+        "confirm": "Từ chối"
+      },
+      "waitlist": {
+        "title": "Chuyển vào danh sách chờ",
+        "description": "Bạn có chắc chắn muốn chuyển {name} vào danh sách chờ?",
+        "confirm": "Danh sách chờ"
+      },
+      "saveNote": {
+        "title": "Lưu ghi chú nội bộ",
+        "description": "Bạn có chắc chắn muốn lưu ghi chú nội bộ này?",
+        "confirm": "Lưu"
+      },
+      "idApproval": {
+        "title": "Duyệt giấy tờ tuỳ thân",
+        "description": "Bạn có chắc chắn muốn duyệt giấy tờ tuỳ thân cho {name}?",
+        "confirm": "Duyệt ID"
+      },
+      "idRejection": {
+        "title": "Từ chối giấy tờ tuỳ thân",
+        "description": "Bạn có chắc chắn muốn từ chối giấy tờ tuỳ thân cho {name}?",
+        "confirm": "Từ chối ID"
+      },
+      "docApproval": {
+        "title": "Duyệt tài liệu chuyên môn",
+        "description": "Bạn có chắc chắn muốn duyệt tài liệu \"{name}\"?",
+        "confirm": "Duyệt"
+      },
+      "docRejection": {
+        "title": "Từ chối tài liệu chuyên môn",
+        "description": "Bạn có chắc chắn muốn từ chối tài liệu \"{name}\"?",
+        "confirm": "Từ chối"
+      }
+    },
+    "messages": {
+      "docStatusUpdated": "Cập nhật trạng thái tài liệu thành công"
+    }
+  }
+}

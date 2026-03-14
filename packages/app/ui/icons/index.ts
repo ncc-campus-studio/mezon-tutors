@@ -43,4 +43,16 @@ export * from './UsersIcon';
 export * from './WalletIcon';
 
 // Types
+export * from './PersonalIcon';
+export * from './VideoIcon';
+export * from './EditListIcon';
+export * from './BadgeIcon';
+export * from './ExternalLinkIcon';
+export * from './LinkIcon';
+export * from './CircleOutlineIcon';
+export * from './BriefcaseUserIcon';
+export * from './DownloadIcon';
+export * from './EyeIcon';
+export * from './DocumentIcon';
+
 export * from './types';

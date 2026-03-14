@@ -39,11 +39,13 @@ export const themes = {
     toastInfoBorder: '#0369a1',
     toastInfoText: '#0c4a6e',
 
-    // ===== Status Card =====
+    // ===== Card =====
     statusSuccessBg: '#dcfce7',
-    statusSuccessBorder: '#4ade80',
+    statusSuccessBorder: '#15803D',
     statusErrorBg: '#fee2e2',
     statusErrorBorder: '#f87171',
+    statusInfoBg: '#E0F2FE',
+    statusInfoBorder: '#0284C7',
     // ===== Table ======
     headerBackground: '#f8fafc',
     selectedBackground: '#e2e8f0',
@@ -54,6 +56,13 @@ export const themes = {
     // ===== Button ======
     tertiary: '#dde6ee',
     tertiaryHover: '#d2d5d8',
+    statusWarningBg: '#FEF3C7',
+    statusWarningBorder: '#D97706',
+
+    priceCardBg: '#f0f9ff',
+    priceCardBorder: '#e0f2fe',
+
+    skeletonBg: '#Cbd5e1',
   },
 
   dark: {
@@ -101,7 +110,8 @@ export const themes = {
     statusSuccessBorder: '#6EE7B7',
     statusErrorBg: '#3F1E29',
     statusErrorBorder: '#FCA5A5',
-
+    statusInfoBg: '#082F49',
+    statusInfoBorder: '#38BDF8',
     // ===== Table ======
     headerBackground: '#1e293b',
     selectedBackground: '#172137',
@@ -112,5 +122,12 @@ export const themes = {
     // ===== Button ======
     tertiary: '#1e293b',
     tertiaryHover: '#334155',
+    statusWarningBg: '#422006',
+    statusWarningBorder: '#F59E0B',
+
+    priceCardBg: '#1e293b',
+    priceCardBorder: '#102645',
+
+    skeletonBg: '#1F2937',
   },
 };

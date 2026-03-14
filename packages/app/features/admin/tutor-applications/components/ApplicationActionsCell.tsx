@@ -2,6 +2,7 @@ import { useTheme } from 'tamagui';
 import { XStack, YStack } from '@mezon-tutors/app/ui';
 import { EyeIcon } from '@mezon-tutors/app/ui/icons/EyeIcon';
 import { useRouter } from 'solito/navigation';
+import type { GestureResponderEvent } from 'react-native';
 
 export type ApplicationActionsCellProps = {
   applicationId: string;
@@ -15,7 +16,7 @@ export function ApplicationActionsCell({ applicationId, isSelected }: Applicatio
   const itemBackground = theme.itemBackground?.val;
   const mutedColor = theme.colorMuted?.val;
 
-  const handleEyePress = (e: any) => {
+  const handleEyePress = (e: GestureResponderEvent) => {
     e.stopPropagation();
     push(`/admin/tutor-applications/${applicationId}`);
   };

@@ -6,11 +6,11 @@ import { TaskIcon } from '@mezon-tutors/app/ui/icons/TaskIcon'
 import { TimerIcon } from '@mezon-tutors/app/ui/icons/TimerIcon'
 import { VerifiedIcon } from '@mezon-tutors/app/ui/icons'
 import { tutorApplicationService } from '@mezon-tutors/app/services/tutor-application.service'
-import type { TutorApplicationMetricsApi } from '@mezon-tutors/shared'
+import type { TutorApplicationMetrics } from '@mezon-tutors/shared'
 import type { MetricCard, MetricStatus } from './types'
 import { AdminMetric } from './types'
 
-function mapMetricsApiToCards(api: TutorApplicationMetricsApi): MetricCard[] {
+function mapMetricsApiToCards(api: TutorApplicationMetrics): MetricCard[] {
   return [
     {
       id: AdminMetric.TotalPending,

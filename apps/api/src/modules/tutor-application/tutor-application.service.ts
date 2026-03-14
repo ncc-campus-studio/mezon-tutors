@@ -1,30 +1,129 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Role, VerificationStatus } from '@mezon-tutors/db';
-import type { TutorApplicationApiItem, TutorApplicationMetricsApi } from '@mezon-tutors/shared';
 import { PrismaService } from '../../prisma/prisma.service';
-import { toTutorApplicationApiItem } from './tutor-applications.mapper';
+import { Role, TutorProfile, VerificationStatus } from '@mezon-tutors/db';
+import {
+  FullTutorApplication,
+  IdentityVerification,
+  ProfessionalDocument,
+  ProfessionalDocumentStatus,
+  TutorAdminNote,
+  TutorApplicationMetrics,
+} from '@mezon-tutors/shared';
 import { calculateAverageDurationHours } from '../../common/utils/time.util';
+import { CreateAdminNoteDto } from './dto/create-admin-note.dto';
+import { UpdateIdentityVerificationStatusDto } from './dto/update-identity-verification-status.dto';
+import { EmailService } from '../../shared/services/email.service';
+import { ContentReviewer, IdentityChecklist } from '../../shared/types';
+import { IdentityVerificationStatus } from '@mezon-tutors/db';
+import { TutorApplicationMapper, TutorProfileWithUser } from './tutor-application.mapper';
 
 @Injectable()
-export class TutorApplicationsService {
-  constructor(private readonly prisma: PrismaService) {}
+export class TutorApplicationService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+    private readonly mapper: TutorApplicationMapper
+  ) {}
 
-  async listApplications(): Promise<TutorApplicationApiItem[]> {
-    const profiles = await this.prisma.tutorProfile.findMany({
-      include: {
-        languages: true,
+  async getTutorProfile(id: string): Promise<FullTutorApplication> {
+    const [profile, notes, documents, verification, availability] = await Promise.all([
+      this.prisma.tutorProfile.findFirst({
+        where: { id },
+        include: { user: true, languages: true },
+      }),
+      this.prisma.tutorAdminNote.findMany({
+        where: { tutorId: id },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.professionalDocument.findMany({
+        where: { tutorId: id },
+      }),
+      this.prisma.identityVerification.findUnique({
+        where: { tutorId: id },
+      }),
+      this.prisma.tutorAvailability.findMany({
+        where: { tutorId: id },
+      }),
+    ]);
+
+    if (!profile) {
+      throw new NotFoundException(`Tutor profile with ID ${id} not found`);
+    }
+
+    return this.mapper.mapFullTutorApplication(
+      profile as TutorProfileWithUser,
+      notes,
+      documents,
+      verification,
+      availability
+    );
+  }
+
+  async createAdminNote(payload: CreateAdminNoteDto): Promise<TutorAdminNote> {
+    const note = await this.prisma.tutorAdminNote.create({
+      data: {
+        tutorId: payload.tutorId,
+        reviewerId: payload.reviewerId,
+        reviewerName: payload.reviewerName,
+        content: payload.content,
       },
+    });
+
+    return note;
+  }
+
+  async updateProfessionalDocumentStatus(
+    id: string,
+    status: ProfessionalDocumentStatus
+  ): Promise<ProfessionalDocument> {
+    const doc = await this.prisma.professionalDocument.update({
+      where: { id },
+      data: {
+        status,
+        reviewedAt: new Date(),
+      },
+    });
+
+    return doc;
+  }
+
+  async updateIdentityVerificationStatus(
+    id: string,
+    payload: UpdateIdentityVerificationStatusDto
+  ): Promise<IdentityVerification> {
+    const verification = await this.prisma.identityVerification.update({
+      where: { id },
+      data: {
+        status: payload.status,
+        nameMatch: payload.nameMatch,
+        notExpired: payload.notExpired,
+        photoClarity: payload.photoClarity,
+        reviewedAt: new Date(),
+      },
+    });
+
+    return verification;
+  }
+
+  async listApplications(): Promise<TutorProfile[]> {
+    const profiles = await this.prisma.tutorProfile.findMany({
       orderBy: {
         createdAt: 'desc',
       },
     });
-    return profiles.map(toTutorApplicationApiItem);
+    return profiles;
   }
 
   async approve(id: string): Promise<{ success: boolean }> {
     const profile = await this.prisma.tutorProfile.findUnique({
       where: { id },
-      select: { id: true, userId: true },
+      select: {
+        id: true,
+        userId: true,
+        user: {
+          select: { email: true, username: true },
+        },
+      },
     });
     if (!profile) {
       throw new NotFoundException(`Tutor application not found: ${id}`);
@@ -41,26 +140,66 @@ export class TutorApplicationsService {
         data: { role: Role.TUTOR },
       }),
     ]);
+
+    if (profile.user?.email) {
+      await this.emailService.sendApprovalEmail(
+        profile.user.email,
+        profile.user.username ?? 'Tutor'
+      );
+    }
+
     return { success: true };
   }
 
   async reject(id: string): Promise<{ success: boolean }> {
     const profile = await this.prisma.tutorProfile.findUnique({
       where: { id },
+
+      include: {
+        user: {
+          select: { email: true, username: true },
+        },
+      },
     });
+
     if (!profile) {
       throw new NotFoundException(`Tutor application not found: ${id}`);
     }
+
     await this.prisma.tutorProfile.update({
       where: { id },
       data: {
         verificationStatus: VerificationStatus.REJECTED,
       },
     });
+
+    const reviewerNotes: ContentReviewer[] = await this.prisma.tutorAdminNote.findMany({
+      where: { tutorId: profile.id },
+      select: { content: true },
+    });
+
+    const checklist: IdentityChecklist | null = await this.prisma.identityVerification.findFirst({
+      where: { tutorId: profile.id, status: IdentityVerificationStatus.REJECTED },
+      select: {
+        nameMatch: true,
+        notExpired: true,
+        photoClarity: true,
+      },
+    });
+
+    if (profile.email) {
+      await this.emailService.sendRejectionEmail(
+        profile.email,
+        profile.user.username,
+        reviewerNotes,
+        checklist
+      );
+    }
+
     return { success: true };
   }
 
-  async getMetrics(): Promise<TutorApplicationMetricsApi> {
+  async getMetrics(): Promise<TutorApplicationMetrics> {
     const now = new Date();
 
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
