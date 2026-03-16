@@ -15,3 +15,6 @@ export * from './constants/routes';
 export * from './constants/layout';
 export * from './constants/tutor-profile';
 export * from './constants/urls';
+
+// Utils
+export * from './utils';

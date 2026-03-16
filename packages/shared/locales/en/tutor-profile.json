@@ -64,6 +64,30 @@
     "uploadButton": "Upload Photo",
     "uploadHint": "Supported formats: JPG, PNG. Max size: 5MB.",
     "tipsTitle": "What makes a great photo?",
+    "identity": {
+      "title": "Update Identity Documents",
+      "subtitle": "Upload your ID card, national ID, or passport to verify your identity.",
+      "uploadButton": "Upload identity photo",
+      "tipsTitle": "Tips for Taking Identity Document Photos",
+      "tips": {
+        "clear": {
+          "title": "Clear Photo",
+          "description": "Make sure the text and numbers on the document are clearly visible and not blurry."
+        },
+        "noReflection": {
+          "title": "No Glare or Reflection",
+          "description": "Avoid lighting reflections that may obscure information on the document."
+        },
+        "fullDocument": {
+          "title": "Show the Entire Document",
+          "description": "Capture all four corners of the document within the frame."
+        },
+        "validDocument": {
+          "title": "Valid Document",
+          "description": "Use a valid ID card, national ID, or passport that has not expired."
+        }
+      }
+    },
     "fields": {
       "headlineLabel": "Profile headline",
       "headlinePlaceholder": "e.g. Passionate math tutor",

@@ -2,7 +2,12 @@
 
 import { atomWithStorage } from 'jotai/utils';
 import { atom } from 'jotai';
-import { DAY_KEYS, type SubmitTutorProfileDto } from '@mezon-tutors/shared';
+import {
+  ABOUT_COUNTRIES,
+  DAY_KEYS,
+  parseEnum,
+  type SubmitTutorProfileDto,
+} from '@mezon-tutors/shared';
 import { submitTutorProfile } from '@mezon-tutors/app/services/tutor-profile.service';
 
 export type TimeSlot = {
@@ -68,6 +73,19 @@ export const defaultPhotoState: TutorProfilePhotoState = {
 export const tutorProfilePhotoAtom = atomWithStorage<TutorProfilePhotoState>(
   'tutorProfile.photo',
   defaultPhotoState
+);
+
+export type TutorProfileIdentityState = {
+  dataUrl: string;
+};
+
+export const defaultIdentityState: TutorProfileIdentityState = {
+  dataUrl: '',
+};
+
+export const tutorProfileIdentityAtom = atomWithStorage<TutorProfileIdentityState>(
+  'tutorProfile.identity',
+  defaultIdentityState
 );
 
 export type TutorProfileCertificationState = {
@@ -228,7 +246,7 @@ export function buildSubmitTutorProfilePayload(
     firstName: values.firstName,
     lastName: values.lastName,
     email: values.email,
-    country: values.country,
+    country: parseEnum(values.country, ABOUT_COUNTRIES, 'Other'),
     phone: values.phone,
     subject: values.subject,
 

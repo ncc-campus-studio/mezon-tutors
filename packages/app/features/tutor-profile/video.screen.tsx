@@ -5,7 +5,18 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
-import { Button, Container, Paragraph, Screen, StatusCard, Text, XStack, YStack, ScrollView, Input } from '@mezon-tutors/app/ui';
+import {
+  Button,
+  Container,
+  Paragraph,
+  Screen,
+  StatusCard,
+  Text,
+  XStack,
+  YStack,
+  ScrollView,
+  Input,
+} from '@mezon-tutors/app/ui';
 import { CircleCheckIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
@@ -15,6 +26,7 @@ import {
   markStepCompletedAtom,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
+import { formatLastSavedTime } from '@mezon-tutors/shared';
 
 const VIDEO_CARD_BORDER = '#7DD3FC';
 const VIDEO_PREVIEW_WIDTH = 420;
@@ -25,17 +37,6 @@ const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 type VideoFormValues = {
   videoLink: string;
 };
-
-function formatLastSavedTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return '';
-  }
-}
 
 function parseYouTubeId(url: string): string | null {
   const trimmed = url.trim();
@@ -60,7 +61,7 @@ export function TutorProfileVideoScreen() {
   const { videoLink, videoId } = videoState;
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [durationError, setDurationError] = useState<string | null>(null);
-  const videoInputSectionRef = useRef<HTMLDivElement>(null);
+  const videoInputSectionRef = useRef<HTMLDivElement | null>(null);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
@@ -113,13 +114,10 @@ export function TutorProfileVideoScreen() {
     }
 
     try {
-      const res = await fetch(
-        `https://noembed.com/embed?url=${encodeURIComponent(trimmed)}`
-      );
+      const res = await fetch(`https://noembed.com/embed?url=${encodeURIComponent(trimmed)}`);
       if (res.ok) {
         const data = (await res.json()) as { duration?: number };
-        const durationSeconds =
-          typeof data.duration === 'number' ? data.duration : null;
+        const durationSeconds = typeof data.duration === 'number' ? data.duration : null;
 
         if (durationSeconds !== null) {
           setVideoDuration(durationSeconds);
@@ -130,8 +128,7 @@ export function TutorProfileVideoScreen() {
           }
         }
       }
-    } catch {
-    }
+    } catch {}
 
     setVideoState((prev) => ({ ...prev, videoLink: trimmed, videoId: nextId }));
     setLastSavedAt(new Date().toISOString());
@@ -161,266 +158,269 @@ export function TutorProfileVideoScreen() {
             paddingBottom: 100,
           }}
         >
-        <YStack
-          flex={1}
-          paddingVertical="$5"
-          paddingHorizontal="$0"
-          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
-          backgroundColor="$background"
-        >
-          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
-            <TutorProfileHeader
-              draftSavedLabel={draftSavedLabel}
-              saveExitLabel={t('saveExit')}
-            />
-
-            <TutorProfileProgress
-              currentStepIndex={CURRENT_STEP}
-              stepLabel={t('stepLabel')}
-              rightLabel={t('progressPercentLabel', { percent: PROGRESS_PERCENT })}
-            />
-
-            {/* Title + description */}
-            <YStack gap="$2">
-              <Paragraph
-                fontSize={24}
-                fontWeight="700"
-              >
-                {t('title')}
-              </Paragraph>
-              <Text variant="muted">{t('subtitle')}</Text>
-            </YStack>
-
-            {/* Video + tips */}
-            <XStack
-              gap="$4"
-              flexWrap="wrap"
-              $xs={{ flexDirection: 'column' }}
+          <YStack
+            flex={1}
+            paddingVertical="$5"
+            paddingHorizontal="$0"
+            $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
+            backgroundColor="$background"
+          >
+            <Container
+              padded
+              maxWidth={960}
+              width="100%"
+              gap="$5"
+              $xs={{ gap: '$4' }}
             >
-              {/* Left column: video preview + link input (cùng width) */}
-              <YStack
-                ref={videoInputSectionRef as React.RefObject<unknown>}
-                width={VIDEO_PREVIEW_WIDTH}
-                gap="$4"
-                $xs={{ width: '100%' }}
-              >
-                {/* Video preview card - border matches accent (light blue) */}
-                <YStack
-                  width="100%"
-                  borderRadius={16}
-                  borderWidth={2}
-                  borderColor={VIDEO_CARD_BORDER}
-                  backgroundColor="$backgroundMuted"
-                  overflow="hidden"
+              <TutorProfileHeader
+                draftSavedLabel={draftSavedLabel}
+                saveExitLabel={t('saveExit')}
+              />
+
+              <TutorProfileProgress
+                currentStepIndex={CURRENT_STEP}
+                stepLabel={t('stepLabel')}
+                rightLabel={t('progressPercentLabel', { percent: PROGRESS_PERCENT })}
+              />
+
+              {/* Title + description */}
+              <YStack gap="$2">
+                <Paragraph
+                  fontSize={24}
+                  fontWeight="700"
                 >
+                  {t('title')}
+                </Paragraph>
+                <Text variant="muted">{t('subtitle')}</Text>
+              </YStack>
+
+              {/* Video + tips */}
+              <XStack
+                gap="$4"
+                flexWrap="wrap"
+                $xs={{ flexDirection: 'column' }}
+              >
+                {/* Left column: video preview + link input (cùng width) */}
+                <YStack
+                  ref={videoInputSectionRef as React.RefObject<unknown>}
+                  width={VIDEO_PREVIEW_WIDTH}
+                  gap="$4"
+                  $xs={{ width: '100%' }}
+                >
+                  {/* Video preview card - border matches accent (light blue) */}
                   <YStack
-                    aspectRatio={16 / 9}
-                    minHeight={180}
-                    backgroundColor="$backgroundCard"
-                    position="relative"
+                    width="100%"
+                    borderRadius={16}
+                    borderWidth={2}
+                    borderColor={VIDEO_CARD_BORDER}
+                    backgroundColor="$backgroundMuted"
+                    overflow="hidden"
                   >
-                    {videoId ? (
-                      <iframe
-                        src={
-                          videoId.type === 'youtube'
-                            ? `https://www.youtube.com/embed/${videoId.id}?rel=0`
-                            : `https://player.vimeo.com/video/${videoId.id}?autoplay=0`
-                        }
-                        title="Profile video"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          width: '100%',
-                          height: '100%',
-                          border: 'none',
-                        }}
+                    <YStack
+                      aspectRatio={16 / 9}
+                      minHeight={180}
+                      backgroundColor="$backgroundCard"
+                      position="relative"
+                    >
+                      {videoId ? (
+                        <iframe
+                          src={
+                            videoId.type === 'youtube'
+                              ? `https://www.youtube.com/embed/${videoId.id}?rel=0`
+                              : `https://player.vimeo.com/video/${videoId.id}?autoplay=0`
+                          }
+                          title="Profile video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          style={{
+                            position: 'absolute',
+                            inset: 0,
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                          }}
+                        />
+                      ) : (
+                        <YStack
+                          alignItems="center"
+                          justifyContent="center"
+                          gap="$2"
+                        >
+                          {/* Empty placeholder when no video link yet */}
+                        </YStack>
+                      )}
+                    </YStack>
+                  </YStack>
+
+                  <YStack
+                    gap="$2"
+                    width="100%"
+                  >
+                    <Text
+                      size="sm"
+                      variant="muted"
+                      textTransform="uppercase"
+                      letterSpacing={1}
+                    >
+                      {t('link.label')}
+                    </Text>
+                    <XStack
+                      gap="$2"
+                      width="100%"
+                      $xs={{
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <Controller
+                        control={control}
+                        name="videoLink"
+                        render={({ field: { value, onChange } }) => (
+                          <Input
+                            flex={1}
+                            placeholder={t('link.placeholder')}
+                            value={value}
+                            onChangeText={onChange}
+                            backgroundColor="$fieldBackground"
+                            borderColor="$borderSubtle"
+                            color="$color"
+                            paddingHorizontal="$4"
+                            height={48}
+                            borderRadius="$5"
+                          />
+                        )}
                       />
-                    ) : (
-                      <YStack
-                        alignItems="center"
-                        justifyContent="center"
-                        gap="$2"
+                      <Button
+                        variant="primary"
+                        onPress={handleSubmit(handleAddLink)}
                       >
-                        {/* Empty placeholder when no video link yet */}
-                      </YStack>
-                    )}
+                        {t('link.addButton')}
+                      </Button>
+                    </XStack>
+                    {durationError ? (
+                      <Text
+                        size="sm"
+                        color="$red8"
+                      >
+                        {durationError}
+                      </Text>
+                    ) : null}
                   </YStack>
                 </YStack>
 
                 <YStack
-                  gap="$2"
-                  width="100%"
+                  flex={1}
+                  minWidth={280}
+                  maxWidth={400}
+                  gap="$4"
                 >
-                  <Text
-                    size="sm"
-                    variant="muted"
-                    textTransform="uppercase"
-                    letterSpacing={1}
-                  >
-                    {t('link.label')}
-                  </Text>
-                  <XStack
-                    gap="$2"
-                    width="100%"
-                    $xs={{
-                      flexDirection: 'column',
-                    }}
-                  >
-                    <Controller
-                      control={control}
-                      name="videoLink"
-                      render={({ field: { value, onChange } }) => (
-                        <Input
-                          flex={1}
-                          placeholder={t('link.placeholder')}
-                          value={value}
-                          onChangeText={onChange}
-                          backgroundColor="$fieldBackground"
-                          borderColor="$borderSubtle"
-                          color="$color"
-                          paddingHorizontal="$4"
-                          height={48}
-                          borderRadius="$5"
+                  <StatusCard variant="success">
+                    <XStack
+                      alignItems="center"
+                      gap="$2"
+                    >
+                      <YStack
+                        width={40}
+                        height={40}
+                        borderRadius={999}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <CircleCheckIcon
+                          size={24}
+                          color={successAccent}
                         />
-                      )}
-                    />
-                    <Button
-                      variant="primary"
-                      onPress={handleSubmit(handleAddLink)}
+                      </YStack>
+                      <Paragraph
+                        fontWeight="700"
+                        fontSize={20}
+                        color={successAccent}
+                      >
+                        {t('bestPracticesTitle')}
+                      </Paragraph>
+                    </XStack>
+                    {bestPractices.map((item, index) => (
+                      <XStack
+                        key={index}
+                        alignItems="center"
+                        gap="$2"
+                      >
+                        <CheckIcon
+                          size={16}
+                          color={successAccent}
+                        />
+                        <Text
+                          size="sm"
+                          fontSize={15}
+                        >
+                          {item}
+                        </Text>
+                      </XStack>
+                    ))}
+                  </StatusCard>
+
+                  <StatusCard variant="danger">
+                    <XStack
+                      alignItems="center"
+                      gap="$2"
                     >
-                      {t('link.addButton')}
-                    </Button>
-                  </XStack>
-                  {durationError ? (
-                    <Text
-                      size="sm"
-                      color="$red8"
-                    >
-                      {durationError}
-                    </Text>
-                  ) : null}
+                      <YStack
+                        width={40}
+                        height={40}
+                        borderRadius={999}
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <CircleCloseIcon
+                          size={22}
+                          color={dangerAccent}
+                        />
+                      </YStack>
+                      <Paragraph
+                        fontWeight="700"
+                        fontSize={20}
+                        color={dangerAccent}
+                      >
+                        {t('avoidTitle')}
+                      </Paragraph>
+                    </XStack>
+                    {avoidItems.map((item, index) => (
+                      <XStack
+                        key={index}
+                        alignItems="center"
+                        gap="$2"
+                      >
+                        <CloseIcon
+                          size={14}
+                          color={dangerAccent}
+                        />
+                        <Text
+                          size="sm"
+                          fontSize={16}
+                        >
+                          {item}
+                        </Text>
+                      </XStack>
+                    ))}
+                  </StatusCard>
                 </YStack>
-              </YStack>
-
-              {/* Best practices + avoid */}
-              <YStack
-                flex={1}
-                minWidth={280}
-                maxWidth={400}
-                gap="$4"
-              >
-                <StatusCard variant="success">
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                  >
-                    <YStack
-                      width={40}
-                      height={40}
-                      borderRadius={999}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <CircleCheckIcon
-                        size={24}
-                        color={successAccent}
-                      />
-                    </YStack>
-                    <Paragraph
-                      fontWeight="700"
-                      fontSize={20}
-                      color={successAccent}
-                    >
-                      {t('bestPracticesTitle')}
-                    </Paragraph>
-                  </XStack>
-                  {bestPractices.map((item, index) => (
-                    <XStack
-                      key={index}
-                      alignItems="center"
-                      gap="$2"
-                    >
-                      <CheckIcon
-                        size={16}
-                        color={successAccent}
-                      />
-                      <Text
-                        size="sm"
-                        fontSize={15}
-                      >
-                        {item}
-                      </Text>
-                    </XStack>
-                  ))}
-                </StatusCard>
-
-                <StatusCard variant="danger">
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                  >
-                    <YStack
-                      width={40}
-                      height={40}
-                      borderRadius={999}
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <CircleCloseIcon
-                        size={22}
-                        color={dangerAccent}
-                      />
-                    </YStack>
-                    <Paragraph
-                      fontWeight="700"
-                      fontSize={20}
-                      color={dangerAccent}
-                    >
-                      {t('avoidTitle')}
-                    </Paragraph>
-                  </XStack>
-                  {avoidItems.map((item, index) => (
-                    <XStack
-                      key={index}
-                      alignItems="center"
-                      gap="$2"
-                    >
-                      <CloseIcon
-                        size={14}
-                        color={dangerAccent}
-                      />
-                      <Text
-                        size="sm"
-                        fontSize={16}
-                      >
-                        {item}
-                      </Text>
-                    </XStack>
-                  ))}
-                </StatusCard>
-              </YStack>
-            </XStack>
-
-            {/* Navigation - moved to sticky bar */}
-          </Container>
-        </YStack>
-      </ScrollView>
-      <TutorProfileStickyActions>
-        <Button
-          variant="outline"
-          onPress={() => router.push('/become-tutor/certification')}
-        >
-          {t('back')}
-        </Button>
-        <Button
-          variant="primary"
-          onPress={handleContinue}
-        >
-          {t('continue')}
-        </Button>
-      </TutorProfileStickyActions>
+              </XStack>
+            </Container>
+          </YStack>
+        </ScrollView>
+        <TutorProfileStickyActions>
+          <Button
+            variant="outline"
+            onPress={() => router.push('/become-tutor/certification')}
+          >
+            {t('back')}
+          </Button>
+          <Button
+            variant="primary"
+            onPress={handleContinue}
+          >
+            {t('continue')}
+          </Button>
+        </TutorProfileStickyActions>
       </YStack>
     </Screen>
   );

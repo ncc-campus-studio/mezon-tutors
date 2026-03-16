@@ -64,6 +64,30 @@
     "uploadButton": "Tải ảnh lên",
     "uploadHint": "Định dạng hỗ trợ: JPG, PNG. Dung lượng tối đa: 5MB.",
     "tipsTitle": "Thế nào là một bức ảnh đẹp?",
+    "identity": {
+      "title": "Cập nhật giấy tờ tùy thân",
+      "subtitle": "Tải lên CCCD/CMND/Hộ chiếu để xác minh danh tính.",
+      "uploadButton": "Tải ảnh identity",
+      "tipsTitle": "Mẹo chụp giấy tờ tùy thân",
+      "tips": {
+        "clear": {
+          "title": "Ảnh rõ nét",
+          "description": "Đảm bảo chữ và số trên giấy tờ nhìn rõ, không bị mờ."
+        },
+        "noReflection": {
+          "title": "Không chói, không phản chiếu",
+          "description": "Tránh ánh sáng phản chiếu làm lóa mất thông tin trên giấy tờ."
+        },
+        "fullDocument": {
+          "title": "Thấy toàn bộ giấy tờ",
+          "description": "Chụp đủ bốn góc của giấy tờ trong khung hình."
+        },
+        "validDocument": {
+          "title": "Giấy tờ còn hiệu lực",
+          "description": "Sử dụng CCCD/CMND/Hộ chiếu còn thời hạn."
+        }
+      }
+    },
     "fields": {
       "headlineLabel": "Tiêu đề hồ sơ",
       "headlinePlaceholder": "VD: Gia sư Toán nhiệt huyết",
@@ -181,8 +205,7 @@
       "missingBeforeContinue": "Vui lòng thêm video dưới 2 phút trước khi tiếp tục."
     },
     "back": "Quay lại",
-    "continue": "Tiếp tục tới bước 5",
-    "saveExit": "Lưu & Thoát"
+    "continue": "Tiếp tục tới bước 5"
   },
   "Availability": {
     "headerTitle": "Cổng gia sư",

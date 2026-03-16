@@ -6,7 +6,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { Button, Container, Paragraph, Screen, Text, XStack, YStack, ScrollView, InputField } from '@mezon-tutors/app/ui';
+import {
+  Button,
+  Container,
+  Paragraph,
+  Screen,
+  Text,
+  XStack,
+  YStack,
+  ScrollView,
+  InputField,
+} from '@mezon-tutors/app/ui';
 import { VerifiedIcon, InfoIcon, UploadIcon, WalletIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
@@ -16,6 +26,7 @@ import {
   markStepCompletedAtom,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
+import { formatLastSavedTime } from '@mezon-tutors/shared';
 import { z } from 'zod';
 
 const CURRENT_STEP = 3;
@@ -23,17 +34,6 @@ const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 
 const MAX_FILE_SIZE_MB = 5;
 const ACCEPT_CERT = '.pdf,.jpg,.jpeg,.png';
-
-function formatLastSavedTime(iso: string) {
-  try {
-    return new Date(iso).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return '';
-  }
-}
 
 export function TutorProfileCertificationScreen() {
   const t = useTranslations('TutorProfile.Certification');
@@ -77,7 +77,7 @@ export function TutorProfileCertificationScreen() {
 
   const { control, handleSubmit, setFocus } = form;
   const teachingCardRef = useRef<HTMLDivElement>(null);
-  const educationCardRef = useRef<HTMLDivElement>(null);
+  const educationCardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     form.reset(certification);
@@ -97,7 +97,9 @@ export function TutorProfileCertificationScreen() {
   };
 
   const teachingFields = ['teachingCertificateName', 'teachingYear'];
-  const onValidationError = (errors: Partial<Record<keyof CertificationFormValues, { message?: string }>>) => {
+  const onValidationError = (
+    errors: Partial<Record<keyof CertificationFormValues, { message?: string }>>
+  ) => {
     const firstError = (Object.keys(errors) as (keyof CertificationFormValues)[])[0];
     if (!firstError) return;
     if (teachingFields.includes(firstError)) {
@@ -120,10 +122,7 @@ export function TutorProfileCertificationScreen() {
     e.target.value = '';
   };
 
-  const handleDrop = (
-    e: React.DragEvent,
-    setFile: (f: File | null) => void
-  ) => {
+  const handleDrop = (e: React.DragEvent, setFile: (f: File | null) => void) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file && file.size <= MAX_FILE_SIZE_MB * 1024 * 1024) setFile(file);
@@ -141,296 +140,313 @@ export function TutorProfileCertificationScreen() {
             paddingBottom: 100,
           }}
         >
-        <YStack
-          flex={1}
-          paddingVertical="$5"
-          paddingHorizontal="$0"
-          $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
-          backgroundColor="$background"
-        >
-          <Container padded maxWidth={960} width="100%" gap="$5" $xs={{ gap: '$4' }}>
-            <TutorProfileHeader draftSavedLabel={draftSavedLabel} saveExitLabel={t('saveExit')} />
-
-            <TutorProfileProgress
-              currentStepIndex={CURRENT_STEP}
-              stepLabel={t('stepLabel')}
-              rightLabel={t('progressPercentLabel', { percent: PROGRESS_PERCENT })}
-              caption={t('currentLabel')}
-              percentOverride={PROGRESS_PERCENT}
-            />
-
-            <YStack
-              backgroundColor="$backgroundCard"
-              borderRadius="$4"
-              padding="$6"
+          <YStack
+            flex={1}
+            paddingVertical="$5"
+            paddingHorizontal="$0"
+            $xs={{ paddingVertical: '$4', paddingHorizontal: '$3' }}
+            backgroundColor="$background"
+          >
+            <Container
+              padded
+              maxWidth={960}
+              width="100%"
               gap="$5"
-              borderWidth={1}
-              borderColor="$borderSubtle"
-              $xs={{ padding: '$4', gap: '$4' }}
+              $xs={{ gap: '$4' }}
             >
-              <XStack
-                alignItems="center"
-                gap="$2"
-              >
-                <VerifiedIcon
-                  size={24}
-                  color="#1253D5"
-                />
-                <Paragraph
-                  fontSize={20}
-                  fontWeight="700"
-                >
-                  {t('teachingTitle')}
-                </Paragraph>
-              </XStack>
+              <TutorProfileHeader
+                draftSavedLabel={draftSavedLabel}
+                saveExitLabel={t('saveExit')}
+              />
 
-              <YStack gap="$4">
+              <TutorProfileProgress
+                currentStepIndex={CURRENT_STEP}
+                stepLabel={t('stepLabel')}
+                rightLabel={t('progressPercentLabel', { percent: PROGRESS_PERCENT })}
+                caption={t('currentLabel')}
+                percentOverride={PROGRESS_PERCENT}
+              />
+
+              <YStack
+                backgroundColor="$backgroundCard"
+                borderRadius="$4"
+                padding="$6"
+                gap="$5"
+                borderWidth={1}
+                borderColor="$borderSubtle"
+                $xs={{ padding: '$4', gap: '$4' }}
+              >
                 <XStack
-                  gap="$4"
-                  $xs={{
-                    flexDirection: 'column',
-                  }}
+                  alignItems="center"
+                  gap="$2"
                 >
-                  <InputField
-                    control={control}
-                    name="teachingCertificateName"
-                    label={t('teaching.certificateLabel')}
-                    placeholder={t('teaching.certificatePlaceholder')}
-                    flex={1}
+                  <VerifiedIcon
+                    size={24}
+                    color="#1253D5"
                   />
-                  <InputField
-                    control={control}
-                    name="teachingYear"
-                    label={t('teaching.yearLabel')}
-                    placeholder={t('teaching.yearPlaceholder')}
-                    flex={1}
-                  />
+                  <Paragraph
+                    fontSize={20}
+                    fontWeight="700"
+                  >
+                    {t('teachingTitle')}
+                  </Paragraph>
                 </XStack>
 
-                <YStack gap="$2">
-                  <Text
-                    size="sm"
-                    fontWeight="600"
-                  >
-                    {t('teaching.uploadTitle')}
-                  </Text>
-
-                  <input
-                    ref={certInputRef}
-                    type="file"
-                    accept={ACCEPT_CERT}
-                    onChange={handleCertChange}
-                    style={{ display: 'none' }}
-                  />
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => certInputRef.current?.click()}
-                    onKeyDown={(e) => e.key === 'Enter' && certInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, setCertFile)}
-                  >
-                    <YStack
-                      borderRadius="$4"
-                      borderWidth={1}
-                      borderColor="$borderSubtle"
-                      borderStyle="dashed"
-                      padding="$6"
-                      alignItems="center"
-                      justifyContent="center"
-                      backgroundColor="$fieldBackground"
-                      gap="$2"
-                    >
-                      <UploadIcon
-                        size={32}
-                        color="#6B7280"
-                      />
-                      <Text
-                        size="sm"
-                        variant="muted"
-                        textAlign="center"
-                      >
-                        {t('teaching.uploadPrompt')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        variant="muted"
-                      >
-                        {t('teaching.uploadHint')}
-                      </Text>
-                      {certFile && (
-                        <Text size="sm" color="$appPrimary" fontWeight="500">
-                          {certFile.name}
-                        </Text>
-                      )}
-                    </YStack>
-                  </div>
-
+                <YStack gap="$4">
                   <XStack
-                    marginTop="$2"
-                    borderRadius="$4"
-                    padding="$3"
-                    backgroundColor="$backgroundMuted"
-                    gap="$2"
-                    alignItems="flex-start"
+                    gap="$4"
+                    $xs={{
+                      flexDirection: 'column',
+                    }}
                   >
-                    <InfoIcon
-                      size={20}
-                      color="#1253D5"
-                    />
-                    <YStack
-                      gap="$1"
+                    <InputField
+                      control={control}
+                      name="teachingCertificateName"
+                      label={t('teaching.certificateLabel')}
+                      placeholder={t('teaching.certificatePlaceholder')}
                       flex={1}
-                    >
-                      <Text
-                        size="sm"
-                        fontWeight="600"
-                        color="$appPrimary"
-                      >
-                        {t('teaching.reviewTitle')}
-                      </Text>
-                      <Text
-                        size="sm"
-                        variant="muted"
-                      >
-                        {t('teaching.reviewDescription')}
-                      </Text>
-                    </YStack>
+                    />
+                    <InputField
+                      control={control}
+                      name="teachingYear"
+                      label={t('teaching.yearLabel')}
+                      placeholder={t('teaching.yearPlaceholder')}
+                      flex={1}
+                    />
                   </XStack>
+
+                  <YStack gap="$2">
+                    <Text
+                      size="sm"
+                      fontWeight="600"
+                    >
+                      {t('teaching.uploadTitle')}
+                    </Text>
+
+                    <input
+                      ref={certInputRef}
+                      type="file"
+                      accept={ACCEPT_CERT}
+                      onChange={handleCertChange}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={0}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => certInputRef.current?.click()}
+                      onKeyDown={(e) => e.key === 'Enter' && certInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, setCertFile)}
+                    >
+                      <YStack
+                        borderRadius="$4"
+                        borderWidth={1}
+                        borderColor="$borderSubtle"
+                        borderStyle="dashed"
+                        padding="$6"
+                        alignItems="center"
+                        justifyContent="center"
+                        backgroundColor="$fieldBackground"
+                        gap="$2"
+                      >
+                        <UploadIcon
+                          size={32}
+                          color="#6B7280"
+                        />
+                        <Text
+                          size="sm"
+                          variant="muted"
+                          textAlign="center"
+                        >
+                          {t('teaching.uploadPrompt')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          variant="muted"
+                        >
+                          {t('teaching.uploadHint')}
+                        </Text>
+                        {certFile && (
+                          <Text
+                            size="sm"
+                            color="$appPrimary"
+                            fontWeight="500"
+                          >
+                            {certFile.name}
+                          </Text>
+                        )}
+                      </YStack>
+                    </button>
+
+                    <XStack
+                      marginTop="$2"
+                      borderRadius="$4"
+                      padding="$3"
+                      backgroundColor="$backgroundMuted"
+                      gap="$2"
+                      alignItems="flex-start"
+                    >
+                      <InfoIcon
+                        size={20}
+                        color="#1253D5"
+                      />
+                      <YStack
+                        gap="$1"
+                        flex={1}
+                      >
+                        <Text
+                          size="sm"
+                          fontWeight="600"
+                          color="$appPrimary"
+                        >
+                          {t('teaching.reviewTitle')}
+                        </Text>
+                        <Text
+                          size="sm"
+                          variant="muted"
+                        >
+                          {t('teaching.reviewDescription')}
+                        </Text>
+                      </YStack>
+                    </XStack>
+                  </YStack>
                 </YStack>
               </YStack>
-            </YStack>
 
-            <YStack
-              ref={educationCardRef as React.RefObject<unknown>}
-              backgroundColor="$backgroundCard"
-              borderRadius="$4"
-              padding="$6"
-              gap="$5"
-              borderWidth={1}
-              borderColor="$borderSubtle"
-              $xs={{ padding: '$4', gap: '$4' }}
-            >
-              <XStack
-                alignItems="center"
-                gap="$2"
+              <YStack
+                ref={educationCardRef}
+                backgroundColor="$backgroundCard"
+                borderRadius="$4"
+                padding="$6"
+                gap="$5"
+                borderWidth={1}
+                borderColor="$borderSubtle"
+                $xs={{ padding: '$4', gap: '$4' }}
               >
-                <WalletIcon
-                  size={24}
-                  color="#1253D5"
-                />
-                <Paragraph
-                  fontSize={20}
-                  fontWeight="700"
-                >
-                  {t('educationTitle')}
-                </Paragraph>
-              </XStack>
-
-              <YStack gap="$4">
                 <XStack
-                  gap="$4"
-                  $xs={{
-                    flexDirection: 'column',
-                  }}
+                  alignItems="center"
+                  gap="$2"
                 >
-                  <InputField
-                    control={control}
-                    name="university"
-                    label={t('education.universityLabel')}
-                    placeholder={t('education.universityPlaceholder')}
-                    flex={1}
+                  <WalletIcon
+                    size={24}
+                    color="#1253D5"
                   />
-                  <InputField
-                    control={control}
-                    name="degree"
-                    label={t('education.degreeLabel')}
-                    placeholder={t('education.degreePlaceholder')}
-                    flex={1}
-                  />
+                  <Paragraph
+                    fontSize={20}
+                    fontWeight="700"
+                  >
+                    {t('educationTitle')}
+                  </Paragraph>
                 </XStack>
 
-                <InputField
-                  control={control}
-                  name="specialization"
-                  label={t('education.specializationLabel')}
-                  placeholder={t('education.specializationPlaceholder')}
-                />
+                <YStack gap="$4">
+                  <XStack
+                    gap="$4"
+                    $xs={{
+                      flexDirection: 'column',
+                    }}
+                  >
+                    <InputField
+                      control={control}
+                      name="university"
+                      label={t('education.universityLabel')}
+                      placeholder={t('education.universityPlaceholder')}
+                      flex={1}
+                    />
+                    <InputField
+                      control={control}
+                      name="degree"
+                      label={t('education.degreeLabel')}
+                      placeholder={t('education.degreePlaceholder')}
+                      flex={1}
+                    />
+                  </XStack>
 
-                <YStack gap="$2">
-                  <Text
-                    size="sm"
-                    fontWeight="600"
-                  >
-                    {t('education.uploadTitle')}
-                  </Text>
-                  <input
-                    ref={educationInputRef}
-                    type="file"
-                    accept={ACCEPT_CERT}
-                    onChange={handleEducationChange}
-                    style={{ display: 'none' }}
+                  <InputField
+                    control={control}
+                    name="specialization"
+                    label={t('education.specializationLabel')}
+                    placeholder={t('education.specializationPlaceholder')}
                   />
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => educationInputRef.current?.click()}
-                    onKeyDown={(e) => e.key === 'Enter' && educationInputRef.current?.click()}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, setEducationFile)}
-                  >
-                    <YStack
-                      borderRadius="$4"
-                      borderWidth={1}
-                      borderColor="$borderSubtle"
-                      borderStyle="dashed"
-                      padding="$6"
-                      alignItems="center"
-                      justifyContent="center"
-                      backgroundColor="$fieldBackground"
-                      gap="$2"
+
+                  <YStack gap="$2">
+                    <Text
+                      size="sm"
+                      fontWeight="600"
                     >
-                      <UploadIcon
-                        size={32}
-                        color="#6B7280"
-                      />
-                      <Text
-                        size="sm"
-                        variant="muted"
+                      {t('education.uploadTitle')}
+                    </Text>
+                    <input
+                      ref={educationInputRef}
+                      type="file"
+                      accept={ACCEPT_CERT}
+                      onChange={handleEducationChange}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type="button"
+                      tabIndex={0}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => educationInputRef.current?.click()}
+                      onKeyDown={(e) => e.key === 'Enter' && educationInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, setEducationFile)}
+                    >
+                      <YStack
+                        borderRadius="$4"
+                        borderWidth={1}
+                        borderColor="$borderSubtle"
+                        borderStyle="dashed"
+                        padding="$6"
+                        alignItems="center"
+                        justifyContent="center"
+                        backgroundColor="$fieldBackground"
+                        gap="$2"
                       >
-                        {t('education.uploadPrompt')}
-                      </Text>
-                      {educationFile && (
-                        <Text size="sm" color="$appPrimary" fontWeight="500">
-                          {educationFile.name}
+                        <UploadIcon
+                          size={32}
+                          color="#6B7280"
+                        />
+                        <Text
+                          size="sm"
+                          variant="muted"
+                        >
+                          {t('education.uploadPrompt')}
                         </Text>
-                      )}
-                    </YStack>
-                  </div>
+                        {educationFile && (
+                          <Text
+                            size="sm"
+                            color="$appPrimary"
+                            fontWeight="500"
+                          >
+                            {educationFile.name}
+                          </Text>
+                        )}
+                      </YStack>
+                    </button>
+                  </YStack>
                 </YStack>
               </YStack>
-            </YStack>
 
-            {/* Navigation - moved to sticky bar */}
-          </Container>
-        </YStack>
-      </ScrollView>
-      <TutorProfileStickyActions>
-        <Button
-          variant="outline"
-          onPress={() => router.push('/become-tutor/photo')}
-        >
-          {t('back')}
-        </Button>
-        <Button
-          variant="primary"
-          onPress={handleSubmit(onSubmit, onValidationError)}
-        >
-          {t('continue')}
-        </Button>
-      </TutorProfileStickyActions>
+              {/* Navigation - moved to sticky bar */}
+            </Container>
+          </YStack>
+        </ScrollView>
+        <TutorProfileStickyActions>
+          <Button
+            variant="outline"
+            onPress={() => router.push('/become-tutor/photo')}
+          >
+            {t('back')}
+          </Button>
+          <Button
+            variant="primary"
+            onPress={handleSubmit(onSubmit, onValidationError)}
+          >
+            {t('continue')}
+          </Button>
+        </TutorProfileStickyActions>
       </YStack>
     </Screen>
   );
