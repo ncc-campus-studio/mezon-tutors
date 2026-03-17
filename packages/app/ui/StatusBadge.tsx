@@ -22,82 +22,78 @@ export function StatusBadge({ status, label: customLabel }: { status: unknown; l
 
   const label = customLabel || t(normalizedStatus);
 
-  if (normalizedStatus === 'NEW') {
-    return (
-      <StatusCard
-        variant="info"
-        borderWidth={0}
-        paddingHorizontal="$2"
-        paddingVertical="$1"
-      >
-        <Text
-          fontWeight="600"
-          color="$statusInfoBorder"
+  switch (normalizedStatus) {
+    case 'NEW':
+      return (
+        <StatusCard
+          variant="info"
+          borderWidth={0}
+          paddingHorizontal="$2"
+          paddingVertical="$1"
         >
-          • {label}
-        </Text>
-      </StatusCard>
-    );
-  }
-
-  if (normalizedStatus === 'APPROVED') {
-    return (
-      <StatusCard
-        variant="success"
-        borderWidth={0}
-        paddingHorizontal="$2"
-        paddingVertical="$1"
-      >
-        <Text
-          fontWeight="600"
-          color="$statusSuccessBorder"
+          <Text
+            fontWeight="600"
+            color="$statusInfoBorder"
+          >
+            • {label}
+          </Text>
+        </StatusCard>
+      );
+    case 'APPROVED':
+      return (
+        <StatusCard
+          variant="success"
+          borderWidth={0}
+          paddingHorizontal="$2"
+          paddingVertical="$1"
         >
-          • {label}
-        </Text>
-      </StatusCard>
-    );
-  }
-
-  if (normalizedStatus === 'REJECTED') {
-    return (
-      <StatusCard
-        variant="danger"
-        borderWidth={0}
-        paddingHorizontal="$2"
-        paddingVertical="$1"
-      >
-        <Text
-          fontWeight="600"
-          color="$statusErrorBorder"
+          <Text
+            fontWeight="600"
+            color="$statusSuccessBorder"
+          >
+            • {label}
+          </Text>
+        </StatusCard>
+      );
+    case 'REJECTED':
+      return (
+        <StatusCard
+          variant="danger"
+          borderWidth={0}
+          paddingHorizontal="$2"
+          paddingVertical="$1"
         >
-          • {label}
-        </Text>
-      </StatusCard>
-    );
-  }
-
-  if (normalizedStatus === 'PENDING' || normalizedStatus === 'WAITLISTED') {
-    return (
-      <StatusCard
-        variant="warning"
-        borderWidth={0}
-        paddingHorizontal="$2"
-        paddingVertical="$1"
-        alignSelf="flex-start"
-        borderRadius={999}
-      >
-        <Text
-          fontWeight="700"
-          fontSize={12}
-          color="$statusWarningBorder"
-          textTransform="uppercase"
-          letterSpacing={0.5}
+          <Text
+            fontWeight="600"
+            color="$statusErrorBorder"
+          >
+            • {label}
+          </Text>
+        </StatusCard>
+      );
+    case 'PENDING':
+    case 'WAITLISTED':
+      return (
+        <StatusCard
+          variant="warning"
+          borderWidth={0}
+          paddingHorizontal="$2"
+          paddingVertical="$1"
+          alignSelf="flex-start"
+          borderRadius={999}
         >
-          • {label}
-        </Text>
-      </StatusCard>
-    );
+          <Text
+            fontWeight="700"
+            fontSize={12}
+            color="$statusWarningBorder"
+            textTransform="uppercase"
+            letterSpacing={0.5}
+          >
+            • {label}
+          </Text>
+        </StatusCard>
+      );
+    default:
+      return null;
   }
-
-  return null;
 }

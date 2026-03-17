@@ -52,7 +52,7 @@ export class TutorApplicationController {
     return this.tutorApplicationService.createAdminNote(dto);
   }
 
-  @Patch('professional-documents/:id')
+  @Patch('professional-documents/:id/status')
   async updateProfessionalDocumentStatus(
     @Param('id') id: string,
     @Body() dto: UpdateProfessionalDocumentStatusDto
@@ -60,7 +60,7 @@ export class TutorApplicationController {
     return this.tutorApplicationService.updateProfessionalDocumentStatus(id, dto.status);
   }
 
-  @Patch('identity-verification/:id')
+  @Patch('identity-verification/:id/status')
   async updateIdentityVerificationStatus(
     @Param('id') id: string,
     @Body() dto: UpdateIdentityVerificationStatusDto
