@@ -17,7 +17,8 @@
       "documents": "Documents & Identity",
       "identity": "Identity",
       "assessment": "Assessment Results",
-      "messageHistory": "Message History"
+      "messageHistory": "Message History",
+      "studentReviews": "Student Reviews"
     },
     "actions": {
       "reject": "Reject",
@@ -97,6 +98,23 @@
             "reject": "Reject"
           }
         }
+      },
+      "studentReviews": {
+        "subtitle": "Performance metrics from lessons taught by this tutor.",
+        "overallTitle": "Overall performance summary",
+        "reviewSummaryTitle": "Review Summary",
+        "ratingBreakdownTitle": "Rating Breakdown",
+        "performanceTitle": "Performance Metrics",
+        "metrics": {
+          "reassurance": "Reassurance",
+          "clarity": "Clarity",
+          "progress": "Progress",
+          "preparation": "Preparation"
+        },
+        "columns": {
+          "lesson": "Lesson"
+        },
+        "noData": "No student reviews available yet."
       }
     },
     "sidebar": {

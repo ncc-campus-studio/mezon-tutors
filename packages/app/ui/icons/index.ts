@@ -41,8 +41,6 @@ export * from './TrendUpIcon';
 export * from './TrianglePlayIcon';
 export * from './UsersIcon';
 export * from './WalletIcon';
-
-// Types
 export * from './PersonalIcon';
 export * from './VideoIcon';
 export * from './EditListIcon';
@@ -54,5 +52,9 @@ export * from './BriefcaseUserIcon';
 export * from './DownloadIcon';
 export * from './EyeIcon';
 export * from './DocumentIcon';
+export * from './StarBlankIcon';
+export * from './StarFilledIcon';
+export * from './StarHalfIcon';
 
+// Types
 export * from './types';

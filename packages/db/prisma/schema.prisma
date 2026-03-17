@@ -7,6 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LessonStatus {
+  PENDING
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+enum LessonType {
+  TRIAL
+  REGULAR
+}
+
+enum LessonPaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
 enum Role {
   STUDENT
   TUTOR
@@ -165,4 +183,57 @@ model TutorAvailability {
 
   @@unique([tutorId, dayOfWeek, startTime, endTime])
   @@map("tutor_availability")
+}
+
+model Lesson {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  tutorId         String               @map("tutor_id") @db.Uuid
+  studentId       String               @map("student_id") @db.Uuid
+
+  startAt         DateTime             @map("start_at") @db.Timestamptz
+  durationMinutes Int                  @map("duration_minutes")
+
+  status          LessonStatus
+  type            LessonType
+
+  meetingLink     String?              @map("meeting_link")
+
+  originalPrice   Decimal              @map("original_price")  @db.Decimal(10, 2)
+  discountAmount  Decimal              @map("discount_amount") @db.Decimal(10, 2)
+  walletUsed      Decimal              @map("wallet_used")     @db.Decimal(10, 2)
+  price           Decimal                                   @db.Decimal(10, 2)
+
+  platformFee     Decimal              @map("platform_fee")    @db.Decimal(10, 2)
+  finalPayout     Decimal              @map("final_payout")    @db.Decimal(10, 2)
+
+  promoCodeId     String?              @map("promo_code_id")
+  planId          String?              @map("plan_id")
+
+  paymentStatus   LessonPaymentStatus  @map("payment_status")
+
+  canceledAt      DateTime?            @map("canceled_at")
+  cancelReason    String?              @map("cancel_reason")
+  completedAt     DateTime?            @map("completed_at")
+
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+
+  performanceMetric LessonPerformanceMetric?
+
+  @@map("lessons")
+}
+
+model LessonPerformanceMetric {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lessonId     String  @unique @map("lesson_id") @db.Uuid
+
+  reassurance  Float
+  clarity      Float
+  progress     Float
+  preparation  Float
+
+  lesson       Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@map("lesson_performance_metrics")
 }

@@ -17,7 +17,8 @@
       "documents": "Tài liệu & Xác thực",
       "identity": "Danh tính",
       "assessment": "Kết quả đánh giá",
-      "messageHistory": "Lịch sử tin nhắn"
+      "messageHistory": "Lịch sử tin nhắn",
+      "studentReviews": "Đánh giá từ học viên"
     },
     "actions": {
       "reject": "Từ chối",
@@ -97,6 +98,23 @@
             "reject": "Từ chối"
           }
         }
+      },
+      "studentReviews": {
+        "subtitle": "Các chỉ số đánh giá từ những buổi học mà gia sư đã dạy.",
+        "overallTitle": "Tổng quan điểm đánh giá",
+        "reviewSummaryTitle": "Tổng quan đánh giá",
+        "ratingBreakdownTitle": "Phân bố số sao",
+        "performanceTitle": "Chỉ số hiệu suất",
+        "metrics": {
+          "reassurance": "Sự yên tâm",
+          "clarity": "Độ rõ ràng",
+          "progress": "Tiến bộ",
+          "preparation": "Chuẩn bị"
+        },
+        "columns": {
+          "lesson": "Buổi học"
+        },
+        "noData": "Chưa có đánh giá nào từ học viên."
       }
     },
     "sidebar": {
