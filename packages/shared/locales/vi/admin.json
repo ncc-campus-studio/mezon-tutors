@@ -1,0 +1,74 @@
+{
+  "Admin": {
+    "brandName": "TutorMatch",
+    "brandSubtitle": "Trang quản trị",
+    "sidebar": {
+      "dashboard": "Bảng điều khiển",
+      "tutorApplications": "Hồ sơ gia sư",
+      "students": "Học viên",
+      "payments": "Thanh toán",
+      "reports": "Báo cáo"
+    },
+    "loggedInAs": "Đăng nhập dưới tên",
+    "adminUser": "Quản trị viên",
+    "TutorApplications": {
+      "searchPlaceholder": "Tìm kiếm hồ sơ...",
+      "title": "Hồ sơ ứng tuyển gia sư",
+      "description": "Xem xét và duyệt các hồ sơ gia sư mới.",
+      "metrics": {
+        "totalPending": {
+          "title": "Đang chờ duyệt",
+          "helper": "+12% so với tuần trước"
+        },
+        "approvedToday": {
+          "title": "Đã duyệt hôm nay",
+          "helper": "+8 hồ sơ mới được duyệt"
+        },
+        "avgReviewTime": {
+          "title": "Thời gian duyệt trung bình",
+          "helper": "Chậm hơn mục tiêu 3%"
+        },
+        "status": {
+          "good": "Tốt",
+          "warning": "Cần theo dõi",
+          "bad": "Cần chú ý"
+        }
+      },
+      "list": {
+        "title": "Hàng chờ hồ sơ",
+        "subtitle": "Hiển thị {count} trên tổng {total} hồ sơ",
+        "filters": "Bộ lọc",
+        "exportCsv": "Xuất CSV",
+        "pagination": {
+          "prev": "Trước",
+          "next": "Tiếp"
+        },
+        "columns": {
+          "tutorName": "Tên gia sư",
+          "subject": "Môn dạy",
+          "date": "Ngày",
+          "actions": "Thao tác"
+        }
+      },
+      "detail": {
+        "noSelection": "Chưa chọn hồ sơ nào.",
+        "title": "Chi tiết đánh giá",
+        "applicationId": "Mã hồ sơ",
+        "verifiedBadge": "Tiến sĩ Toán học lý thuyết · Đã xác minh danh tính",
+        "introVideoTitle": "Video giới thiệu",
+        "introVideoHint": "Nhấn để xem trước video giới thiệu",
+        "certificatesTitle": "Bằng cấp & Tài liệu",
+        "viewDocument": "Xem",
+        "reviewFeedbackTitle": "Nhận xét & ghi chú",
+        "reviewFeedbackPlaceholder": "Nhập ghi chú hoặc lý do duyệt / từ chối...",
+        "profileHeadlineLabel": "Tiêu đề hồ sơ",
+        "motivateLabel": "Điều gì truyền cảm hứng cho bạn dạy học?",
+        "introduceLabel": "Giới thiệu bản thân với học viên"
+      },
+      "actions": {
+        "reject": "Từ chối",
+        "approveTutor": "Duyệt gia sư"
+      }
+    }
+  }
+}

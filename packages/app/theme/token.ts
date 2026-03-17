@@ -72,7 +72,7 @@ export const tokens = createTokens({
 
   radius: {
     ...defaultConfig.tokens.radius,
-    appCard: 9999,
+    appCard: 20,
     appPill: 999,
   },
   size: defaultConfig.tokens.size,

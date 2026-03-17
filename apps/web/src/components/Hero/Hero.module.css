@@ -1,0 +1,131 @@
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 120px 80px;
+  background: linear-gradient(120deg, #0b1628, #081124);
+  color: white;
+}
+
+/* LEFT */
+
+.left {
+  max-width: 520px;
+}
+
+.badge {
+  background: rgba(37, 99, 235, 0.2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #3b82f6;
+}
+
+.title {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-top: 20px;
+}
+
+.title span {
+  color: #2563eb;
+}
+
+.desc {
+  margin-top: 20px;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+/* BUTTONS */
+
+.buttons {
+  margin-top: 30px;
+  display: flex;
+  gap: 20px;
+}
+
+.primary {
+  background: #2563eb;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 30px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background: #1d4ed8;
+}
+
+.secondary {
+  border: 1px solid #334155;
+  padding: 14px 28px;
+  border-radius: 30px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+/* RIGHT */
+
+.right {
+  position: relative;
+}
+
+.card {
+  width: 320px;
+  background: #111827;
+  border-radius: 20px;
+  overflow: hidden;
+  transform: rotate(-3deg);
+}
+
+.card img {
+  width: 100%;
+}
+
+.cardInfo {
+  padding: 20px;
+}
+
+.match {
+  font-size: 12px;
+  color: #60a5fa;
+}
+
+.cardInfo h3 {
+  margin: 10px 0 5px 0;
+}
+
+.cardInfo p {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.cardButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.profile {
+  flex: 1;
+  background: #374151;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+}
+
+.connect {
+  flex: 1;
+  background: #2563eb;
+  border: none;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+}

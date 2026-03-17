@@ -253,7 +253,6 @@ export function buildSubmitTutorProfilePayload(
 }
 
 export const submitTutorProfileAtom = atom(null, async (_, set, payload: SubmitTutorProfileDto) => {
-  console.log('submit payload', payload);
   await submitTutorProfile(payload);
 
   set(tutorProfileAboutAtom, defaultAboutState);

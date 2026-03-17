@@ -6,7 +6,7 @@ export const Card = styled(YStack, {
   borderRadius: '$appCard',
   backgroundColor: '$backgroundCard',
   borderWidth: 1,
-  borderColor: '$backgroundCard',
+  borderColor: '$borderCard',
   padding: '$4',
   shadowColor: '$appShadow',
   shadowRadius: 25,

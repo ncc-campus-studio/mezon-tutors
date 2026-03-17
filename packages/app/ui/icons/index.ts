@@ -1,10 +1,9 @@
+// Icons
 export * from './ArrowRightIcon';
 export * from './BackArrowIcon';
 export * from './CalendarIcon';
 export * from './CameraIcon';
 export * from './CardIcon';
-export * from './CheckCircleIcon';
-export * from './CheckCircleIcon';
 export * from './CheckIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
@@ -28,4 +27,20 @@ export * from './FrameIcon';
 export * from './VerifiedIcon';
 export * from './WalletIcon';
 export * from './ImageIcon';
+export * from './CalendarIcon';
+export * from './ChartIcon';
+export * from './CloseCircle';
+export * from './DocumentIcon';
+export * from './EyeIcon';
+export * from './GraduationCapIcon';
+export * from './GridIcon';
+export * from './SearchIcon';
+export * from './TimerIcon';
+export * from './TrendDownIcon';
+export * from './TrendUpIcon';
+export * from './TrianglePlayIcon';
+export * from './UsersIcon';
+export * from './WalletIcon';
+
+// Types
 export * from './types';

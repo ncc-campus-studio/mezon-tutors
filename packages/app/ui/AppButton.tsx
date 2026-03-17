@@ -1,4 +1,4 @@
-import { Button as BaseButton, styled } from 'tamagui';
+import { Button as BaseButton, styled } from 'tamagui'
 
 /**
  * Button is the standard button component for the entire app.
@@ -40,12 +40,12 @@ export const AppButton = styled(BaseButton, {
         },
       },
       secondary: {
-        backgroundColor: '$appSecondary',
-        color: '$appText',
-        borderColor: '$appSecondary',
+        backgroundColor: '$secondary',
+        color: '$default',
+        borderColor: '$secondary',
         hoverStyle: {
-          backgroundColor: '$appSecondary',
-          borderColor: '$appSecondary',
+          backgroundColor: '$secondaryHover',
+          borderColor: '$secondaryHover',
         },
       },
       outline: {
@@ -59,10 +59,18 @@ export const AppButton = styled(BaseButton, {
       },
       ghost: {
         backgroundColor: 'transparent',
-        color: '$appText',
+        color: '$color',
         borderColor: 'transparent',
         hoverStyle: {
           backgroundColor: '$appSecondary',
+          borderColor: 'transparent',
+        },
+      },
+      tertiary: {
+        backgroundColor: '$tertiary',
+        color: '$color',
+        hoverStyle: {
+          backgroundColor: '$tertiaryHover',
           borderColor: 'transparent',
         },
       },
@@ -72,4 +80,4 @@ export const AppButton = styled(BaseButton, {
   defaultVariants: {
     variant: 'ghost',
   },
-});
+})

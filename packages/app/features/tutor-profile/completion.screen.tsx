@@ -12,7 +12,7 @@ import {
   ScrollView,
   InfoCard,
 } from '@mezon-tutors/app/ui';
-import { CheckCircleIcon, ClockCircleIcon, InfoIcon, MailIcon } from '@mezon-tutors/app/ui/icons';
+import { CircleCheckIcon, ClockCircleIcon, InfoIcon, MailIcon } from '@mezon-tutors/app/ui/icons';
 
 export function TutorProfileCompletionScreen() {
   const t = useTranslations('TutorProfile.Completion');
@@ -47,10 +47,7 @@ export function TutorProfileCompletionScreen() {
                 shadowRadius={40}
                 shadowOffset={{ width: 0, height: 18 }}
               >
-                <CheckCircleIcon
-                  color="#ffffff"
-                  size={56}
-                />
+                <CircleCheckIcon color="#ffffff" size={56} />
               </YStack>
 
               <YStack

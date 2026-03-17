@@ -10,4 +10,5 @@ export * from './features/tutor-profile/video.screen';
 export * from './features/tutor-profile/availability.screen';
 export * from './features/tutor-profile/completion.screen';
 
+export * from './features/admin/tutor-applications/screen';
 export * from './provider';

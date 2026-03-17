@@ -1,13 +1,9 @@
-import { Header, Hero, Stats } from 'src/components';
+import LandingPage from '../components';
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      <Header />
-      <main>
-        <Hero />
-        <Stats />
-      </main>
-    </div>
+    <main className="min-h-screen bg-[#050A15]">
+      <LandingPage />
+    </main>
   );
 }

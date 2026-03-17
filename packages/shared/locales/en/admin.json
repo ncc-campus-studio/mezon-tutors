@@ -1,0 +1,74 @@
+{
+  "Admin": {
+    "brandName": "TutorMatch",
+    "brandSubtitle": "Admin Panel",
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "tutorApplications": "Tutor Applications",
+      "students": "Students",
+      "payments": "Payments",
+      "reports": "Reports"
+    },
+    "loggedInAs": "Logged in as",
+    "adminUser": "Admin User",
+    "TutorApplications": {
+      "searchPlaceholder": "Search applications...",
+      "title": "Tutor Applications",
+      "description": "Review and manage new tutor onboarding requests.",
+      "metrics": {
+        "totalPending": {
+          "title": "Total Pending",
+          "helper": "+12% from last week"
+        },
+        "approvedToday": {
+          "title": "Approved Today",
+          "helper": "+8 new approvals"
+        },
+        "avgReviewTime": {
+          "title": "Avg. Review Time",
+          "helper": "3% slower than target"
+        },
+        "status": {
+          "good": "Healthy",
+          "warning": "Monitor",
+          "bad": "Needs attention"
+        }
+      },
+      "list": {
+        "title": "Applications Queue",
+        "subtitle": "Showing {count} of {total} applications",
+        "filters": "Filters",
+        "exportCsv": "Export CSV",
+        "pagination": {
+          "prev": "Prev",
+          "next": "Next"
+        },
+        "columns": {
+          "tutorName": "Tutor Name",
+          "subject": "Subject",
+          "date": "Date",
+          "actions": "Actions"
+        }
+      },
+      "detail": {
+        "noSelection": "No application selected.",
+        "title": "Detailed Review",
+        "applicationId": "Application ID",
+        "verifiedBadge": "PhD in Theoretical Mathematics · Identity Verified",
+        "introVideoTitle": "Intro Video",
+        "introVideoHint": "Tap to preview intro video",
+        "certificatesTitle": "Certificates & Documents",
+        "viewDocument": "View",
+        "reviewFeedbackTitle": "Review Feedback",
+        "reviewFeedbackPlaceholder": "Enter notes or reasons for approval / rejection...",
+        "profileHeadlineLabel": "Profile headline",
+        "motivateLabel": "What motivates you to teach?",
+        "introduceLabel": "Introduce yourself to students"
+      },
+      "actions": {
+        "reject": "Reject",
+        "approveTutor": "Approve Tutor"
+      }
+    }
+  }
+}

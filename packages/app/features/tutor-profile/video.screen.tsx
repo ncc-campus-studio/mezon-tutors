@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Container, Paragraph, Screen, StatusCard, Text, XStack, YStack, ScrollView, Input } from '@mezon-tutors/app/ui';
-import { CheckCircleIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
+import { CircleCheckIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
 import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
@@ -323,7 +323,7 @@ export function TutorProfileVideoScreen() {
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <CheckCircleIcon
+                      <CircleCheckIcon
                         size={24}
                         color={successAccent}
                       />

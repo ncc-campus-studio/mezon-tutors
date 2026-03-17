@@ -1,0 +1,87 @@
+.header {
+  height: 80px;
+  padding: 0 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #0b1628, #101f3f);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* logo */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.logoIcon {
+  width: 34px;
+  height: 34px;
+  background: #2563eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* menu */
+
+.nav {
+  display: flex;
+  gap: 40px;
+}
+
+.nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.nav a:hover {
+  color: white;
+}
+
+/* right actions */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.login {
+  color: white;
+  text-decoration: none;
+}
+
+.startBtn {
+  background: #2563eb;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+.startBtn:hover {
+  background: #1d4ed8;
+}
+
+/* avatar */
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+}

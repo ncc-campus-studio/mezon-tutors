@@ -5,7 +5,7 @@ import type {
   TutorAvailabilitySlotDto,
   TutorLanguageDto,
 } from '@mezon-tutors/shared';
-import { Role } from '@mezon-tutors/db';
+import { Role, VerificationStatus } from '@mezon-tutors/db';
 
 @Injectable()
 export class TutorProfileService {
@@ -39,7 +39,7 @@ export class TutorProfileService {
         headline: dto.headline,
         pricePerHour: dto.pricePerHour,
         ratingAverage: 0,
-        verificationStatus: 'pending',
+        verificationStatus: VerificationStatus.PENDING,
       },
     });
 
@@ -61,34 +61,22 @@ export class TutorProfileService {
       throw new Error('User not found');
     }
 
-    const profile = await this.prisma.$transaction(async (tx) => {
-      if (user.role !== Role.TUTOR) {
-        await tx.user.update({
-          where: { id: userId },
-          data: { role: Role.TUTOR },
-        });
-      }
-
-      const profile = await tx.tutorProfile.update({
-        where: { userId },
-        data: {
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          avatar: dto.avatar ?? '',
-          videoUrl: dto.videoUrl ?? '',
-          country: dto.country,
-          subject: dto.subject,
-          introduce: dto.introduce,
-          experience: dto.specialization,
-          motivate: dto.motivate,
-          headline: dto.headline,
-          pricePerHour: dto.pricePerHour,
-          isProfessional: !!dto.teachingCertificateName,
-          verificationStatus: 'pending',
-        },
-      });
-
-      return profile;
+    const profile = await this.prisma.tutorProfile.update({
+      where: { userId },
+      data: {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        avatar: dto.avatar ?? '',
+        videoUrl: dto.videoUrl ?? '',
+        country: dto.country,
+        subject: dto.subject,
+        introduce: dto.introduce,
+        experience: dto.specialization,
+        motivate: dto.motivate,
+        headline: dto.headline,
+        pricePerHour: dto.pricePerHour,
+        isProfessional: !!dto.teachingCertificateName,
+      },
     });
 
     if (dto.languages?.length && profile) {

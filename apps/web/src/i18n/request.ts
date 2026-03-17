@@ -8,6 +8,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
   const common = (await import(`@mezon-tutors/shared/locales/${locale}/common.json`)).default;
+  const adminAll = (await import(`@mezon-tutors/shared/locales/${locale}/admin.json`)).default;
   const tutorProfile = (
     await import(`@mezon-tutors/shared/locales/${locale}/tutor-profile.json`)
   ).default;
@@ -16,6 +17,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale,
     messages: {
       Common: common,
+      Admin: adminAll.Admin,
       TutorProfile: tutorProfile,
     },
   };

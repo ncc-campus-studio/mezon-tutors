@@ -9,6 +9,7 @@ export const themes = {
     // ===== Text =====
     appText: '#111827',
     colorMuted: '#6B7280',
+    foreground: '#000',
 
     // ===== Field / Input =====
     fieldBackground: '#F1F5F9',
@@ -16,11 +17,13 @@ export const themes = {
     // ===== Borders =====
     borderColor: '#D1D5DB',
     borderSubtle: '#E5E7EB',
+    borderCard: '#252f41',
 
     // ===== Brand =====
-    primary: '#1253D5',
-    primaryHover: '#104BC4',
-    primaryActive: '#104BC4',
+    primary: '$appPrimary',
+    primaryHover: '$appPrimaryHover',
+    primaryActive: '$appPrimaryHover',
+    secondary: '#DDE6EE',
     secondaryHover: '#DDE6EE',
 
     // ===== Toast =====
@@ -41,6 +44,16 @@ export const themes = {
     statusSuccessBorder: '#4ade80',
     statusErrorBg: '#fee2e2',
     statusErrorBorder: '#f87171',
+    // ===== Table ======
+    headerBackground: '#f8fafc',
+    selectedBackground: '#e2e8f0',
+
+    // ===== Item =======
+    itemBackground: '#f1f5f9',
+
+    // ===== Button ======
+    tertiary: '#dde6ee',
+    tertiaryHover: '#d2d5d8',
   },
 
   dark: {
@@ -48,11 +61,12 @@ export const themes = {
     background: '#101622',
     backgroundMuted: '#0B1220',
     surface: '#0F172A',
-    backgroundCard: '#0F172A',
+    backgroundCard: '#171f2f',
 
     // ===== Text =====
     appText: '#FFFFFF',
     colorMuted: '#9CA3AF',
+    foreground: '#fff',
 
     // ===== Field / Input =====
     fieldBackground: '#334155',
@@ -60,6 +74,7 @@ export const themes = {
     // ===== Borders =====
     borderColor: '#1F2937',
     borderSubtle: '#1F2937',
+    borderCard: '#252f41',
 
     // ===== Brand =====
     primary: '#1253D5',
@@ -86,5 +101,16 @@ export const themes = {
     statusSuccessBorder: '#6EE7B7',
     statusErrorBg: '#3F1E29',
     statusErrorBorder: '#FCA5A5',
+
+    // ===== Table ======
+    headerBackground: '#1e293b',
+    selectedBackground: '#172137',
+
+    // ===== Item =======
+    itemBackground: '#152a56',
+
+    // ===== Button ======
+    tertiary: '#1e293b',
+    tertiaryHover: '#334155',
   },
 };

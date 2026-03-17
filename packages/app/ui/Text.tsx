@@ -13,6 +13,9 @@ export const Text = styled(Paragraph, {
       primary: {
         color: '$appPrimary',
       },
+      default: {
+        color: '$foreground',
+      },
     },
     size: {
       sm: { fontSize: 12, lineHeight: 18 },
