@@ -140,6 +140,22 @@ export type TutorApplicationMetrics = {
   avg_review_time_change_percent?: number;
 };
 
+export type LessonPerformance = {
+  reassurance: number;
+  clarity: number;
+  progress: number;
+  preparation: number;
+};
+
+export type LessonReview = {
+  id: string;
+  startAt: Date;
+  durationMinutes: number;
+  status: string;
+  type: string;
+  performance: LessonPerformance | null;
+};
+
 export type TutorCertificate = {
   id: string;
   name: string;
@@ -170,4 +186,5 @@ export type FullTutorApplication = {
   professionalDocuments: ProfessionalDocument[];
   identityVerification: IdentityVerification | null;
   availability: TutorAvailability[];
+  studentReviews?: LessonReview[];
 };

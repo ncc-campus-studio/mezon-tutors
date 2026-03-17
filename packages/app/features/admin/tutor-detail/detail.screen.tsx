@@ -26,8 +26,9 @@ import { StatusBadge } from '@mezon-tutors/app/ui/StatusBadge';
 import { useToastController } from '@mezon-tutors/app/ui';
 import { useAtomValue } from 'jotai';
 import { userAtom } from '@mezon-tutors/app/store/auth.atom';
+import { StudentReviewsTab } from './student-reviews-tab';
 
-type DetailTab = 'full-application' | 'documents';
+type DetailTab = 'full-application' | 'documents' | 'student-reviews';
 
 export function AdminTutorApplicationDetailScreen() {
   const t = useTranslations('AdminTutorApplications.Detail');
@@ -186,7 +187,8 @@ export function AdminTutorApplicationDetailScreen() {
                         fontWeight="600"
                         color="$appTextMuted"
                       >
-                        {profile.firstName?.[0]}{profile.lastName?.[0]}
+                        {profile.firstName?.[0]}
+                        {profile.lastName?.[0]}
                       </Text>
                     </YStack>
                     <YStack
@@ -208,7 +210,8 @@ export function AdminTutorApplicationDetailScreen() {
                         <StatusBadge status={profile.verificationStatus} />
                       </XStack>
                       <Text variant="muted">
-                        {profile.headline}{profile.subject ? ` • ${profile.subject}` : ''} • {profile.country}
+                        {profile.headline}
+                        {profile.subject ? ` • ${profile.subject}` : ''} • {profile.country}
                       </Text>
                       <Text
                         size="sm"
@@ -231,7 +234,7 @@ export function AdminTutorApplicationDetailScreen() {
                     {profile.verificationStatus === 'PENDING' && (
                       <>
                         <Button
-                          variant="secondary"
+                          variant="reject"
                           onPress={() => setIsRejectConfirmOpen(true)}
                           disabled={rejectMutation.isPending}
                         >
@@ -292,11 +295,23 @@ export function AdminTutorApplicationDetailScreen() {
                     >
                       {t('tabs.documents')}
                     </Text>
+                    <Text
+                      fontWeight={activeTab === 'student-reviews' ? '600' : '400'}
+                      color={activeTab === 'student-reviews' ? '$appPrimary' : '$color10'}
+                      cursor="pointer"
+                      onPress={() => setActiveTab('student-reviews')}
+                    >
+                      {t('tabs.studentReviews')}
+                    </Text>
                   </XStack>
 
                   {activeTab === 'full-application' && <FullApplicationTab fullData={fullData} />}
 
                   {activeTab === 'documents' && <DocumentsTab fullData={fullData} />}
+
+                  {activeTab === 'student-reviews' && (
+                    <StudentReviewsTab studentReviews={fullData.studentReviews ?? []} />
+                  )}
                 </YStack>
 
                 {/* Right column – Admin notes & meta */}
@@ -395,7 +410,9 @@ export function AdminTutorApplicationDetailScreen() {
         open={isApproveConfirmOpen}
         onOpenChange={setIsApproveConfirmOpen}
         title={t('modals.approve.title')}
-        description={t('modals.approve.description', { name: `${profile.firstName} ${profile.lastName}` })}
+        description={t('modals.approve.description', {
+          name: `${profile.firstName} ${profile.lastName}`,
+        })}
         confirmLabel={t('modals.approve.confirm')}
         onConfirm={async () => {
           if (id) await approveMutation.mutateAsync(id);
@@ -407,7 +424,9 @@ export function AdminTutorApplicationDetailScreen() {
         open={isRejectConfirmOpen}
         onOpenChange={setIsRejectConfirmOpen}
         title={t('modals.reject.title')}
-        description={t('modals.reject.description', { name: `${profile.firstName} ${profile.lastName}` })}
+        description={t('modals.reject.description', {
+          name: `${profile.firstName} ${profile.lastName}`,
+        })}
         confirmLabel={t('modals.reject.confirm')}
         destructive
         onConfirm={async () => {
@@ -420,7 +439,9 @@ export function AdminTutorApplicationDetailScreen() {
         open={isWaitlistConfirmOpen}
         onOpenChange={setIsWaitlistConfirmOpen}
         title={t('modals.waitlist.title')}
-        description={t('modals.waitlist.description', { name: `${profile.firstName} ${profile.lastName}` })}
+        description={t('modals.waitlist.description', {
+          name: `${profile.firstName} ${profile.lastName}`,
+        })}
         confirmLabel={t('modals.waitlist.confirm')}
         onConfirm={async () => {
           if (id) await waitlistMutation.mutateAsync(id);

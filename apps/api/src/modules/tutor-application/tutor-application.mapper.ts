@@ -4,6 +4,8 @@ import {
   ABOUT_COUNTRIES,
   FullTutorApplication,
   IdentityVerification,
+  LessonReview,
+  LessonPerformance,
   parseEnum,
   ProfessionalDocument,
   TutorProfile,
@@ -89,12 +91,37 @@ export class TutorApplicationMapper {
     };
   }
 
+  private mapLessonPerformance(
+    metric: Prisma.LessonPerformanceMetricGetPayload<{}>
+  ): LessonPerformance {
+    return {
+      reassurance: metric.reassurance,
+      clarity: metric.clarity,
+      progress: metric.progress,
+      preparation: metric.preparation,
+    };
+  }
+
+  private mapLessonReview(lesson: Prisma.LessonGetPayload<{ include: { performanceMetric: true } }>): LessonReview {
+    return {
+      id: lesson.id,
+      startAt: lesson.startAt,
+      durationMinutes: lesson.durationMinutes,
+      status: lesson.status,
+      type: lesson.type,
+      performance: lesson.performanceMetric
+        ? this.mapLessonPerformance(lesson.performanceMetric)
+        : null,
+    };
+  }
+
   mapFullTutorApplication(
     profile: TutorProfileWithUser,
     notes: Prisma.TutorAdminNoteGetPayload<{}>[],
     documents: Prisma.ProfessionalDocumentGetPayload<{}>[],
     verification: Prisma.IdentityVerificationGetPayload<{}> | null,
-    availability: Prisma.TutorAvailabilityGetPayload<{}>[]
+    availability: Prisma.TutorAvailabilityGetPayload<{}>[],
+    lessons: Prisma.LessonGetPayload<{ include: { performanceMetric: true } }>[]
   ): FullTutorApplication {
     return {
       profile: this.mapTutorProfile(profile),
@@ -102,6 +129,7 @@ export class TutorApplicationMapper {
       professionalDocuments: documents.map((d) => this.mapProfessionalDocument(d)),
       identityVerification: verification ? this.mapIdentityVerification(verification) : null,
       availability: availability,
+      studentReviews: lessons.map((lesson) => this.mapLessonReview(lesson)),
     };
   }
 }

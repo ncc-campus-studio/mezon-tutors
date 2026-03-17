@@ -26,7 +26,7 @@ export class TutorApplicationService {
   ) {}
 
   async getTutorProfile(id: string): Promise<FullTutorApplication> {
-    const [profile, notes, documents, verification, availability] = await Promise.all([
+    const [profile, notes, documents, verification, availability, lessons] = await Promise.all([
       this.prisma.tutorProfile.findFirst({
         where: { id },
         include: { user: true, languages: true },
@@ -44,6 +44,10 @@ export class TutorApplicationService {
       this.prisma.tutorAvailability.findMany({
         where: { tutorId: id },
       }),
+      this.prisma.lesson.findMany({
+        where: { tutorId: id },
+        include: { performanceMetric: true },
+      }),
     ]);
 
     if (!profile) {
@@ -55,7 +59,8 @@ export class TutorApplicationService {
       notes,
       documents,
       verification,
-      availability
+      availability,
+      lessons
     );
   }
 
