@@ -47,7 +47,11 @@ class AuthService {
 
   async logout(): Promise<void> {
     const refreshToken = await tokenStorage.getRefreshToken();
-    await apiClient.post('/auth/logout', { refreshToken });
+    try {
+      await apiClient.post('/auth/logout', { refreshToken });
+    } finally {
+      await tokenStorage.clearTokens();
+    }
   }
 }
 

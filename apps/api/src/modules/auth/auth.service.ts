@@ -126,6 +126,7 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: {
         userId,
+        token,
         expiresAt,
       },
     });
@@ -147,11 +148,10 @@ export class AuthService {
 
       const refreshTokenRecord = await this.prisma.refreshToken.findFirst({
         where: {
-          userId: payload.sub,
+          token,
           revokedAt: null,
           expiresAt: { gt: new Date() },
         },
-        orderBy: { createdAt: 'desc' },
       });
 
       if (!refreshTokenRecord) {
@@ -169,26 +169,30 @@ export class AuthService {
   }
 
   async revokeRefreshToken(token: string): Promise<void> {
-    const jwtConfig = this.appConfig.jwtConfig;
-
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: jwtConfig.refreshSecret,
-      });
-
       await this.prisma.refreshToken.updateMany({
         where: {
-          userId: payload.sub,
+          token,
           revokedAt: null,
-          expiresAt: { gt: new Date() },
         },
         data: {
           revokedAt: new Date(),
         },
       });
-    } catch {
-      // Token invalid or expired, ignore
-    }
+    } catch {}
+  }
+
+  async revokeAllUserTokens(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
   }
 
   async refreshAccessToken(refreshToken: string): Promise<AuthTokens> {

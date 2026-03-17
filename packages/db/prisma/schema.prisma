@@ -21,14 +21,14 @@ enum VerificationStatus {
 
 /// Application users table mapped to `users`
 model User {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  mezonUserId  String         @unique @map("mezon_user_id")
-  username     String
-  avatar       String
-  role         Role           @default(STUDENT)
-  email        String
-  createdAt    DateTime       @default(now()) @map("created_at")
-  tutorProfile TutorProfile?
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mezonUserId   String         @unique @map("mezon_user_id")
+  username      String
+  avatar        String
+  role          Role           @default(STUDENT)
+  email         String
+  createdAt     DateTime       @default(now()) @map("created_at")
+  tutorProfile  TutorProfile?
   refreshTokens RefreshToken[]
 
   @@map("users")
@@ -97,6 +97,7 @@ model TutorAvailability {
 model RefreshToken {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String    @map("user_id") @db.Uuid
+  token     String    @unique @map("token")
   expiresAt DateTime  @map("expires_at")
   revokedAt DateTime? @map("revoked_at")
   createdAt DateTime  @default(now()) @map("created_at")
