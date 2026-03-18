@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards, Headers } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AppConfigService } from '../../shared/services/app-config.service';
@@ -48,6 +48,12 @@ export class AuthController {
     return res.redirect(302, redirectUrl);
   }
 
+  @Post('refresh')
+  async refresh(@Body() body: { refreshToken: string }) {
+    const tokens = await this.authService.refreshAccessToken(body.refreshToken);
+    return { tokens };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Req() req: Request) {
@@ -56,7 +62,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout() {
+  async logout(@Body() body: { refreshToken?: string }, @Req() req: Request) {
+    await this.authService.revokeRefreshToken(body.refreshToken!);
+
     return {
       success: true,
       message: 'Logged out successfully',

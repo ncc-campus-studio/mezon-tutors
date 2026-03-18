@@ -108,6 +108,106 @@ export class AuthService {
     });
   }
 
+  async createRefreshToken(userId: string): Promise<string> {
+    const jwtConfig = this.appConfig.jwtConfig;
+    const expiresIn = '30d';
+
+    const token = await this.jwtService.signAsync(
+      { sub: userId, type: 'refresh' },
+      {
+        expiresIn,
+        secret: jwtConfig.refreshSecret,
+      }
+    );
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        userId,
+        token,
+        expiresAt,
+      },
+    });
+
+    return token;
+  }
+
+  async validateRefreshToken(token: string): Promise<User | null> {
+    const jwtConfig = this.appConfig.jwtConfig;
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtConfig.refreshSecret,
+      });
+
+      if (payload.type !== 'refresh') {
+        return null;
+      }
+
+      const refreshTokenRecord = await this.prisma.refreshToken.findFirst({
+        where: {
+          token,
+          revokedAt: null,
+          expiresAt: { gt: new Date() },
+        },
+      });
+
+      if (!refreshTokenRecord) {
+        return null;
+      }
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+
+      return user;
+    } catch {
+      return null;
+    }
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    try {
+      await this.prisma.refreshToken.updateMany({
+        where: {
+          token,
+          revokedAt: null,
+        },
+        data: {
+          revokedAt: new Date(),
+        },
+      });
+    } catch {}
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
+    const user = await this.validateRefreshToken(refreshToken);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    const payload: AuthUserPayload = {
+      sub: user.id,
+      mezonUserId: user.mezonUserId,
+      username: user.username,
+      role: user.role,
+      avatar: user.avatar,
+      email: user.email,
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
   async generateTokens(user: User): Promise<AuthTokens> {
     const jwtConfig = this.appConfig.jwtConfig;
     const payload: AuthUserPayload = {
@@ -123,13 +223,7 @@ export class AuthService {
       expiresIn: '15m',
     });
 
-    const refreshToken = await this.jwtService.signAsync(
-      { sub: user.id },
-      {
-        expiresIn: '30d',
-        secret: jwtConfig.refreshSecret,
-      }
-    );
+    const refreshToken = await this.createRefreshToken(user.id);
 
     return {
       accessToken,

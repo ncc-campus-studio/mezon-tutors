@@ -77,8 +77,22 @@ apiClient.interceptors.response.use(
       try {
         if (!refreshPromise) {
           refreshPromise = (async () => {
-            // TODO: Add refresh token logic
-            return '';
+            const refreshToken = await tokenStorage.getRefreshToken();
+            if (!refreshToken) {
+              throw new Error('No refresh token available');
+            }
+
+            interface RefreshResponse {
+              tokens: { accessToken: string };
+            }
+            const res = await axios.post<RefreshResponse, { data: RefreshResponse }>(
+              `${BASE_URL}/auth/refresh`,
+              { refreshToken }
+            );
+            const { accessToken } = res.data.tokens;
+
+            await tokenStorage.setAccessToken(accessToken);
+            return accessToken;
           })();
         }
 
