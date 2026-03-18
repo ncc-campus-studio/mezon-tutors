@@ -80,7 +80,7 @@ mezon-tutors/
 └─ README.md
 ```
 
-## Getting Started
+## 🏁 Getting Started
 
 ### Prerequisites
 
@@ -203,7 +203,7 @@ TAMAGUI_DISABLE_WARN_DYNAMIC_LOAD=1
 IGNORE_TS_CONFIG_PATHS=true
 ```
 
-## Testing 🧪
+## 🧪 Testing
 
 Run the available project checks with:
 
@@ -224,7 +224,7 @@ yarn workspace @mezon-tutors/db typecheck
 
 Coverage is not wired into the repository yet. If you want coverage reports, add Vitest coverage in the relevant workspace and publish the result to your CI.
 
-## Contributing 🤝
+## 🤝 Contributing
 
 1. Create a branch from `main`.
 2. Make your changes in the relevant workspace.
@@ -238,10 +238,34 @@ Recommended conventions:
 - Keep UI and screen logic in `apps/web` or `packages/app`.
 - Keep server-side business logic in `apps/api`.
 
-## Contact 📫
+## 🌍 Community
 
-| Role   | Info                                                |
-| ------ | --------------------------------------------------- |
-| Author | Tomedis                                             |
-| GitHub | [phuocnguyenncc](https://github.com/phuocnguyenncc) |
-| Email  | nguyen.nguyenphuoc@ncc.asia                         |
+### Special thanks
+
+- Huge thanks to everyone who supported and shared early feedback for Mezon Tutors.
+- Thanks to the open-source community for all the ideas, patterns, and tools we build on.
+
+### Contributors
+
+Thank you to everyone who has contributed code, ideas, issues, and feedback:
+
+<p align="left">
+  <a href="https://github.com/phunguyenthien-ncc">
+    <img src="https://avatars.githubusercontent.com/u/247509413?v=4" width="48" height="48" alt="phunguyenthien-ncc" title="phunguyenthien-ncc" />
+  </a>
+  <a href="https://github.com/phuocnguyenncc">
+    <img src="https://avatars.githubusercontent.com/u/167954084?v=4" width="48" height="48" alt="phuocnguyenncc" title="phuocnguyenncc" />
+  </a>
+  <a href="https://github.com/tomedis">
+    <img src="https://avatars.githubusercontent.com/u/114924189?v=4" width="48" height="48" alt="tomedis" title="tomedis" />
+  </a>
+  <a href="https://github.com/thieuthangncc">
+    <img src="https://avatars.githubusercontent.com/u/217855691?v=4" width="48" height="48" alt="thieuthangncc" title="thieuthangncc" />
+  </a>
+  <a href="https://github.com/LongVu236">
+    <img src="https://avatars.githubusercontent.com/u/218201012?v=4" width="48" height="48" alt="LongVu236" title="LongVu236" />
+  </a>
+  <a href="https://github.com/tiennguyenvan-ncc">
+    <img src="https://avatars.githubusercontent.com/u/226026574?v=4" width="48" height="48" alt="tiennguyenvan-ncc" title="tiennguyenvan-ncc" />
+  </a>
+</p>
