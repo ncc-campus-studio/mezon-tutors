@@ -3,10 +3,11 @@ export * from './types/user';
 export * from './types/pagination';
 export * from './types/api-response';
 export * from './types/auth';
-export * from './types/tutor-application';
+export * from './types/tutor-profile';
 
 // Enums
 export * from './enums/verification-status';
+export * from './enums/filters';
 
 // Constants
 export * from './constants/admin-tutor-application';

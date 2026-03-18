@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type {
+import {
+  PaginatedResponse,
   SubmitTutorProfileDto,
   TutorAvailabilitySlotDto,
   TutorLanguageDto,
+  TutorSortBy,
+  VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared';
 import { Role, VerificationStatus } from '@mezon-tutors/db';
+import { toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 
 @Injectable()
 export class TutorProfileService {
@@ -188,5 +192,65 @@ export class TutorProfileService {
         });
       }
     });
+  }
+
+  private getVerifiedTutorOrderBy(sortBy: TutorSortBy) {
+    switch (sortBy) {
+      case TutorSortBy.HIGHEST_PRICE:
+        return { pricePerHour: 'desc' as const }
+      case TutorSortBy.LOWEST_PRICE:
+        return { pricePerHour: 'asc' as const }
+      case TutorSortBy.NUMBER_OF_REVIEWS:
+        return [{ ratingCount: 'desc' as const }, { ratingAverage: 'desc' as const }]
+      case TutorSortBy.BEST_RATING:
+      case TutorSortBy.TOP_PICKS:
+      case TutorSortBy.POPULARITY:
+      default:
+        return [{ ratingAverage: 'desc' as const }, { ratingCount: 'desc' as const }]
+    }
+  }
+
+  async getVerifiedTutors(
+    page: number,
+    limit: number,
+    sortBy: TutorSortBy = TutorSortBy.POPULARITY
+  ): Promise<PaginatedResponse<VerifiedTutorProfileDto>> {
+    const orderBy = this.getVerifiedTutorOrderBy(sortBy)
+
+    const [data, total] = await Promise.all([
+      this.prisma.tutorProfile.findMany({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+        },
+        include: {
+          languages: true,
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy,
+      }),
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+        },
+      }),
+    ])
+
+    const totalPages = Math.ceil(total / limit)
+
+    return {
+      data: {
+        items: data.map(toVerifiedTutorProfileDto),
+        meta: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      },
+      error: null,
+    }
   }
 }

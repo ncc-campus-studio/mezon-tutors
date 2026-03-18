@@ -27,3 +27,5 @@ export * from './SkeletonCard';
 export * from './StatusBadge';
 export * from './ImagePreview';
 export * from './ConfirmModal';
+export * from './Pagination'
+export * from './Chip'
