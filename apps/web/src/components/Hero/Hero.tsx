@@ -9,8 +9,8 @@ export default function Hero() {
       {/* LEFT CONTENT */}
       <div className={styles.left}>
 
-        <span className={styles.badge}>
-          ⚡ MATCHING STYLE TINDER
+        <span className={styles.badge} >
+          <img src="/icons/flash.svg" alt="flash" />  MATCHING STYLE TINDER
         </span>
 
         <h1 className={styles.title}>
