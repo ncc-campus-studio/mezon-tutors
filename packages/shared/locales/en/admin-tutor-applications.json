@@ -1,0 +1,161 @@
+{
+  "Detail": {
+    "breadcrumbs": "Admin / Applications / Review",
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "WAITLISTED": "Waitlisted",
+      "NEW": "New"
+    },
+    "submittedAt": "Submitted on {date} · ID: {id}",
+    "loading": "Loading...",
+    "error": "Error loading application detail.",
+    "footer": "© 2026 Tutor Audit Administrative Dashboard. Internal Use Only.",
+    "tabs": {
+      "fullApplication": "Full Application",
+      "documents": "Documents & Identity",
+      "identity": "Identity",
+      "assessment": "Assessment Results",
+      "messageHistory": "Message History"
+    },
+    "actions": {
+      "reject": "Reject",
+      "waitlist": "Waitlist",
+      "approve": "Approve"
+    },
+    "sections": {
+      "personalInfo": {
+        "title": "Personal Information",
+        "fullName": "Full name",
+        "email": "Email address",
+        "phone": "Phone number",
+        "address": "Address"
+      },
+      "videoBio": {
+        "title": "Video Introduction & Bio",
+        "videoPlaceholder": "Video preview",
+        "clickToPlay": "Click to play video",
+        "aboutLabel": "About this tutor"
+      },
+      "education": {
+        "title": "Education & Credentials",
+        "verifyCredential": "Verify Credential"
+      },
+      "availability": {
+        "title": "Availability & Pricing",
+        "weeklySchedule": "Weekly schedule",
+        "requestedRate": "Requested rate",
+        "recommendationPrefix": "System recommendation: ",
+        "recommendationSuffix": " based on qualifications and region.",
+        "perHour": "/ hour",
+        "days": {
+          "0": "Sunday",
+          "1": "Monday",
+          "2": "Tuesday",
+          "3": "Wednesday",
+          "4": "Thursday",
+          "5": "Friday",
+          "6": "Saturday"
+        }
+      },
+      "documents": {
+        "identityVerification": {
+          "title": "Identity verification",
+          "subtitle": "Review and verify tutor identity documents before approving this application.",
+          "pending": "Pending",
+          "uploadedAt": "Uploaded on {date}",
+          "approve": "Approve ID",
+          "reject": "Reject",
+          "download": "Download ID",
+          "idTypeLabel": "Passport / Government ID",
+          "idPreviewPlaceholder": "ID preview",
+          "noDocument": "No identity document uploaded",
+          "checklist": {
+            "title": "Verification Checklist",
+            "nameMatchesProfile": "Name matches profile",
+            "documentNotExpired": "Document is not expired",
+            "photoClarity": "Photo clarity verification"
+          }
+        },
+        "professionalDocuments": {
+          "title": "Professional Documents",
+          "subtitle": "Check diplomas, certifications and language scores to validate qualifications.",
+          "headers": {
+            "documentName": "Document name",
+            "type": "Type",
+            "issueDate": "Issue date",
+            "status": "Status",
+            "actions": "Actions"
+          },
+          "status": {
+            "verified": "Verified",
+            "new": "New"
+          },
+          "actions": {
+            "approve": "Approve document",
+            "reject": "Reject"
+          }
+        }
+      }
+    },
+    "sidebar": {
+      "adminNotes": {
+        "title": "Admin Notes",
+        "placeholder": "Add a private note about this candidate...",
+        "save": "Save Internal Note",
+        "previousNotes": "Previous notes"
+      },
+      "meta": {
+        "title": "Application Details",
+        "timezone": "Tutor timezone & local time"
+      }
+    },
+    "modals": {
+      "defaultDocName": "this document",
+      "approve": {
+        "title": "Approve Application",
+        "description": "Are you sure you want to approve {name}'s application? This will grant them tutor access.",
+        "confirm": "Approve"
+      },
+      "reject": {
+        "title": "Reject Application",
+        "description": "Are you sure you want to reject {name}'s application? This action cannot be undone.",
+        "confirm": "Reject"
+      },
+      "waitlist": {
+        "title": "Move to Waitlist",
+        "description": "Are you sure you want to move {name} to the waitlist?",
+        "confirm": "Waitlist"
+      },
+      "saveNote": {
+        "title": "Save Internal Note",
+        "description": "Are you sure you want to save this internal note?",
+        "confirm": "Save"
+      },
+      "idApproval": {
+        "title": "Approve Identity Document",
+        "description": "Are you sure you want to approve this identity document for {name}?",
+        "confirm": "Approve ID"
+      },
+      "idRejection": {
+        "title": "Reject Identity Document",
+        "description": "Are you sure you want to reject this identity document for {name}?",
+        "confirm": "Reject ID"
+      },
+      "docApproval": {
+        "title": "Approve Professional Document",
+        "description": "Are you sure you want to approve the document \"{name}\"?",
+        "confirm": "Approve"
+      },
+      "docRejection": {
+        "title": "Reject Professional Document",
+        "description": "Are you sure you want to reject the document \"{name}\"?",
+        "confirm": "Reject"
+      }
+    },
+    "messages": {
+      "docStatusUpdated": "Document status updated"
+    }
+  }
+}

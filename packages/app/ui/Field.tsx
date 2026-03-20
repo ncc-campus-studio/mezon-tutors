@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme, Input, Label, YStack, isWeb } from 'tamagui';
+import { useTheme, Input, Label, YStack, isWeb, ColorTokens } from 'tamagui';
 import { Text } from './Text';
 
 export type FieldProps = {
@@ -14,6 +14,9 @@ export type FieldProps = {
   error?: string;
   /** Gợi ý hiển thị khi nhập (dùng native input + datalist trên web). */
   suggestions?: readonly string[];
+  backgroundColor?: ColorTokens | string;
+  borderWidth?: number;
+  height?: number | string;
 };
 
 export function Field({
@@ -26,6 +29,9 @@ export function Field({
   onChangeText,
   error,
   suggestions,
+  backgroundColor,
+  borderWidth,
+  height,
 }: FieldProps) {
   const theme = useTheme();
   const inputId = id ?? label;
@@ -53,9 +59,11 @@ export function Field({
 
   return (
     <YStack gap="$2" flex={flex}>
-      <Label htmlFor={inputId} color="$colorMuted" fontSize={13}>
-        {label}
-      </Label>
+      {label && (
+        <Label htmlFor={inputId} color="$colorMuted" fontSize={13}>
+          {label}
+        </Label>
+      )}
       {useNativeInputForSuggestions ? (
         <>
           <input
@@ -78,11 +86,12 @@ export function Field({
           id={inputId}
           placeholder={placeholder}
           placeholderTextColor="$colorMuted"
-          backgroundColor="$fieldBackground"
+          backgroundColor={backgroundColor ?? '$fieldBackground'}
           borderColor={error ? '$red9' : '$borderSubtle'}
+          borderWidth={borderWidth}
           color="$color"
           paddingHorizontal="$4"
-          height={48}
+          height={height ?? 48}
           borderRadius="$5"
           value={value}
           onChangeText={onChangeText}

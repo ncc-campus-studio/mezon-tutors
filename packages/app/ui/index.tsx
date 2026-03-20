@@ -1,4 +1,4 @@
-export { XStack, YStack, ScrollView, Separator, Input, Label, Paragraph } from 'tamagui';
+export { XStack, YStack, ScrollView, Separator, Input, Label, Paragraph,Dialog, AlertDialog } from 'tamagui';
 
 export { Toast, ToastProvider, useToastController } from '@tamagui/toast';
 
@@ -14,3 +14,12 @@ export * from './Toast';
 export * from './Textarea';
 export * from './AdminTable';
 export * from './SkeletonCard';
+export * from './StatusBadge';
+export * from './ImagePreview';
+export * from './ConfirmModal';
+export * from './Pagination'
+export * from './Chip'
+export * from './Select'
+export * from './Slider'
+export * from './Empty'
+export * from './loadings/OverlayLoading'

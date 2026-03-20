@@ -18,7 +18,19 @@ export const ABOUT_COUNTRIES = [
 ] as const;
 
 /** Subjects to teach. Default/focus: English only. Có thể thêm môn khác sau. */
-export const ABOUT_SUBJECTS = ['English'] as const;
+export const ABOUT_SUBJECTS = [
+  'English',
+  'Math',
+  'Science',
+  'History',
+  'Spanish',
+  'French',
+  'German',
+  'Japanese',
+  'Korean',
+  'Vietnamese',
+  'Other',
+] as const;
 
 /** Languages spoken (display names in English). */
 export const ABOUT_LANGUAGES = [

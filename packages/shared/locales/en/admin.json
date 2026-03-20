@@ -47,6 +47,7 @@
           "tutorName": "Tutor Name",
           "subject": "Subject",
           "date": "Date",
+          "status": "Status",
           "actions": "Actions"
         }
       },

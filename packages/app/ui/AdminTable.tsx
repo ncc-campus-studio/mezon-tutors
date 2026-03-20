@@ -1,31 +1,31 @@
-import type { ReactNode } from 'react'
-import { useTheme, useMedia, XStack, YStack } from 'tamagui'
-import { Text } from './Text'
+import type { ReactNode } from 'react';
+import { useTheme, useMedia, XStack, YStack } from 'tamagui';
+import { Text } from './Text';
 
 export type AdminTableColumn = {
-  id: string
-  label: ReactNode
-  flex?: number
-  width?: number | string
-  align?: 'left' | 'right' | 'center'
-}
+  id: string;
+  label: ReactNode;
+  flex?: number;
+  width?: number | string;
+  align?: 'left' | 'right' | 'center';
+};
 
 export type AdminTableRow = {
-  id: string
-  cells: ReactNode[]
-  isSelected?: boolean
-  onPress?: () => void
-}
+  id: string;
+  cells: ReactNode[];
+  isSelected?: boolean;
+  onPress?: () => void;
+};
 
 export type AdminTableProps = {
-  columns: AdminTableColumn[]
-  rows: AdminTableRow[]
-  highlightColorToken?: string
-  headerBackgroundToken?: string
-  rowHoverBackgroundToken?: string
-  selectedBackgroundToken?: string
-  footer?: ReactNode
-}
+  columns: AdminTableColumn[];
+  rows: AdminTableRow[];
+  highlightColorToken?: string;
+  headerBackgroundToken?: string;
+  rowHoverBackgroundToken?: string;
+  selectedBackgroundToken?: string;
+  footer?: ReactNode;
+};
 
 export function AdminTable({
   columns,
@@ -34,12 +34,12 @@ export function AdminTable({
   rowHoverBackgroundToken = '$backgroundMuted',
   footer,
 }: AdminTableProps) {
-  const theme = useTheme()
-  const media = useMedia()
-  const selectedBackground = theme.selectedBackground?.val
-  const isNarrow = media.sm || media.xs
-  const paddingHorizontal = isNarrow ? 12 : 16
-  const paddingVerticalRow = isNarrow ? 16 : 25
+  const theme = useTheme();
+  const media = useMedia();
+  const selectedBackground = theme.selectedBackground?.val;
+  const isNarrow = media.sm || media.xs;
+  const paddingHorizontal = isNarrow ? 12 : 16;
+  const paddingVerticalRow = isNarrow ? 16 : 25;
 
   return (
     <YStack
@@ -77,7 +77,7 @@ export function AdminTable({
       </XStack>
 
       {rows.map((row, index) => {
-        const isSelected = row.isSelected
+        const isSelected = row.isSelected;
 
         return (
           <XStack
@@ -97,7 +97,7 @@ export function AdminTable({
             onPress={row.onPress}
           >
             {row.cells.map((cell, cellIndex) => {
-              const column = columns[cellIndex]
+              const column = columns[cellIndex];
 
               return (
                 <YStack
@@ -115,10 +115,10 @@ export function AdminTable({
                 >
                   {cell}
                 </YStack>
-              )
+              );
             })}
           </XStack>
-        )
+        );
       })}
 
       {footer && (
@@ -132,5 +132,5 @@ export function AdminTable({
         </XStack>
       )}
     </YStack>
-  )
+  );
 }

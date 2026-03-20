@@ -47,6 +47,7 @@
           "tutorName": "Tên gia sư",
           "subject": "Môn dạy",
           "date": "Ngày",
+          "status": "Trạng thái",
           "actions": "Thao tác"
         }
       },

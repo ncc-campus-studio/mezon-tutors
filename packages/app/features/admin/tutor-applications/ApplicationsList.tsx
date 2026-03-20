@@ -5,6 +5,7 @@ import {
   AdminTable,
   type AdminTableColumn,
   type AdminTableRow,
+  StatusBadge,
   Text,
   YStack,
 } from '@mezon-tutors/app/ui';
@@ -40,6 +41,7 @@ export function TutorApplicationsList({
     { id: 'tutorName', label: t('list.columns.tutorName'), flex: 2, align: 'left' },
     { id: 'subject', label: t('list.columns.subject'), flex: 1, align: 'left' },
     { id: 'date', label: t('list.columns.date'), flex: 1, align: 'left' },
+    { id: 'status', label: t('list.columns.status'), flex: 1, align: 'left' },
     { id: 'actions', label: t('list.columns.actions'), width: 88, align: 'right' },
   ];
 
@@ -89,8 +91,15 @@ export function TutorApplicationsList({
         size="sm"
         variant="muted"
       >
-        {app.date}
+        {new Date(app.date).toLocaleDateString('en-GB')}
       </Text>
+    );
+
+    const statusCell = (
+      <StatusBadge
+        key="status"
+        status={app.status}
+      />
     );
 
     const actionsCell = (
@@ -103,7 +112,7 @@ export function TutorApplicationsList({
 
     const cells = isNarrow
       ? [nameCell, actionsCell]
-      : [nameCell, subjectCell, dateCell, actionsCell];
+      : [nameCell, subjectCell, dateCell, statusCell, actionsCell];
 
     return {
       id: app.id,

@@ -21,6 +21,7 @@ export function SkeletonCard() {
         backgroundColor="$skeletonBg"
         alignItems="center"
       >
+        {/* Avatar skeleton */}
         <YStack
           width={80}
           height={80}
@@ -28,6 +29,7 @@ export function SkeletonCard() {
           backgroundColor="#95A3B8"
         />
 
+        {/* Text skeleton */}
         <YStack
           flex={1}
           gap="$2"

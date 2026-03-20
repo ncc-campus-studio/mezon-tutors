@@ -2,34 +2,27 @@ import {
   type TutorApplication,
   type TutorApplicationApproveBody,
   type TutorApplicationRejectBody,
-  type TutorApplicationApiItem,
-  type TutorApplicationMetricsApi,
+  type TutorApplicationMetrics,
   VerificationStatus,
+  TutorProfile,
 } from '@mezon-tutors/shared';
-import { apiClient } from './api-client';
+import { apiClient } from '@mezon-tutors/app/services/api-client';
 
-const BASE = '/admin/tutor-applications';
+const BASE = 'admin/tutor-applications';
 
-const formatDate = (iso: string): string =>
-  new Date(iso).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  });
-
-const mapItem = (item: TutorApplicationApiItem): TutorApplication => ({
+const mapItem = (item: TutorProfile): TutorApplication => ({
   id: item.id,
-  name: `${item.first_name} ${item.last_name}`.trim(),
+  name: `${item.firstName} ${item.lastName}`.trim(),
   subject: item.subject,
   subjectColor: '#4299E1',
-  date: formatDate(item.created_at),
+  date: item.createdAt,
   status:
-    item.verification_status === VerificationStatus.PENDING ||
-    item.verification_status === VerificationStatus.APPROVED ||
-    item.verification_status === VerificationStatus.REJECTED
-      ? (item.verification_status as VerificationStatus)
+    item.verificationStatus === VerificationStatus.PENDING ||
+    item.verificationStatus === VerificationStatus.APPROVED ||
+    item.verificationStatus === VerificationStatus.REJECTED
+      ? (item.verificationStatus as VerificationStatus)
       : VerificationStatus.PENDING,
-  videoUrl: item.video_url,
+  videoUrl: item.videoUrl,
   introVideoTitle: 'Intro Video',
   introPreview: item.introduce || item.motivate || item.experience,
   headline: item.headline,
@@ -41,7 +34,7 @@ const mapItem = (item: TutorApplicationApiItem): TutorApplication => ({
 
 export const tutorApplicationService = {
   async getList(): Promise<TutorApplication[]> {
-    const data = await apiClient.get<TutorApplicationApiItem[]>(BASE);
+    const data = await apiClient.get<TutorProfile[]>(BASE);
     return data.map(mapItem);
   },
 
@@ -53,7 +46,7 @@ export const tutorApplicationService = {
     await apiClient.post(`${BASE}/${id}/reject`, body ?? {});
   },
 
-  async getMetrics(): Promise<TutorApplicationMetricsApi> {
-    return apiClient.get<TutorApplicationMetricsApi>(`${BASE}/metrics`);
+  async getMetrics(): Promise<TutorApplicationMetrics> {
+    return apiClient.get<TutorApplicationMetrics>(`${BASE}/metrics`);
   },
 };

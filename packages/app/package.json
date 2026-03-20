@@ -18,17 +18,24 @@
     "@tamagui/colors": "^1.144.2",
     "@tamagui/font-inter": "^1.144.2",
     "@tamagui/lucide-icons": "^1.144.2",
+    "@tamagui/select": "2.0.0-rc.26",
     "@tamagui/shorthands": "^1.144.2",
+    "@tamagui/slider": "2.0.0-rc.26",
     "@tamagui/themes": "^1.144.2",
     "@tamagui/toast": "^1.144.2",
     "@tanstack/react-query": "^5.62.8",
     "axios": "^1.13.5",
     "burnt": "^0.12.2",
+    "expo": "^55.0.6",
     "expo-image-picker": "~16.0.0",
     "expo-linking": "~7.1.4",
     "expo-secure-store": "^15.0.8",
     "jotai": "^2.10.4",
+    "react": "^19.2.4",
+    "react-dom": "19.0.0",
+    "react-native": "^0.84.1",
     "react-native-safe-area-context": "5.4.0",
+    "react-native-svg": "^15.15.3",
     "solito": "^5.0.0",
     "tamagui": "^1.144.2"
   },
@@ -36,6 +43,7 @@
     "@biomejs/biome": "^1.9.3",
     "@tamagui/build": "^1.144.2",
     "@types/react": "~19.0.10",
+    "@types/react-dom": "^19",
     "@types/react-native": "^0.73.0"
   }
 }

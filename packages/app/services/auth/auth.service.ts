@@ -1,4 +1,5 @@
 import { apiClient } from '@mezon-tutors/app/services/api-client';
+import { tokenStorage } from '@mezon-tutors/app/services/token-storage';
 
 export type AuthTokens = {
   accessToken: string;
@@ -45,7 +46,12 @@ class AuthService {
   }
 
   async logout(): Promise<void> {
-    await apiClient.post('/auth/logout');
+    const refreshToken = await tokenStorage.getRefreshToken();
+    try {
+      await apiClient.post('/auth/logout', { refreshToken });
+    } finally {
+      await tokenStorage.clearTokens();
+    }
   }
 }
 

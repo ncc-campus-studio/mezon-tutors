@@ -1,19 +1,23 @@
 'use client';
 
-import type { Control, FieldValues, RegisterOptions } from 'react-hook-form';
+import type { Control, FieldValues, RegisterOptions, Path } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
+import type { ColorTokens } from 'tamagui';
 import { Field } from './Field';
 
 export type InputFieldProps<TFieldValues extends FieldValues = FieldValues> = {
   control: Control<TFieldValues>;
-  name: string;
+  name: Path<TFieldValues>;
   label: string;
   placeholder?: string;
   helperText?: string;
-  rules?: RegisterOptions;
+  rules?: RegisterOptions<TFieldValues, Path<TFieldValues>>;
   flex?: number;
   id?: string;
   suggestions?: readonly string[];
+  backgroundColor?: ColorTokens | string;
+  borderWidth?: number;
+  height?: number | string;
 };
 
 export function InputField<TFieldValues extends FieldValues = FieldValues>({
@@ -26,6 +30,9 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
   flex,
   id,
   suggestions,
+  backgroundColor,
+  borderWidth,
+  height,
 }: InputFieldProps<TFieldValues>) {
   return (
     <Controller
@@ -43,6 +50,9 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
           onChangeText={onChange}
           error={error?.message}
           suggestions={suggestions}
+          backgroundColor={backgroundColor}
+          borderWidth={borderWidth}
+          height={height}
         />
       )}
     />

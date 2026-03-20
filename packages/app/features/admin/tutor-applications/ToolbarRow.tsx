@@ -45,13 +45,13 @@ export function TutorApplicationsToolbarRow({
       <XStack
         flex={1}
         alignItems="center"
-        paddingHorizontal={16}
-        borderRadius={999}
-        backgroundColor="$headerBackground"
+        paddingHorizontal={12}
+        borderRadius={12}
+        backgroundColor="$backgroundMuted"
         borderWidth={1}
         borderColor="$borderSubtle"
-        gap={8}
-        minHeight={44}
+        gap={4}
+        height={40}
       >
         <SearchIcon size={18} color={colorMuted} />
         <InputField
@@ -60,6 +60,9 @@ export function TutorApplicationsToolbarRow({
           label=""
           placeholder={t('searchPlaceholder')}
           flex={1}
+          backgroundColor="transparent"
+          borderWidth={0}
+          height={38}
         />
       </XStack>
 

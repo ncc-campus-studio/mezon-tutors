@@ -19,16 +19,36 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ProfessionalDocumentStatus {
+  NEW
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProfessionalDocumentType {
+  DEGREE
+  CERTIFICATE
+  OTHER
+}
+
+enum IdentityVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 /// Application users table mapped to `users`
 model User {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  mezonUserId  String        @unique @map("mezon_user_id")
-  username     String
-  avatar       String
-  role         Role          @default(STUDENT)
-  email        String
-  createdAt    DateTime      @default(now()) @map("created_at")
-  tutorProfile TutorProfile?
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mezonUserId   String         @unique @map("mezon_user_id")
+  username      String
+  avatar        String
+  role          Role           @default(STUDENT)
+  email         String
+  createdAt     DateTime       @default(now()) @map("created_at")
+  tutorProfile  TutorProfile?
+  refreshTokens RefreshToken[]
 
   @@map("users")
 }
@@ -42,6 +62,8 @@ model TutorProfile {
   avatar             String             @default("")
   videoUrl           String             @default("") @map("video_url")
   country            String
+  phone              String
+  email              String
   subject            String             @default("")
   introduce          String             @default("")
   experience         String             @default("")
@@ -62,7 +84,61 @@ model TutorProfile {
   languages    TutorLanguage[]
   availability TutorAvailability[]
 
+  adminNotes            TutorAdminNote[]
+  professionalDocuments ProfessionalDocument[]
+  identityVerification  IdentityVerification?
+
   @@map("tutor_profiles")
+}
+
+/// Tutor admin notes
+model TutorAdminNote {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String   @map("tutor_id") @db.Uuid
+  reviewerId   String   @map("reviewer_id")
+  reviewerName String   @map("reviewer_name")
+  content      String   @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("tutor_admin_notes")
+}
+
+/// Professional documents for tutors
+model ProfessionalDocument {
+  id             String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId        String                     @map("tutor_id") @db.Uuid
+  name           String
+  institution    String?
+  type           ProfessionalDocumentType
+  status         ProfessionalDocumentStatus @default(PENDING)
+  uploadedAt     DateTime                   @default(now()) @map("uploaded_at")
+  specialization String?
+  yearOfComplete Int?                       @map("year_of_complete")
+  fileKey        String                     @map("file_key")
+  reviewedAt     DateTime?                  @map("reviewed_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("professional_documents")
+}
+
+/// Identity verification record
+model IdentityVerification {
+  id           String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId      String                     @unique @map("tutor_id") @db.Uuid
+  status       IdentityVerificationStatus @default(PENDING)
+  nameMatch    Boolean                    @default(false) @map("name_match")
+  notExpired   Boolean                    @default(false) @map("not_expired")
+  photoClarity Boolean                    @default(false) @map("photo_clarity")
+  uploadedAt   DateTime                   @default(now()) @map("uploaded_at")
+  fileKey      String                     @map("file_key")
+  reviewedAt   DateTime?                  @map("reviewed_at")
+
+  tutor TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("identity_verification")
 }
 
 /// Tutor spoken languages
@@ -90,4 +166,19 @@ model TutorAvailability {
 
   @@unique([tutorId, dayOfWeek, startTime, endTime])
   @@map("tutor_availability")
+}
+
+/// Refresh token for session management
+model RefreshToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  token     String    @unique @map("token")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
 }

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Card, Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import { DocumentIcon } from '@mezon-tutors/app/ui/icons/DocumentIcon';
 import { VerifiedIcon } from '@mezon-tutors/app/ui/icons';
-import { YOUTUBE_EMBED_BASE_URL } from '@mezon-tutors/shared';
+import { getYoutubeEmbedUrl } from '@mezon-tutors/shared';
 import type { TutorApplication } from './types';
 
 export type TutorApplicationDetailProps = {
@@ -17,33 +17,10 @@ export function TutorApplicationDetail({ application }: TutorApplicationDetailPr
   const primaryColor = theme.appPrimary?.val;
   const borderColor = theme.borderColor?.val;
 
-  const youtubeEmbedUrl = useMemo(() => {
-    const videoUrl = application?.videoUrl;
-    if (!videoUrl) return null;
-
-    try {
-      const url = new URL(videoUrl);
-      const host = url.hostname.toLowerCase();
-
-      if (host.includes('youtube.com')) {
-        const videoId = url.searchParams.get('v');
-        if (videoId) {
-          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`;
-        }
-      }
-
-      if (host.includes('youtu.be')) {
-        const videoId = url.pathname.replace('/', '');
-        if (videoId) {
-          return `${YOUTUBE_EMBED_BASE_URL}/${videoId}`;
-        }
-      }
-    } catch {
-      return null;
-    }
-
-    return null;
-  }, [application?.videoUrl]);
+  const youtubeEmbedUrl = useMemo(
+    () => getYoutubeEmbedUrl(application?.videoUrl),
+    [application?.videoUrl]
+  );
 
   const openInNewTab = (url: string) => {
     if (typeof window !== 'undefined') {
@@ -54,7 +31,7 @@ export function TutorApplicationDetail({ application }: TutorApplicationDetailPr
   if (!application) {
     return (
       <Card
-        flexBasis={420}
+        flexBasis={378}
         flexGrow={1}
         backgroundColor="$backgroundCard"
         borderColor={borderColor}
@@ -67,7 +44,7 @@ export function TutorApplicationDetail({ application }: TutorApplicationDetailPr
 
   return (
     <Card
-      flexBasis={420}
+      flexBasis={378}
       flexGrow={1}
       backgroundColor="$backgroundCard"
       borderColor={borderColor}

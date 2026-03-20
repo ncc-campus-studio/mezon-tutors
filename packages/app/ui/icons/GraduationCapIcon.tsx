@@ -1,14 +1,11 @@
-import Svg, { Path } from 'react-native-svg';
-import { IconProps } from './types';
+import Svg, { Path } from 'react-native-svg'
+import { IconProps } from './types'
 
 export const GraduationCapIcon = ({ size, width, height, color, ...props }: IconProps) => {
-  const w = width ?? size ?? 22;
-  const h = height ?? (size ? (Number(size) * 18) / 22 : 18);
-
   return (
     <Svg
-      width={w}
-      height={h}
+      width={width ?? size ?? 20}
+      height={height ?? size ?? 16}
       viewBox="0 0 22 18"
       fill="none"
       {...props}
@@ -18,5 +15,5 @@ export const GraduationCapIcon = ({ size, width, height, color, ...props }: Icon
         fill={color ?? '#FFFFFF'}
       />
     </Svg>
-  );
-};
+  )
+}

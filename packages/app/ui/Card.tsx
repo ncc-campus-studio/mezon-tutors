@@ -30,6 +30,14 @@ export const StatusCard = styled(Card, {
         backgroundColor: '$statusErrorBg',
         borderColor: '$statusErrorBorder',
       },
+      warning: {
+        backgroundColor: '$statusWarningBg',
+        borderColor: '$statusWarningBorder',
+      },
+      info: {
+        backgroundColor: '$statusInfoBg',
+        borderColor: '$statusInfoBorder',
+      },
     },
   },
   defaultVariants: {
@@ -70,7 +78,6 @@ export function InfoCard({ title, value, icon }: InfoCardProps) {
         {icon}
       </YStack>
       <Text
-        size="$2"
         color="$color8"
         textTransform="uppercase"
         letterSpacing={1}

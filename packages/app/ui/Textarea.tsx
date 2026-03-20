@@ -1,4 +1,4 @@
-import { TextArea, styled, type GetProps } from 'tamagui'
+import { TextArea, styled, type GetProps } from 'tamagui';
 
 export const Textarea = styled(TextArea, {
   name: 'Textarea',
@@ -11,6 +11,6 @@ export const Textarea = styled(TextArea, {
   fontSize: 14,
   lineHeight: 20,
   minHeight: 96,
-})
+});
 
-export type TextareaProps = GetProps<typeof Textarea>
+export type TextareaProps = GetProps<typeof Textarea>;

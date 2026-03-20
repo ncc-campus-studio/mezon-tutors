@@ -1,0 +1,319 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Role, TutorProfile, VerificationStatus } from '@mezon-tutors/db';
+import {
+  FullTutorApplication,
+  IdentityVerification,
+  ProfessionalDocument,
+  ProfessionalDocumentStatus,
+  TutorAdminNote,
+  TutorApplicationMetrics,
+} from '@mezon-tutors/shared';
+import { calculateAverageDurationHours } from '../../common/utils/time.util';
+import { CreateAdminNoteDto } from './dto/create-admin-note.dto';
+import { UpdateIdentityVerificationStatusDto } from './dto/update-identity-verification-status.dto';
+import { EmailService } from '../../shared/services/email.service';
+import { ContentReviewer, IdentityChecklist } from '../../shared/types';
+import { IdentityVerificationStatus } from '@mezon-tutors/db';
+import { TutorApplicationMapper, TutorProfileWithUser } from './tutor-application.mapper';
+
+@Injectable()
+export class TutorApplicationService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+    private readonly mapper: TutorApplicationMapper
+  ) {}
+
+  async getTutorProfile(id: string): Promise<FullTutorApplication> {
+    const [profile, notes, documents, verification, availability] = await Promise.all([
+      this.prisma.tutorProfile.findFirst({
+        where: { id },
+        include: { user: true, languages: true },
+      }),
+      this.prisma.tutorAdminNote.findMany({
+        where: { tutorId: id },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.professionalDocument.findMany({
+        where: { tutorId: id },
+      }),
+      this.prisma.identityVerification.findUnique({
+        where: { tutorId: id },
+      }),
+      this.prisma.tutorAvailability.findMany({
+        where: { tutorId: id },
+      }),
+    ]);
+
+    if (!profile) {
+      throw new NotFoundException(`Tutor profile with ID ${id} not found`);
+    }
+
+    return this.mapper.mapFullTutorApplication(
+      profile as TutorProfileWithUser,
+      notes,
+      documents,
+      verification,
+      availability
+    );
+  }
+
+  async createAdminNote(payload: CreateAdminNoteDto): Promise<TutorAdminNote> {
+    const note = await this.prisma.tutorAdminNote.create({
+      data: {
+        tutorId: payload.tutorId,
+        reviewerId: payload.reviewerId,
+        reviewerName: payload.reviewerName,
+        content: payload.content,
+      },
+    });
+
+    return note;
+  }
+
+  async updateProfessionalDocumentStatus(
+    id: string,
+    status: ProfessionalDocumentStatus
+  ): Promise<ProfessionalDocument> {
+    const doc = await this.prisma.professionalDocument.update({
+      where: { id },
+      data: {
+        status,
+        reviewedAt: new Date(),
+      },
+    });
+
+    return doc;
+  }
+
+  async updateIdentityVerificationStatus(
+    id: string,
+    payload: UpdateIdentityVerificationStatusDto
+  ): Promise<IdentityVerification> {
+    const verification = await this.prisma.identityVerification.update({
+      where: { id },
+      data: {
+        status: payload.status,
+        nameMatch: payload.nameMatch,
+        notExpired: payload.notExpired,
+        photoClarity: payload.photoClarity,
+        reviewedAt: new Date(),
+      },
+    });
+
+    return verification;
+  }
+
+  async listApplications(): Promise<TutorProfile[]> {
+    const profiles = await this.prisma.tutorProfile.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return profiles;
+  }
+
+  async approve(id: string): Promise<{ success: boolean }> {
+    const profile = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        user: {
+          select: { email: true, username: true },
+        },
+      },
+    });
+    if (!profile) {
+      throw new NotFoundException(`Tutor application not found: ${id}`);
+    }
+    await this.prisma.$transaction([
+      this.prisma.tutorProfile.update({
+        where: { id },
+        data: {
+          verificationStatus: VerificationStatus.APPROVED,
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: profile.userId },
+        data: { role: Role.TUTOR },
+      }),
+    ]);
+
+    if (profile.user?.email) {
+      await this.emailService.sendApprovalEmail(profile.user.email, profile.user.username);
+    }
+
+    return { success: true };
+  }
+
+  async reject(id: string): Promise<{ success: boolean }> {
+    const profile = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+
+      include: {
+        user: {
+          select: { email: true, username: true },
+        },
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException(`Tutor application not found: ${id}`);
+    }
+
+    await this.prisma.tutorProfile.update({
+      where: { id },
+      data: {
+        verificationStatus: VerificationStatus.REJECTED,
+      },
+    });
+
+    const reviewerNotes: ContentReviewer[] = await this.prisma.tutorAdminNote.findMany({
+      where: { tutorId: profile.id },
+      select: { content: true },
+    });
+
+    const checklist: IdentityChecklist | null = await this.prisma.identityVerification.findFirst({
+      where: { tutorId: profile.id, status: IdentityVerificationStatus.REJECTED },
+      select: {
+        nameMatch: true,
+        notExpired: true,
+        photoClarity: true,
+      },
+    });
+
+    if (profile.email) {
+      await this.emailService.sendRejectionEmail(
+        profile.email,
+        profile.user.username,
+        reviewerNotes,
+        checklist
+      );
+    }
+
+    return { success: true };
+  }
+
+  async getMetrics(): Promise<TutorApplicationMetrics> {
+    const now = new Date();
+
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const startOf7DaysAgo = new Date(startOfToday);
+    startOf7DaysAgo.setDate(startOfToday.getDate() - 7);
+
+    const startOf14DaysAgo = new Date(startOfToday);
+    startOf14DaysAgo.setDate(startOfToday.getDate() - 14);
+
+    const [
+      totalPending,
+      pendingLastWeek,
+      approvedToday,
+      approvedLast7Days,
+      approvedPrevious7Days,
+      last10Reviewed,
+      previous10Reviewed,
+    ] = await Promise.all([
+      this.prisma.tutorProfile.count({
+        where: { verificationStatus: VerificationStatus.PENDING },
+      }),
+
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.PENDING,
+          createdAt: { lt: startOf7DaysAgo },
+        },
+      }),
+
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+          updatedAt: { gte: startOfToday },
+        },
+      }),
+
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+          updatedAt: { gte: startOf7DaysAgo },
+        },
+      }),
+
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: VerificationStatus.APPROVED,
+          updatedAt: { gte: startOf14DaysAgo, lt: startOf7DaysAgo },
+        },
+      }),
+
+      this.prisma.tutorProfile.findMany({
+        where: {
+          verificationStatus: {
+            in: [VerificationStatus.APPROVED, VerificationStatus.REJECTED],
+          },
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        take: 10,
+        select: {
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+
+      this.prisma.tutorProfile.findMany({
+        where: {
+          verificationStatus: {
+            in: [VerificationStatus.APPROVED, VerificationStatus.REJECTED],
+          },
+        },
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        skip: 10,
+        take: 10,
+        select: {
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+    ]);
+
+    const avgReviewTimeLast10 = calculateAverageDurationHours(last10Reviewed);
+    const avgReviewTimePrevious10 = calculateAverageDurationHours(previous10Reviewed);
+
+    const approvedChangePercent =
+      approvedPrevious7Days > 0
+        ? Math.round(((approvedLast7Days - approvedPrevious7Days) / approvedPrevious7Days) * 100)
+        : approvedLast7Days > 0
+          ? 100
+          : 0;
+
+    const avgReviewTimeChangePercent =
+      avgReviewTimePrevious10 > 0
+        ? Math.round(
+            ((avgReviewTimeLast10 - avgReviewTimePrevious10) / avgReviewTimePrevious10) * 100
+          )
+        : 0;
+
+    const totalPendingChangePercent =
+      pendingLastWeek > 0
+        ? Math.round(((totalPending - pendingLastWeek) / pendingLastWeek) * 100)
+        : totalPending > 0
+          ? 100
+          : 0;
+
+    return {
+      total_pending: totalPending,
+      approved_today: approvedToday,
+      avg_review_time_hours: Math.round(avgReviewTimeLast10 * 10) / 10,
+
+      total_pending_change_percent: totalPendingChangePercent,
+      approved_today_change_percent: approvedChangePercent,
+      avg_review_time_change_percent: avgReviewTimeChangePercent,
+    };
+  }
+}

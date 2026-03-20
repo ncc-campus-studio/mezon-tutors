@@ -35,12 +35,14 @@ export function useAsyncAction<TArgs extends unknown[], TResult>(
 
         options?.onSuccess?.(result);
         return result;
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (options?.onError) {
           options.onError(err);
         } else {
-          const message = err?.body?.message || (err as Error)?.message || 'Something went wrong';
+          const message =
+            (err as { body?: { message?: string } })?.body?.message ||
+            (err as Error)?.message ||
+            'Something went wrong';
           showError(options?.errorTitle || 'Error', message);
         }
         throw err;

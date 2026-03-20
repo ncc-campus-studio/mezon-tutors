@@ -1,4 +1,4 @@
-import { Paragraph, styled, type GetProps } from 'tamagui';
+import { Paragraph, styled, type GetProps } from 'tamagui'
 
 export const Text = styled(Paragraph, {
   name: 'Text',
@@ -21,12 +21,12 @@ export const Text = styled(Paragraph, {
       sm: { fontSize: 12, lineHeight: 18 },
       md: { fontSize: 14, lineHeight: 20 },
       lg: { fontSize: 16, lineHeight: 24 },
+      xl: { fontSize: 18, lineHeight: 28 },
     },
   } as const,
   defaultVariants: {
     size: 'md',
   },
-});
+})
 
-export type TextProps = GetProps<typeof Text>;
-
+export type TextProps = GetProps<typeof Text>

@@ -4,8 +4,8 @@ import { IconProps } from './types';
 export const DocumentIcon = ({ size, width, height, color, ...props }: IconProps) => {
   return (
     <Svg
-      width={width ?? size}
-      height={height ?? size}
+      width={width ?? size ?? 20}
+      height={height ?? size ?? 20}
       viewBox="0 0 16 20"
       fill="none"
       {...props}
