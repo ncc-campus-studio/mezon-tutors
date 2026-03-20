@@ -62,7 +62,7 @@ export function TutorsFilter({
   }, [])
 
   return (
-      <XStack gap="$4">
+      <XStack gap="$4" flexWrap="wrap">
         <Select
           label={t('subjectLabel')}
           value={subject}

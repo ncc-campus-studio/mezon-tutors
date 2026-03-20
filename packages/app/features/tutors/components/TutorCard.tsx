@@ -6,7 +6,7 @@ import {
   StarOutlineIcon,
   WorldIcon,
 } from '@mezon-tutors/app/ui/icons'
-import { H2, Image, Separator, useTheme } from 'tamagui'
+import { H2, Image, Separator, useMedia, useTheme } from 'tamagui'
 import { useTranslations } from 'next-intl'
 
 function Tag({ children }: { children: React.ReactNode }) {
@@ -25,10 +25,12 @@ export function TutorCard({
   isActive,
 }: {
   tutor: VerifiedTutorProfileDto
-  onHover: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void
+  onHover?: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void
   isActive?: boolean
 }) {
   const t = useTranslations('Tutors.TutorCard')
+  const media = useMedia()
+  const isVertical = media.sm
   const theme = useTheme()
   const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280'
 
@@ -41,22 +43,60 @@ export function TutorCard({
       cursor="pointer"
       borderColor={isActive ? '$appPrimary' : '$cardBorder'}
       borderWidth={2}
-      onMouseEnter={(e) => onHover(tutor, e.currentTarget as unknown as HTMLElement)}
+      maxWidth="100%"
+      overflow="hidden"
+      onMouseEnter={(e) => onHover?.(tutor, e.currentTarget as unknown as HTMLElement)}
     >
-      <XStack gap="$4" alignItems="flex-start">
-        <YStack gap="$4" alignItems="center" justifyContent="center">
+      <XStack
+        gap="$4"
+        alignItems="flex-start"
+        flexDirection={isVertical ? 'column' : 'row'}
+        width="100%"
+        minWidth={0}
+      >
+        <XStack gap="$4" minWidth={0} flexShrink={isVertical ? 1 : 0}>
           <Image
             src={tutor.avatar}
-            width={150}
-            height={150}
+            width={isVertical ? 80 : 150}
+            height={isVertical ? 80 : 150}
             objectFit="cover"
             aspectRatio={1}
             borderRadius={8}
+            maxWidth="100%"
+            flexShrink={0}
           />
-        </YStack>
-        <YStack flex={1} gap="$4">
-          <XStack alignItems="center" gap="$2" flexWrap="wrap">
-            <H2 size="$5" fontWeight="700">
+          {isVertical && (
+            <YStack alignItems="flex-start" gap="$2" flexWrap="wrap" flex={1} minWidth={0}>
+            <H2 size="$5" fontWeight="700" maxWidth="100%">
+              {tutor.firstName} {tutor.lastName}
+            </H2>
+            {tutor.isProfessional && (
+              <Chip tone="primary">
+                <ChipText tone="primary">{t('professional')}</ChipText>
+              </Chip>
+            )}
+            <XStack alignItems="center" gap="$6" flexWrap="wrap" minWidth={0}>
+            <XStack alignItems="center" gap="$1" minWidth={0} flexShrink={1}>
+            <StarOutlineIcon />
+            <Text size="xl" fontWeight="700">
+              {tutor.ratingAverage}
+            </Text>
+            <Text variant="muted">{t('reviews', { count: tutor.ratingCount })}</Text>
+          </XStack>
+          <XStack alignItems="baseline" gap="$1">
+            <Text size="xl" fontWeight="700">
+              ${tutor.pricePerHour}
+            </Text>
+            <Text variant="muted">{t('perLesson')}</Text>
+          </XStack>
+            </XStack>
+          </YStack>
+          )}
+        </XStack>
+        <YStack flex={1} gap="$4" minWidth={0} maxWidth="100%">
+          {!isVertical && (
+            <XStack alignItems="center" gap="$2" flexWrap="wrap" minWidth={0}>
+            <H2 size="$5" fontWeight="700" maxWidth="100%">
               {tutor.firstName} {tutor.lastName}
             </H2>
             {tutor.isProfessional && (
@@ -65,28 +105,41 @@ export function TutorCard({
               </Chip>
             )}
           </XStack>
+          )}
 
-          <XStack alignItems="center" gap="$6">
-            <XStack alignItems="center" gap="$2">
-              <GraduationCapIcon color={mutedColor} />
-              <Text variant="muted">{t('teaches', { subject: tutor.subject })}</Text>
+          <XStack alignItems="center" gap="$6" flexWrap="wrap" minWidth={0}>
+            <XStack alignItems="center" gap="$2" minWidth={0} flexShrink={1}>
+              <YStack flexShrink={0}>
+                <GraduationCapIcon color={mutedColor} />
+              </YStack>
+              <Text variant="muted" flexShrink={1}>
+                {t('teaches', { subject: tutor.subject })}
+              </Text>
             </XStack>
-            <XStack alignItems="center" gap="$2">
-              <WorldIcon color={mutedColor} />
-              <Text variant="muted">{t('country', { country: tutor.country })}</Text>
+            <XStack alignItems="center" gap="$2" minWidth={0} flexShrink={1}>
+              <YStack flexShrink={0}>
+                <WorldIcon color={mutedColor} />
+              </YStack>
+              <Text variant="muted" flexShrink={1}>
+                {t('country', { country: tutor.country })}
+              </Text>
             </XStack>
           </XStack>
-          <XStack alignItems="center" gap="$2">
-            <LanguageIcon color={mutedColor} />
-            <Text variant="muted">
+          <XStack alignItems="flex-start" gap="$2" minWidth={0}>
+            <YStack flexShrink={0} paddingTop={2}>
+              <LanguageIcon color={mutedColor} />
+            </YStack>
+            <Text variant="muted" flex={1} minWidth={0} style={{ wordBreak: 'break-word' }}>
               {t('speaks', {
                 languages: tutor.languages.map((language) => language.languageCode).join(', '),
               })}
             </Text>
           </XStack>
-          <Paragraph numberOfLines={3}>{tutor.introduce}</Paragraph>
+          <Paragraph numberOfLines={3} maxWidth="100%">
+            {tutor.introduce}
+          </Paragraph>
 
-          <XStack gap="$2" flexWrap="wrap">
+          <XStack gap="$2" flexWrap="wrap" minWidth={0}>
             {proficiencyTags.map((proficiency) => {
               const isKnownProficiency = (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(
                 proficiency,
@@ -101,10 +154,18 @@ export function TutorCard({
           </XStack>
         </YStack>
 
-        <Separator vertical height="100%" />
+        {!isVertical && <Separator vertical height="100%" flexShrink={0} />}
 
-        <YStack gap="$3" alignItems="flex-start" minWidth="25%">
-          <XStack alignItems="center" gap="$1">
+        <YStack
+          gap="$3"
+          alignItems="flex-start"
+          minWidth={0}
+          flexShrink={1}
+          width={isVertical ? '100%' : undefined}
+          maxWidth={isVertical ? '100%' : '35%'}
+        >
+          {!isVertical && (
+            <><XStack alignItems="center" gap="$1">
             <StarOutlineIcon />
             <Text size="xl" fontWeight="700">
               {tutor.ratingAverage}
@@ -116,14 +177,17 @@ export function TutorCard({
               ${tutor.pricePerHour}
             </Text>
             <Text variant="muted">{t('perLesson')}</Text>
-          </XStack>
+          </XStack></>
+          )}
 
+          <YStack gap="$3" width="100%">
           <Button variant="primary" width="100%">
             {t('bookTrial')}
           </Button>
           <Button variant="outline" width="100%" size="sm">
             {t('sendMessage')}
           </Button>
+          </YStack>
         </YStack>
       </XStack>
     </Card>

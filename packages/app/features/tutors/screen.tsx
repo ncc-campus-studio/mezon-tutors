@@ -11,9 +11,10 @@ import { ETutorSortBy } from '@mezon-tutors/shared'
 import { useGetVerifiedTutors } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
 import { useTranslations } from 'next-intl'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { useMedia } from 'tamagui'
 
 const DEFAULT_LIMIT = 5
-const PREVIEW_GAP = 16
+const PREVIEW_GAP = 32
 const PREVIEW_WIDTH = 420
 const PREVIEW_ANIM_MS = 400
 
@@ -22,6 +23,8 @@ export function TutorsScreen() {
   const tFilter = useTranslations('Tutors.Filter')
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const media = useMedia()
+  const showHoverPreview = !media.md
 
   const [page, setPage] = useState(() => {
     const initialPage = Number(searchParams.get('page') ?? '1')
@@ -37,7 +40,6 @@ export function TutorsScreen() {
   const {
     data: verifiedTutorsResponse,
     isLoading,
-    isError,
     isFetching,
   } = useGetVerifiedTutors(page, limit, {
     sortBy: sortByFilter,
@@ -52,13 +54,13 @@ export function TutorsScreen() {
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage)
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search)
-      params.set('page', String(nextPage))
-      params.set('limit', String(limit))
-      const url = `${pathname}?${params.toString()}`
-      window.history.replaceState({}, '', url)
-    }
+  
+    const params = new URLSearchParams(window.location.search)
+    params.set('page', String(nextPage))
+    params.set('limit', String(limit))
+  
+    window.history.replaceState({}, '', `${pathname}?${params.toString()}`)
+  
     setHoverTutor(null)
     setHoverRect(null)
   }
@@ -119,7 +121,7 @@ export function TutorsScreen() {
   const showInitialLoading = isLoading && !verifiedTutorsResponse
 
   return (
-    <Screen>
+    <Screen paddingHorizontal="$8">
       <YStack flex={1}>
         <Container padded paddingTop="$4" paddingBottom="$6" gap="$4">
           <TutorsFilter
@@ -130,13 +132,14 @@ export function TutorsScreen() {
             onCountryChange={handleCountryChange}
             onPricePerLessonChange={handlePriceChange}
           />
-          <XStack gap="$8" flexDirection="row" alignItems="flex-start">
+          <XStack gap="$8" flexDirection="row" alignItems="flex-start" width="100%">
             <YStack
               ref={(node) => {
                 listRef.current = node as unknown as HTMLElement | null
               }}
-              width="65%"
-              height="65vh"
+              width="100%"
+              height="auto"
+              $gtMd={{ width: '65%', height: '65vh' }}
               gap="$3"
               position="relative"
             >
@@ -179,7 +182,7 @@ export function TutorsScreen() {
                   <YStack key={tutor.id}>
                     <TutorCard
                       tutor={tutor}
-                      onHover={handleTutorCardHover}
+                      onHover={showHoverPreview ? handleTutorCardHover : undefined}
                       isActive={hoverTutor?.id === tutor.id}
                     />
                   </YStack>
@@ -192,7 +195,7 @@ export function TutorsScreen() {
                 <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
               </XStack>
 
-              {hoverTutor && previewPosition && (
+              {showHoverPreview && hoverTutor && previewPosition && (
                 <YStack
                   style={{
                     position: 'absolute',
