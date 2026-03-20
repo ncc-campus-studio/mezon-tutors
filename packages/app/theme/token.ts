@@ -1,5 +1,5 @@
-import { createTokens } from 'tamagui';
-import { defaultConfig } from '@tamagui/config/v4';
+import { createTokens } from 'tamagui'
+import { defaultConfig } from '@tamagui/config/v4'
 
 export const tokens = createTokens({
   color: {
@@ -15,6 +15,7 @@ export const tokens = createTokens({
     // ===== Text =====
     appText: '#272A3C',
     appTextMuted: '#6B7280',
+    appWhite: '#FFFFFF',
 
     // ===== Borders =====
     appBorder: '#D1D5DB',
@@ -63,11 +64,17 @@ export const tokens = createTokens({
     green2: '#dcfce7',
     green3: '#bbf7d0',
     green4: '#4ade80',
+    green5: '#22c55e',
     green6: '#16a34a',
     green8: '#15803d',
     green9: '#166534',
     green11: '#14532d',
     green12: '#052e16',
+
+    // ===== Gray scale =====
+    gray2: '#DCDCE5',
+    gray5: '#64748B',
+    gray10: '#101622',
   },
 
   radius: {
@@ -78,4 +85,4 @@ export const tokens = createTokens({
   size: defaultConfig.tokens.size,
   space: defaultConfig.tokens.space,
   zIndex: defaultConfig.tokens.zIndex,
-});
+})

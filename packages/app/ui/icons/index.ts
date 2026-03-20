@@ -41,6 +41,10 @@ export * from './TrendUpIcon';
 export * from './TrianglePlayIcon';
 export * from './UsersIcon';
 export * from './WalletIcon';
+export * from './TrianglePlayOutlineIcon'
+export * from './WorldIcon'
+export * from './LanguageIcon'
+export * from './StarOutlineIcon'
 
 // Types
 export * from './PersonalIcon';

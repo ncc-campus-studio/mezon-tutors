@@ -13,6 +13,9 @@
       ],
       "@mezon-tutors/app/ui/*": [
         "./packages/app/ui/*"
+      ],
+      "@mezon-tutors/app/utils/*": [
+        "./packages/app/utils/*"
       ]
     }
   },

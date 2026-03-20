@@ -18,6 +18,7 @@ export const themes = {
     borderColor: '#D1D5DB',
     borderSubtle: '#E5E7EB',
     borderCard: '#252f41',
+    cardBorder: '#DCDCE5',
 
     // ===== Brand =====
     primary: '$appPrimary',
@@ -84,6 +85,7 @@ export const themes = {
     borderColor: '#1F2937',
     borderSubtle: '#1F2937',
     borderCard: '#252f41',
+    cardBorder: '#252f41',
 
     // ===== Brand =====
     primary: '#1253D5',
