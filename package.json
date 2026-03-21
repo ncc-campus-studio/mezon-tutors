@@ -25,7 +25,7 @@
     "check-tamagui": "tamagui check",
     "test": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf node_modules/.cache .turbo .next apps/*/node_modules/.cache apps/*/.next apps/*/.expo",
+    "clean": "node scripts/clean-cache.ts",
     "prepare": "husky"
   },
   "resolutions": {
