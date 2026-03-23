@@ -9,12 +9,12 @@ export default function Features() {
       {/* TOP */}
       <div className={styles.top}>
 
-        <div>
+        <div className={styles.topLeft}>
           <h2>For busy learners</h2>
 
           <p>
             Our learning system is specifically designed to optimize the
-            time of working <br /> professionals, helping you conquer foreign
+            time of working professionals, helping you conquer foreign
             languages without affecting your career.
           </p>
         </div>
@@ -28,43 +28,42 @@ export default function Features() {
       {/* CARDS */}
       <div className={styles.cards}>
 
-        <div className={styles.card}>
+        {/* CARD 1 - FULL WIDTH ON MOBILE */}
+        <div className={`${styles.card} ${styles.featured}`}>
           <div className={styles.icon}>
-            <img src="/icons/ft1.svg" alt="icft1" />
+            <img src="/icons/ft1.svg" alt="Evening classes" />
           </div>
 
           <h3>Evening classes</h3>
 
           <p>
-            Make use of your time after work with tutors ready to accompany
-            you until 11 PM.
+            Make use of your time after work with tutors ready to accompany you until 11 PM.
           </p>
         </div>
 
+        {/* CARD 2 */}
         <div className={styles.card}>
           <div className={styles.icon}>
-            <img src="/icons/ft2.svg" alt="icft2"
-            style={{ width: "24px", height: "24px" }} />
+            <img src="/icons/ft2.svg" alt="Flexible weekends" />
           </div>
 
           <h3>Flexible weekends</h3>
 
           <p>
-            No more worrying about work pressure, spend 2 weekend days
-            to upgrade your communication skills.
+            No more worrying about work pressure, spend 2 weekend days to upgrade your communication skills.
           </p>
         </div>
 
+        {/* CARD 3 */}
         <div className={styles.card}>
           <div className={styles.icon}>
-            <img src="/icons/ft3.svg" alt="icft3" />
+            <img src="/icons/ft3.svg" alt="Learn via Mezon" />
           </div>
 
           <h3>Learn via Mezon</h3>
 
           <p>
-            Chat, video call, and share materials smoothly on the
-            familiar Mezon app.
+            Chat, video call, and share materials smoothly on the familiar Mezon app.
           </p>
         </div>
 

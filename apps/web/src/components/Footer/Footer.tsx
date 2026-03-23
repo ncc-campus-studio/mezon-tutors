@@ -11,18 +11,19 @@ export default function Footer() {
         {/* BRAND */}
         <div className={styles.brand}>
           <div className={styles.logo}>
-  <div style={{display: "flex",alignItems: "center",gap: "10px"}} className={styles.icons}>
-  <img src="/icons/Background.svg" alt="background" />
-   <h3 style={{ margin: 0 }}>TutorMatch</h3>
-</div>
+            <div className={styles.logoInner}>
+              <img src="/icons/Background.svg" alt="background" />
+              <h3>TutorMatch</h3>
+            </div>
+          </div>
 
-</div>
           <p>
-            The leading language tutor < br/>  matching platform
-            for working < br/>  professionals in Vietnam.
+            The leading language tutor <br />
+            matching platform for working <br />
+            professionals in Vietnam.
           </p>
 
-          <div className={styles.icons}>
+          <div className={styles.socialIcons}>
             <img src="/icons/foot1.svg" alt="foot1" />
             <img src="/icons/foot2.svg" alt="foot2" />
           </div>

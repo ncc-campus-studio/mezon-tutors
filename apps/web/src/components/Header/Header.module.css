@@ -1,6 +1,6 @@
 .header {
-  height: 80px;
-  padding: 0 60px;
+  height: 70px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -8,8 +8,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* logo */
+/* LEFT */
+.left {
+  display: flex;
+  align-items: center;
+}
 
+/* logo */
 .logo {
   display: flex;
   align-items: center;
@@ -17,6 +22,7 @@
   color: white;
   font-weight: 700;
   font-size: 18px;
+  flex-shrink: 0;
 }
 
 .logo img {
@@ -24,29 +30,29 @@
   height: 28px;
 }
 
-/* menu */
-
+/* CENTER */
 .nav {
   display: flex;
-  gap: 40px;
+  gap: 32px;
 }
 
 .nav a {
   color: #cbd5e1;
   text-decoration: none;
   font-size: 15px;
+  white-space: nowrap;
 }
 
 .nav a:hover {
   color: white;
 }
 
-/* right actions */
-
-.actions {
+/* RIGHT */
+.right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
 .login {
@@ -57,26 +63,60 @@
 .startBtn {
   background: #2563eb;
   border: none;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 20px;
   color: white;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .startBtn:hover {
   background: #1d4ed8;
 }
 
-/* avatar */
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #9ca3af;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
+/* mobile menu */
+.mobileMenu {
+  display: none;
   color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* RESPONSIVE */
+
+/* tablet */
+@media (max-width: 1024px) {
+  .header {
+    padding: 0 20px;
+  }
+
+  .nav {
+    gap: 20px;
+  }
+}
+
+/* mobile */
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+
+  .login {
+    display: none;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+}
+
+/* mobile nhỏ */
+@media (max-width: 480px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .logo span {
+    font-size: 16px;
+  }
 }
