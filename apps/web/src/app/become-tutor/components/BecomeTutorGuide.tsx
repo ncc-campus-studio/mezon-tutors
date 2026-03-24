@@ -255,7 +255,9 @@ export function BecomeTutorGuide() {
                     >
                       {item.tag}
                     </Text>
-                    <ArrowRightLineIcon color={isHovered ? '#F6FAFF' : '#1D66F2'} />
+                    <ArrowRightLineIcon 
+                      color={isHovered ? '$myLessonsPrimaryButtonText' : '$myLessonsPrimaryButton'} 
+                    />
                   </XStack>
                 </YStack>
               );

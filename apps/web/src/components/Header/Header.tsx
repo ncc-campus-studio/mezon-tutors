@@ -7,7 +7,7 @@ import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton'
 import { LogoutButton } from '@mezon-tutors/app/components/auth/LogoutButton'
 import { ROUTES } from '@mezon-tutors/shared'
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useTheme } from 'tamagui'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
@@ -53,6 +53,7 @@ function ThemeIcon({ isDark }: { isDark: boolean }) {
 
 export default function Header() {
   const locale = useLocale()
+  const t = useTranslations('Common.Header')
   const theme = useTheme()
   const router = useRouter()
   const pathname = usePathname()
@@ -135,9 +136,9 @@ export default function Header() {
       </div>
 
       <nav className={styles.nav}>
-        <Link href={ROUTES.TUTOR.INDEX}>Find Tutor</Link>
-        <Link href={ROUTES.MY_LESSONS.INDEX}>My Lessons</Link>
-        <Link href={ROUTES.BECOME_TUTOR.INDEX}>Become a Tutor</Link>
+        <Link href={ROUTES.TUTOR.INDEX}>{t('findTutors')}</Link>
+        <Link href={ROUTES.MY_LESSONS.INDEX}>{t('myLessons')}</Link>
+        <Link href={ROUTES.BECOME_TUTOR.INDEX}>{t('becomeTutor')}</Link>
       </nav>
 
       <div className={styles.actions}>
