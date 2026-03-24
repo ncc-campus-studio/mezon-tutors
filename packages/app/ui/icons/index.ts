@@ -1,5 +1,6 @@
 // Icons
 export * from './ArrowRightIcon';
+export * from './ArrowRightLineIcon';
 export * from './BackArrowIcon';
 export * from './CalendarIcon';
 export * from './CameraIcon';
@@ -8,6 +9,7 @@ export * from './CheckIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';
+export * from './ClockOutlineIcon';
 export * from './CompassIcon';
 export * from './CloseIcon';
 export * from './FocusIcon';
@@ -28,20 +30,19 @@ export * from './FrameIcon';
 export * from './VerifiedIcon';
 export * from './WalletIcon';
 export * from './ImageIcon';
-export * from './CalendarIcon';
 export * from './ChartIcon';
 export * from './CloseCircle';
 export * from './DocumentIcon';
 export * from './EyeIcon';
-export * from './GraduationCapIcon';
 export * from './GridIcon';
+export * from './GrowthOutlineIcon';
 export * from './SearchIcon';
 export * from './TimerIcon';
 export * from './TrendDownIcon';
 export * from './TrendUpIcon';
 export * from './TrianglePlayIcon';
 export * from './UsersIcon';
-export * from './WalletIcon';
+export * from './WalletOutlineIcon';
 export * from './TrianglePlayOutlineIcon'
 export * from './WorldIcon'
 export * from './LanguageIcon'
@@ -57,7 +58,5 @@ export * from './LinkIcon';
 export * from './CircleOutlineIcon';
 export * from './BriefcaseUserIcon';
 export * from './DownloadIcon';
-export * from './EyeIcon';
-export * from './DocumentIcon';
 
 export * from './types';

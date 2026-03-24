@@ -1,57 +1,27 @@
 'use client';
 
 import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton';
-import { ROUTES } from '@mezon-tutors/shared';
+import {
+  ArrowRightLineIcon,
+  ClockOutlineIcon,
+  GrowthOutlineIcon,
+  WalletOutlineIcon,
+} from '@mezon-tutors/app/ui/icons';
+import {
+  GUIDE_HIGHLIGHTS,
+  GUIDE_STEPS,
+  ROUTES,
+  type GuideHighlightIconKey,
+} from '@mezon-tutors/shared';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useMedia, XStack, YStack, Paragraph, H1, H2, Text } from 'tamagui';
 
-const STEP_KEYS = ['1', '2', '3'] as const;
-const HIGHLIGHT_KEYS = ['1', '2', '3'] as const;
-const STEP_BADGE_SIZE = 52;
-const STEP_ROW_PADDING_Y_DESKTOP = 8;
-
-function WalletIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect x="3.5" y="6.5" width="17" height="11" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3.5 10.5h17M8 14h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M12 8v4.2l3 1.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function GrowthIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M5 16.5l4.5-4.5 3 3L19 8.5M14 8.5h5v5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M6 12h12M13 7l5 5-5 5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-const HIGHLIGHT_ICONS = [WalletIcon, ClockIcon, GrowthIcon] as const;
+const HIGHLIGHT_ICON_BY_KEY: Record<GuideHighlightIconKey, typeof WalletOutlineIcon> = {
+  setOwnRate: WalletOutlineIcon,
+  teachAnytime: ClockOutlineIcon,
+  growProfessionally: GrowthOutlineIcon,
+};
 
 export function BecomeTutorGuide() {
   const t = useTranslations('BecomeTutorGuide');
@@ -59,17 +29,18 @@ export function BecomeTutorGuide() {
   const isCompact = media.sm || media.xs;
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
-  const steps = STEP_KEYS.map((key, index) => ({
-    number: `0${index + 1}`,
-    title: t(`steps.${key}.title`),
-    description: t(`steps.${key}.description`),
+  const steps = GUIDE_STEPS.map((step) => ({
+    ...step,
+    title: t(step.titleKey),
+    description: t(step.descriptionKey),
   }));
 
-  const highlights = HIGHLIGHT_KEYS.map((key, index) => ({
-    Icon: HIGHLIGHT_ICONS[index],
-    title: t(`highlights.${key}.title`),
-    description: t(`highlights.${key}.description`),
-    tag: t(`highlights.${key}.tag`),
+  const highlights = GUIDE_HIGHLIGHTS.map((item) => ({
+    ...item,
+    Icon: HIGHLIGHT_ICON_BY_KEY[item.iconKey],
+    title: t(item.titleKey),
+    description: t(item.descriptionKey),
+    tag: t(item.tagKey),
   }));
 
   return (
@@ -123,7 +94,7 @@ export function BecomeTutorGuide() {
             {!isCompact ? (
               <YStack
                 position="absolute"
-                top={STEP_ROW_PADDING_Y_DESKTOP + STEP_BADGE_SIZE / 2}
+                top={34}
                 left={52}
                 right={52}
                 height={1}
@@ -138,16 +109,16 @@ export function BecomeTutorGuide() {
             >
               {steps.map((step) => (
                 <YStack
-                  key={step.number}
+                  key={step.id}
                   flex={1}
                   alignItems={isCompact ? 'flex-start' : 'center'}
                   paddingHorizontal={isCompact ? 8 : 12}
-                  paddingVertical={isCompact ? 10 : STEP_ROW_PADDING_Y_DESKTOP}
+                  paddingVertical={isCompact ? 10 : 8}
                   gap="$2"
                 >
                   <XStack
-                    width={STEP_BADGE_SIZE}
-                    height={STEP_BADGE_SIZE}
+                    width={52}
+                    height={52}
                     borderRadius={14}
                     alignItems="center"
                     justifyContent="center"
@@ -214,7 +185,7 @@ export function BecomeTutorGuide() {
 
               return (
                 <YStack
-                  key={item.title}
+                  key={item.id}
                   flex={1}
                   minHeight={isCompact ? 220 : 252}
                   padding={isCompact ? 16 : 18}
@@ -252,9 +223,7 @@ export function BecomeTutorGuide() {
                     justifyContent="center"
                     backgroundColor={isHovered ? 'rgba(255,255,255,0.16)' : 'rgba(32, 107, 255, 0.12)'}
                   >
-                    <Text color={isHovered ? '$myLessonsPrimaryButtonText' : '$myLessonsPrimaryButton'}>
-                      <Icon />
-                    </Text>
+                    <Icon color={isHovered ? '#F6FAFF' : '#1D66F2'} />
                   </XStack>
 
                   <H2
@@ -286,12 +255,7 @@ export function BecomeTutorGuide() {
                     >
                       {item.tag}
                     </Text>
-                    <Text
-                      color={isHovered ? '$myLessonsPrimaryButtonText' : '$myLessonsPrimaryButton'}
-                      fontSize={14}
-                    >
-                      <ArrowIcon />
-                    </Text>
+                    <ArrowRightLineIcon color={isHovered ? '#F6FAFF' : '#1D66F2'} />
                   </XStack>
                 </YStack>
               );
