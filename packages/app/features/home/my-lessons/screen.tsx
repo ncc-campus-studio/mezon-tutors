@@ -10,7 +10,6 @@ import { MyLessonsCalendarSection } from './components/MyLessonsCalendarSection'
 import { MyLessonsHeader } from './components/MyLessonsHeader';
 import { MyLessonsLessonsPanel } from './components/MyLessonsLessonsPanel';
 import { MyLessonsPromoCard } from './components/MyLessonsPromoCard';
-import { MyLessonsTopNav } from './components/MyLessonsTopNav';
 import { MyLessonsTutorsPanel } from './components/MyLessonsTutorsPanel';
 import { getMyLessonsDataByMezonUserId } from './data-source';
 import type { MyLessonsTab, MyLessonsViewData } from './types';
@@ -51,8 +50,6 @@ export function MyLessonsScreen() {
   return (
     <Screen backgroundColor="$myLessonsPageBackground">
       <YStack minHeight="100vh" backgroundColor="$myLessonsPageBackground">
-        <MyLessonsTopNav user={user} />
-
         <ScrollView flex={1} contentContainerStyle={{ paddingBottom: 16 }}>
           <YStack
             width="100%"

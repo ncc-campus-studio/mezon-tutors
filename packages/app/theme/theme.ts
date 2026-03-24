@@ -58,6 +58,19 @@ export const themes = {
     tertiary: '#dde6ee',
     tertiaryHover: '#d2d5d8',
 
+    // ===== Web Header =====
+    webHeaderBgStart: '#f8fbff',
+    webHeaderBgEnd: '#eef4ff',
+    webHeaderBorder: 'rgba(29, 36, 51, 0.08)',
+    webHeaderLogoText: '#1d2433',
+    webHeaderNavText: '#56709c',
+    webHeaderNavHover: '#1d66f2',
+    webHeaderToggleBorder: 'rgba(29, 36, 51, 0.12)',
+    webHeaderToggleBg: '#ffffff',
+    webHeaderToggleText: '#2b3447',
+    webHeaderToggleHover: '#f3f7ff',
+    webHeaderLocaleActiveBg: '#1d66f2',
+    webHeaderLocaleActiveText: '#ffffff',
     myLessonsPageBackground: '#F3F5F9',
     myLessonsTopNavBackground: '#FFFFFF',
     myLessonsTopNavBorder: '#E2E7F0',
@@ -148,6 +161,12 @@ export const themes = {
     priceCardBorder: '#e0f2fe',
 
     skeletonBg: '#Cbd5e1',
+
+    // ===== Tutors =====
+    tutorsPageBackground: '#F3F5F9',
+    tutorsVideoOverlayBg: 'rgba(7, 15, 31, 0.72)',
+    tutorsVideoFrameBg: '#0B1220',
+    tutorsVideoPlayIcon: '#FFFFFF',
   },
 
   dark: {
@@ -209,6 +228,19 @@ export const themes = {
     tertiary: '#1e293b',
     tertiaryHover: '#334155',
 
+    // ===== Web Header =====
+    webHeaderBgStart: '#0b1628',
+    webHeaderBgEnd: '#101f3f',
+    webHeaderBorder: 'rgba(255, 255, 255, 0.1)',
+    webHeaderLogoText: '#ffffff',
+    webHeaderNavText: '#cbd5e1',
+    webHeaderNavHover: '#ffffff',
+    webHeaderToggleBorder: 'rgba(255, 255, 255, 0.22)',
+    webHeaderToggleBg: 'rgba(255, 255, 255, 0.04)',
+    webHeaderToggleText: '#e7eeff',
+    webHeaderToggleHover: 'rgba(255, 255, 255, 0.12)',
+    webHeaderLocaleActiveBg: 'rgba(29, 102, 242, 0.75)',
+    webHeaderLocaleActiveText: '#ffffff',
     myLessonsPageBackground: '#050D1A',
     myLessonsTopNavBackground: '#070F1F',
     myLessonsTopNavBorder: 'rgba(20, 44, 89, 0.9)',
@@ -299,5 +331,11 @@ export const themes = {
     priceCardBorder: '#102645',
 
     skeletonBg: '#1F2937',
+
+    // ===== Tutors =====
+    tutorsPageBackground: '#050D1A',
+    tutorsVideoOverlayBg: 'rgba(0, 0, 0, 0.75)',
+    tutorsVideoFrameBg: '#000000',
+    tutorsVideoPlayIcon: '#FFFFFF',
   },
 };

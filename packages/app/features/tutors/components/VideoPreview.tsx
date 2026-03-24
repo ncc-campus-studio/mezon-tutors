@@ -4,6 +4,7 @@ import { TrianglePlayOutlineIcon } from '@mezon-tutors/app/ui/icons'
 import { useTranslations } from 'next-intl'
 import { createPortal } from 'react-dom'
 import { getYoutubeEmbedUrl } from '@mezon-tutors/shared'
+import { useTheme } from 'tamagui'
 
 type VideoPreviewProps = {
   videoUrl?: string | null
@@ -14,6 +15,7 @@ type VideoPreviewProps = {
 
 export function VideoPreview({ videoUrl, height = 500, title = '' }: VideoPreviewProps) {
   const t = useTranslations('Tutors.VideoPreview')
+  const theme = useTheme()
 
   const [isVideoOpen, setIsVideoOpen] = useState(false)
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null)
@@ -22,6 +24,9 @@ export function VideoPreview({ videoUrl, height = 500, title = '' }: VideoPrevie
   const isYoutubeVideo = Boolean(embedUrl && youtubeId)
   const hasVideoUrl = Boolean(videoUrl)
   const canOpenVideo = isYoutubeVideo
+  const playIconColor = theme.tutorsVideoPlayIcon?.get() ?? '#FFFFFF'
+  const overlayBg = theme.tutorsVideoOverlayBg?.get() ?? 'rgba(7, 15, 31, 0.72)'
+  const frameBg = theme.tutorsVideoFrameBg?.get() ?? '#0B1220'
 
   useEffect(() => {
     if (!isVideoOpen) return
@@ -105,7 +110,7 @@ export function VideoPreview({ videoUrl, height = 500, title = '' }: VideoPrevie
               alignItems="center"
               paddingLeft="$2"
             >
-              <TrianglePlayOutlineIcon width={22} height={26} color="white" />
+              <TrianglePlayOutlineIcon width={22} height={26} color={playIconColor} />
             </YStack>
           </YStack>
         ) : (
@@ -128,12 +133,11 @@ export function VideoPreview({ videoUrl, height = 500, title = '' }: VideoPrevie
               bottom={0}
               left={0}
               zIndex={1000}
-              backgroundColor="rgba(0,0,0,0.72)"
               justifyContent="center"
               alignItems="center"
               padding="$4"
               onPress={() => setIsVideoOpen(false)}
-              style={{ position: 'fixed' }}
+              style={{ position: 'fixed', backgroundColor: overlayBg }}
             >
               <YStack
                 width="85vw"
@@ -150,7 +154,7 @@ export function VideoPreview({ videoUrl, height = 500, title = '' }: VideoPrevie
                   width="100%"
                   style={{
                     aspectRatio: '16 / 9',
-                    background: 'black',
+                    background: frameBg,
                     maxHeight: '90vh',
                   }}
                 >

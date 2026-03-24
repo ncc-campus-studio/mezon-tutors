@@ -11,7 +11,7 @@ import { ETutorSortBy } from '@mezon-tutors/shared'
 import { useGetVerifiedTutors } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
 import { useTranslations } from 'next-intl'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useMedia } from 'tamagui'
+import { useMedia, useTheme } from 'tamagui'
 
 const DEFAULT_LIMIT = 10
 const PREVIEW_GAP = 32
@@ -24,6 +24,7 @@ export function TutorsScreen() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const media = useMedia()
+  const theme = useTheme()
   const showHoverPreview = !media.md
 
   const [page, setPage] = useState(() => {
@@ -121,7 +122,10 @@ export function TutorsScreen() {
   const showInitialLoading = isLoading && !verifiedTutorsResponse
 
   return (
-    <Screen paddingHorizontal="$8">
+    <Screen
+      paddingHorizontal="$8"
+      backgroundColor={theme.tutorsPageBackground?.get() ?? '$background'}
+    >
       <YStack flex={1}>
         <Container padded paddingTop="$4" paddingBottom="$6" gap="$4">
           <TutorsFilter
