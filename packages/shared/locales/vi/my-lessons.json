@@ -1,0 +1,71 @@
+{
+  "topNav": {
+    "brandName": "TutorMatch",
+    "home": "Trang chủ",
+    "messages": "Tin nhắn",
+    "myLessons": "Lớp học của tôi",
+    "learn": "Học",
+    "settings": "Cài đặt",
+    "avatarAlt": "Ảnh đại diện người dùng đã đăng nhập"
+  },
+  "header": {
+    "title": "Lớp học của tôi",
+    "scheduleLesson": "+ Đặt lịch học",
+    "tabs": {
+      "lessons": "Buổi học",
+      "calendar": "Lịch",
+      "tutors": "Gia sư"
+    }
+  },
+  "promo": {
+    "title": "Đặt buổi học tiếp theo với Alex Smith",
+    "description": "Bạn đang có chuỗi học 3 tuần. Hãy duy trì động lực và tiến nhanh hơn tới mục tiêu.",
+    "scheduleButton": "Đặt lịch học"
+  },
+  "calendar": {
+    "switchWeek": "Tuần",
+    "switchMonth": "Tháng",
+    "legendSuffix": "Buổi học",
+    "company": "{year} TutorMatch Inc."
+  },
+  "weekGrid": {
+    "emptyHours": "Trống {hours}h"
+  },
+  "panels": {
+    "lessons": {
+      "upcoming": {
+        "title": "Buổi học sắp tới",
+        "emptyTitle": "Chưa có buổi học sắp tới",
+        "emptyDescription": "Đừng để mục tiêu bị gián đoạn! Hãy đặt lịch buổi học tiếp theo ngay để tiếp tục tiến bộ.",
+        "scheduleNow": "Đặt lịch ngay",
+        "rescheduleOrCancel": "Đổi lịch/Hủy",
+        "joinLesson": "Vào lớp"
+      },
+      "past": {
+        "title": "Buổi học trước đó",
+        "rate": "Đánh giá",
+        "rated": "Đã đánh giá"
+      }
+    },
+    "tutors": {
+      "title": "Gia sư của tôi",
+      "subtitle": "Bạn có {count} gia sư đang hoạt động trong học kỳ này.",
+      "findNewTutors": "+ Tìm gia sư mới",
+      "completed": "Hoàn thành",
+      "nextLesson": "Buổi tiếp theo",
+      "lessonsCount": "{count} buổi",
+      "reviewCount": "({count} đánh giá)",
+      "schedule": "Đặt lịch",
+      "message": "Nhắn tin",
+      "unscheduled": "Chưa có lịch",
+      "discoverTitle": "Muốn mở rộng việc học của bạn?",
+      "discoverDescription": "Khám phá gia sư được đánh giá cao ở Vật lý, Hóa học, Thiết kế và hơn 100 môn khác.",
+      "findTutors": "Tìm gia sư",
+      "viewSubjects": "Xem tất cả môn"
+    }
+  },
+  "screen": {
+    "loading": "Đang tải dữ liệu buổi học..."
+  },
+  "previewFooter": "Xem trước giao diện TutorMatch."
+}

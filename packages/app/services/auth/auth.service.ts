@@ -7,8 +7,10 @@ export type AuthTokens = {
 };
 
 export type AuthUser = {
-  id: string;
-  email: string;
+  id?: string;
+  mezonUserId?: string;
+  username?: string;
+  email?: string | null;
   avatar?: string | null;
 };
 
@@ -20,6 +22,7 @@ export type ExchangeResponse = {
 export type MeResponse = {
   sub?: string;
   id?: string;
+  mezonUserId?: string;
   email?: string;
   username?: string;
   avatar?: string | null;

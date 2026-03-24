@@ -26,6 +26,7 @@
     "@tanstack/react-query": "^5.62.8",
     "axios": "^1.13.5",
     "burnt": "^0.12.2",
+    "dayjs": "^1.11.13",
     "expo": "^55.0.6",
     "expo-image-picker": "~16.0.0",
     "expo-linking": "~7.1.4",

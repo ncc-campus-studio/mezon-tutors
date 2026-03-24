@@ -4,6 +4,7 @@ export * from './types/pagination';
 export * from './types/api-response';
 export * from './types/auth';
 export * from './types/tutor-profile';
+export * from './types/my-lessons-api';
 
 // Enums
 export * from './enums/verification-status';

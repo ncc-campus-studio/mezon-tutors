@@ -19,6 +19,19 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum LessonCategory {
+  MATH
+  SCIENCE
+  CHEMISTRY
+  OTHER
+}
+
+enum LessonStatus {
+  BOOKED
+  COMPLETED
+  CANCELLED
+}
+
 enum ProfessionalDocumentStatus {
   NEW
   PENDING
@@ -40,15 +53,16 @@ enum IdentityVerificationStatus {
 
 /// Application users table mapped to `users`
 model User {
-  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  mezonUserId   String         @unique @map("mezon_user_id")
-  username      String
-  avatar        String
-  role          Role           @default(STUDENT)
-  email         String
-  createdAt     DateTime       @default(now()) @map("created_at")
-  tutorProfile  TutorProfile?
-  refreshTokens RefreshToken[]
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mezonUserId    String         @unique @map("mezon_user_id")
+  username       String
+  avatar         String
+  role           Role           @default(STUDENT)
+  email          String
+  createdAt      DateTime       @default(now()) @map("created_at")
+  tutorProfile   TutorProfile?
+  studentLessons Lesson[]       @relation("StudentLessons")
+  refreshTokens  RefreshToken[]
 
   @@map("users")
 }
@@ -83,6 +97,7 @@ model TutorProfile {
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   languages    TutorLanguage[]
   availability TutorAvailability[]
+  lessons      Lesson[]
 
   adminNotes            TutorAdminNote[]
   professionalDocuments ProfessionalDocument[]
@@ -166,6 +181,27 @@ model TutorAvailability {
 
   @@unique([tutorId, dayOfWeek, startTime, endTime])
   @@map("tutor_availability")
+}
+
+/// Student booked/completed lesson sessions
+model Lesson {
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId String         @map("student_id") @db.Uuid
+  tutorId   String         @map("tutor_id") @db.Uuid
+  subject   String
+  category  LessonCategory @default(OTHER)
+  status    LessonStatus   @default(BOOKED)
+  startsAt  DateTime       @map("starts_at")
+  endsAt    DateTime       @map("ends_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  student User         @relation("StudentLessons", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, startsAt])
+  @@index([tutorId, startsAt])
+  @@map("lessons")
 }
 
 /// Refresh token for session management

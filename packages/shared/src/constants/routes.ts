@@ -26,4 +26,7 @@ export const ROUTES = {
   AUTH: {
     MEZON_CALLBACK: '/auth/mezon/callback',
   },
+  MY_LESSONS: {
+    INDEX: '/my-lessons',
+  },
 } as const;

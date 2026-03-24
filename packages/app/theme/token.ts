@@ -1,5 +1,5 @@
-import { createTokens } from 'tamagui'
-import { defaultConfig } from '@tamagui/config/v4'
+import { createTokens } from 'tamagui';
+import { defaultConfig } from '@tamagui/config/v4';
 
 export const tokens = createTokens({
   color: {
@@ -15,7 +15,6 @@ export const tokens = createTokens({
     // ===== Text =====
     appText: '#272A3C',
     appTextMuted: '#6B7280',
-    appWhite: '#FFFFFF',
 
     // ===== Borders =====
     appBorder: '#D1D5DB',
@@ -64,17 +63,41 @@ export const tokens = createTokens({
     green2: '#dcfce7',
     green3: '#bbf7d0',
     green4: '#4ade80',
-    green5: '#22c55e',
     green6: '#16a34a',
     green8: '#15803d',
     green9: '#166534',
     green11: '#14532d',
     green12: '#052e16',
 
-    // ===== Gray scale =====
-    gray2: '#DCDCE5',
-    gray5: '#64748B',
-    gray10: '#101622',
+    // ===== My Lessons =====
+    myLessonsCardBorder: 'rgba(20, 44, 89, 0.9)',
+    myLessonsCardBackground: '#08142D',
+    myLessonsCalendarTitle: '#EDF3FF',
+    myLessonsMonthNav: '#7F93BD',
+    myLessonsSwitcherBackground: '#13233F',
+    myLessonsSwitcherBorder: 'rgba(255, 255, 255, 0.06)',
+    myLessonsSwitcherActiveBackground: '#40577F',
+    myLessonsSwitcherActiveText: '#F6FAFF',
+    myLessonsSwitcherInactiveText: '#8EA4CE',
+    myLessonsLegendText: '#8DA3CD',
+    myLessonsFooterText: '#7E93BE',
+    myLessonsGridHeaderBackground: '#0A142D',
+    myLessonsGridBodyBackground: '#091327',
+    myLessonsGridBorder: 'rgba(20, 44, 89, 0.9)',
+    myLessonsDayLabel: '#96A7CC',
+    myLessonsActiveDate: '#2F7CFF',
+    myLessonsInactiveDate: '#E8EEFE',
+    myLessonsActiveDayColumn: 'rgba(18, 43, 90, 0.7)',
+    myLessonsCurrentColumn: 'rgba(16, 42, 94, 0.45)',
+    myLessonsCurrentColumnGap: 'rgba(16, 42, 94, 0.3)',
+    myLessonsGapCellBackground: 'rgba(9, 19, 39, 0.75)',
+    myLessonsTimeLabel: '#7F93BD',
+    myLessonsNowLine: '#2F7CFF',
+    myLessonsGapLabel: '#7389B5',
+    myLessonsGapHint: '#5A709C',
+    myLessonsEventBorder: 'rgba(255, 255, 255, 0.08)',
+    myLessonsEventTutor: '#DDE6FD',
+    myLessonsEventTime: '#9FB2DC',
   },
 
   radius: {
@@ -85,4 +108,4 @@ export const tokens = createTokens({
   size: defaultConfig.tokens.size,
   space: defaultConfig.tokens.space,
   zIndex: defaultConfig.tokens.zIndex,
-})
+});

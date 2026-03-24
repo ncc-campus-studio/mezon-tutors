@@ -23,6 +23,7 @@ export default function Header() {
 
       <nav className={styles.nav}>
         <Link href={ROUTES.TUTOR.INDEX}>Find Tutor</Link>
+        <Link href={ROUTES.MY_LESSONS.INDEX}>My Lessons</Link>
         <Link href={ROUTES.BECOME_TUTOR.INDEX}>Become a Tutor</Link>
       </nav>
 

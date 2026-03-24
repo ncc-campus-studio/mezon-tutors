@@ -3,7 +3,9 @@ export interface MezonAuthSuccessMessage {
   data: {
     user?: {
       id?: string;
-      email?: string;
+      mezonUserId?: string;
+      username?: string;
+      email?: string | null;
       avatar?: string | null;
     };
     tokens: {

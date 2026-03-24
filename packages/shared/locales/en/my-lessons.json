@@ -1,0 +1,71 @@
+{
+  "topNav": {
+    "brandName": "TutorMatch",
+    "home": "Home",
+    "messages": "Messages",
+    "myLessons": "My Lessons",
+    "learn": "Learn",
+    "settings": "Settings",
+    "avatarAlt": "Logged in user avatar"
+  },
+  "header": {
+    "title": "My lessons",
+    "scheduleLesson": "+ Schedule lesson",
+    "tabs": {
+      "lessons": "Lessons",
+      "calendar": "Calendar",
+      "tutors": "Tutors"
+    }
+  },
+  "promo": {
+    "title": "Schedule your next lesson with Alex Smith",
+    "description": "You are on a 3-week streak. Keep your learning momentum and reach your goals faster.",
+    "scheduleButton": "Schedule lesson"
+  },
+  "calendar": {
+    "switchWeek": "Week",
+    "switchMonth": "Month",
+    "legendSuffix": "Lessons",
+    "company": "{year} TutorMatch Inc."
+  },
+  "weekGrid": {
+    "emptyHours": "Empty {hours}h"
+  },
+  "panels": {
+    "lessons": {
+      "upcoming": {
+        "title": "Upcoming lessons",
+        "emptyTitle": "No upcoming lessons",
+        "emptyDescription": "Don't put your goals on hold! Schedule your next lesson now to see progress.",
+        "scheduleNow": "Schedule now",
+        "rescheduleOrCancel": "Reschedule/Cancel",
+        "joinLesson": "Join lesson"
+      },
+      "past": {
+        "title": "Past lessons",
+        "rate": "Rate",
+        "rated": "Rated"
+      }
+    },
+    "tutors": {
+      "title": "My tutors",
+      "subtitle": "You have {count} active tutors this semester.",
+      "findNewTutors": "+ Find New Tutors",
+      "completed": "Completed",
+      "nextLesson": "Next lesson",
+      "lessonsCount": "{count} lessons",
+      "reviewCount": "({count} reviews)",
+      "schedule": "Schedule",
+      "message": "Message",
+      "unscheduled": "Unscheduled",
+      "discoverTitle": "Want to expand your learning?",
+      "discoverDescription": "Discover top-rated tutors in Physics, Chemistry, Design, and over 100 other subjects.",
+      "findTutors": "Find Tutors",
+      "viewSubjects": "View All Subjects"
+    }
+  },
+  "screen": {
+    "loading": "Loading lessons data..."
+  },
+  "previewFooter": "TutorMatch interface preview."
+}

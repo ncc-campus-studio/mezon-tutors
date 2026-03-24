@@ -8,6 +8,7 @@ export * from './CheckIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';
+export * from './CompassIcon';
 export * from './CloseIcon';
 export * from './FocusIcon';
 export * from './GalleryIcon';

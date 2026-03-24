@@ -6,10 +6,30 @@ import { atomWithStorage } from 'jotai/utils';
 
 export type AuthUser = {
   id: string;
+  mezonUserId: string;
   email: string | null;
   username: string | null;
   avatar?: string | null;
 };
+
+type AuthUserSource = {
+  sub?: string;
+  id?: string;
+  mezonUserId?: string;
+  email?: string | null;
+  username?: string | null;
+  avatar?: string | null;
+};
+
+function toAuthUser(source: AuthUserSource): AuthUser {
+  return {
+    id: source.sub ?? source.id ?? '',
+    mezonUserId: source.mezonUserId ?? '',
+    email: source.email ?? '',
+    username: source.username ?? '',
+    avatar: source.avatar ?? null,
+  };
+}
 
 export const userAtom = atom<AuthUser | null>(null);
 export const isLoadingAtom = atom<boolean>(true);
@@ -30,13 +50,7 @@ export const initAuthAtom = atom(null, async (get, set) => {
 
   try {
     const data = await authService.getMe();
-
-    set(userAtom, {
-      id: data.sub ?? data.id ?? '',
-      email: data.email ?? '',
-      username: data.username ?? '',
-      avatar: data.avatar ?? null,
-    });
+    set(userAtom, toAuthUser(data));
   } catch {
     set(accessTokenAtom, null);
     set(userAtom, null);
@@ -45,23 +59,25 @@ export const initAuthAtom = atom(null, async (get, set) => {
   }
 });
 
-export const loginAtom = atom(null, async (_, set, { accessToken }: { accessToken: string }) => {
-  set(accessTokenAtom, accessToken);
+export const loginAtom = atom(
+  null,
+  async (_, set, { accessToken, user }: { accessToken: string; user?: AuthUserSource }) => {
+    set(accessTokenAtom, accessToken);
 
-  try {
-    const data = await authService.getMe();
+    if (user?.mezonUserId) {
+      set(userAtom, toAuthUser(user));
+      return;
+    }
 
-    set(userAtom, {
-      id: data.sub ?? data.id ?? '',
-      email: data.email ?? '',
-      username: data.username ?? '',
-      avatar: data.avatar ?? null,
-    });
-  } catch {
-    set(accessTokenAtom, null);
-    set(userAtom, null);
+    try {
+      const data = await authService.getMe();
+      set(userAtom, toAuthUser(data));
+    } catch {
+      set(accessTokenAtom, null);
+      set(userAtom, null);
+    }
   }
-});
+);
 
 export const logoutAtom = atom(null, async (get, set) => {
   const token = get(accessTokenAtom);

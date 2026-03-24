@@ -16,6 +16,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     await import(`@mezon-tutors/shared/locales/${locale}/admin-tutor-applications.json`)
   ).default;
   const tutors = (await import(`@mezon-tutors/shared/locales/${locale}/tutors.json`)).default;
+  const myLessons = (await import(`@mezon-tutors/shared/locales/${locale}/my-lessons.json`)).default;
 
   return {
     locale,
@@ -25,6 +26,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       TutorProfile: tutorProfile,
       AdminTutorApplications: adminTutorApplications,
       Tutors: tutors,
+      MyLessons: myLessons,
     },
-  }
-})
+  };
+});
