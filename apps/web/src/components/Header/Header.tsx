@@ -210,7 +210,7 @@ export default function Header() {
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
               {user?.avatar ? (
-                <img src={user.avatar} alt={user.username} className={styles.avatar} />
+                <img src={user.avatar} alt={user.username ?? 'User avatar'} className={styles.avatar} />
               ) : (
                 <div className={styles.avatar}>
                   {user?.username?.substring(0, 2).toUpperCase() || 'U'}
