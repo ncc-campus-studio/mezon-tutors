@@ -5,8 +5,11 @@ import { ROUTES } from '@mezon-tutors/shared';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useMedia, XStack, YStack, Paragraph, H1, H2, Text } from 'tamagui';
+
 const STEP_KEYS = ['1', '2', '3'] as const;
 const HIGHLIGHT_KEYS = ['1', '2', '3'] as const;
+const STEP_BADGE_SIZE = 52;
+const STEP_ROW_PADDING_Y_DESKTOP = 8;
 
 function WalletIcon() {
   return (
@@ -48,6 +51,8 @@ function ArrowIcon() {
   );
 }
 
+const HIGHLIGHT_ICONS = [WalletIcon, ClockIcon, GrowthIcon] as const;
+
 export function BecomeTutorGuide() {
   const t = useTranslations('BecomeTutorGuide');
   const media = useMedia();
@@ -60,9 +65,8 @@ export function BecomeTutorGuide() {
     description: t(`steps.${key}.description`),
   }));
 
-  const highlightIcons = [<WalletIcon key="wallet" />, <ClockIcon key="clock" />, <GrowthIcon key="growth" />];
   const highlights = HIGHLIGHT_KEYS.map((key, index) => ({
-    icon: highlightIcons[index],
+    Icon: HIGHLIGHT_ICONS[index],
     title: t(`highlights.${key}.title`),
     description: t(`highlights.${key}.description`),
     tag: t(`highlights.${key}.tag`),
@@ -119,7 +123,7 @@ export function BecomeTutorGuide() {
             {!isCompact ? (
               <YStack
                 position="absolute"
-                top={26}
+                top={STEP_ROW_PADDING_Y_DESKTOP + STEP_BADGE_SIZE / 2}
                 left={52}
                 right={52}
                 height={1}
@@ -138,12 +142,12 @@ export function BecomeTutorGuide() {
                   flex={1}
                   alignItems={isCompact ? 'flex-start' : 'center'}
                   paddingHorizontal={isCompact ? 8 : 12}
-                  paddingVertical={isCompact ? 10 : 8}
+                  paddingVertical={isCompact ? 10 : STEP_ROW_PADDING_Y_DESKTOP}
                   gap="$2"
                 >
                   <XStack
-                    width={52}
-                    height={52}
+                    width={STEP_BADGE_SIZE}
+                    height={STEP_BADGE_SIZE}
                     borderRadius={14}
                     alignItems="center"
                     justifyContent="center"
@@ -206,6 +210,7 @@ export function BecomeTutorGuide() {
           <XStack flexDirection={isCompact ? 'column' : 'row'} gap="$2.5">
             {highlights.map((item, index) => {
               const isHovered = hoveredCard === index;
+              const Icon = item.Icon;
 
               return (
                 <YStack
@@ -228,8 +233,6 @@ export function BecomeTutorGuide() {
                   y={isHovered ? -2 : 0}
                   onMouseEnter={() => setHoveredCard(index)}
                   onMouseLeave={() => setHoveredCard(null)}
-                  onHoverIn={() => setHoveredCard(index)}
-                  onHoverOut={() => setHoveredCard(null)}
                 >
                   <YStack
                     position="absolute"
@@ -250,7 +253,7 @@ export function BecomeTutorGuide() {
                     backgroundColor={isHovered ? 'rgba(255,255,255,0.16)' : 'rgba(32, 107, 255, 0.12)'}
                   >
                     <Text color={isHovered ? '$myLessonsPrimaryButtonText' : '$myLessonsPrimaryButton'}>
-                      {item.icon}
+                      <Icon />
                     </Text>
                   </XStack>
 
