@@ -14,7 +14,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: yarn
+
+      - name: Enable Corepack and use project Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@4.11.0 --activate
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
