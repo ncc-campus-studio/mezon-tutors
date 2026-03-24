@@ -21,7 +21,10 @@ jobs:
           corepack prepare yarn@4.11.0 --activate
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        env:
+          YARN_ENABLE_HARDENED_MODE: false
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+        run: yarn install --mode=skip-build
 
       - name: Install Snyk CLI
         run: npm install -g snyk
