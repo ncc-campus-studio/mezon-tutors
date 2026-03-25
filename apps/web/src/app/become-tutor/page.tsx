@@ -1,9 +1,9 @@
 'use client';
 
 import { TutorProfileAboutScreen } from '@mezon-tutors/app';
+import { BecomeTutorGuideScreen } from '@mezon-tutors/app/features/become-tutor-guide/screen';
 import { isAuthenticatedAtom, isLoadingAtom } from '@mezon-tutors/app/store/auth.atom';
 import { useAtomValue } from 'jotai';
-import { BecomeTutorGuide } from './components/BecomeTutorGuide';
 
 export default function BecomeTutorPage() {
   const isAuthenticated = useAtomValue(isAuthenticatedAtom);
@@ -14,7 +14,7 @@ export default function BecomeTutorPage() {
   }
 
   if (!isAuthenticated) {
-    return <BecomeTutorGuide />;
+    return <BecomeTutorGuideScreen />;
   }
 
   return (
