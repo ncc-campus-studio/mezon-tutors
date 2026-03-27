@@ -48,10 +48,6 @@ export const tutorProfileApi = {
     return response.data
   },
 
-  getTutorDetail(id: string): Promise<TutorDetailDto> {
-    return apiClient.get<ApiResponse<TutorDetailDto>, TutorDetailDto>(`/tutor-profiles/${id}`)
-  },
-
   getTutorAbout(id: string): Promise<TutorAboutDto> {
     return apiClient.get<ApiResponse<TutorAboutDto>, TutorAboutDto>(`/tutor-profiles/${id}/about`)
   },
@@ -91,14 +87,6 @@ const useGetVerifiedTutors = (page: number, limit: number, filters: VerifiedTuto
     ),
     queryFn: () => tutorProfileApi.getVerifiedTutors(page, limit, filters),
     placeholderData: keepPreviousData,
-  })
-}
-
-const useGetTutorDetail = (id: string) => {
-  return useQuery({
-    queryKey: tutorProfileQueryKey.tutorDetail(id),
-    queryFn: () => tutorProfileApi.getTutorDetail(id),
-    enabled: !!id,
   })
 }
 
@@ -151,7 +139,6 @@ export function submitTutorProfile(payload: SubmitTutorProfileDto): Promise<bool
 
 export {
   useGetVerifiedTutors,
-  useGetTutorDetail,
   useGetTutorAbout,
   useGetTutorSchedule,
   useGetTutorReviews,
