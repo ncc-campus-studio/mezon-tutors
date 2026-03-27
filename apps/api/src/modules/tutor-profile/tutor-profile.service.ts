@@ -22,16 +22,19 @@ export class TutorProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createReview(tutorId: string, reviewerId: string, rating: number, comment: string): Promise<void> {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id: tutorId },
+      select: { ratingCount: true, ratingAverage: true },
+    })
+
+    if (!tutor) {
+      throw new NotFoundException(`Tutor with ID ${tutorId} not found`)
+    }
+
+    const newCount = tutor.ratingCount + 1
+    const newAverage = (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount
+
     await this.prisma.$transaction(async (tx) => {
-      const tutor = await tx.tutorProfile.findUnique({
-        where: { id: tutorId },
-        select: { ratingCount: true, ratingAverage: true },
-      })
-
-      if (!tutor) {
-        throw new NotFoundException(`Tutor with ID ${tutorId} not found`)
-      }
-
       await tx.tutorReview.create({
         data: {
           tutorId,
@@ -40,9 +43,6 @@ export class TutorProfileService {
           comment,
         },
       })
-
-      const newCount = tutor.ratingCount + 1
-      const newAverage = (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount
 
       await tx.tutorProfile.update({
         where: { id: tutorId },
