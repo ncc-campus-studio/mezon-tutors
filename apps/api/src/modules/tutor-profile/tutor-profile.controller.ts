@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards, NotFoundException } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import type { Request } from 'express'
 import type { AuthUserPayload } from '../auth/interfaces/auth.interfaces'
@@ -12,14 +12,30 @@ import type {
   TutorResourcesDto,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared'
+import { VerificationStatus } from '@mezon-tutors/db'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { TutorProfileService } from './tutor-profile.service'
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto'
+import { PrismaService } from '../../prisma/prisma.service'
 
 @Controller('tutor-profiles')
 @ApiTags('Tutor Profile')
 export class TutorProfileController {
-  constructor(private readonly tutorProfileService: TutorProfileService) {}
+  constructor(
+    private readonly tutorProfileService: TutorProfileService,
+    private readonly prisma: PrismaService
+  ) {}
+
+  private async validateVerifiedTutor(id: string): Promise<void> {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+      select: { verificationStatus: true },
+    })
+
+    if (!tutor || tutor.verificationStatus !== VerificationStatus.APPROVED) {
+      throw new NotFoundException(`Verified tutor with ID ${id} not found`)
+    }
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -37,22 +53,26 @@ export class TutorProfileController {
   }
 
   @Get(':id/about')
-  async getTutorAbout(@Param('id') id: string): Promise<TutorAboutDto> {
-    return this.tutorProfileService.getTutorAbout(id)
+  async getVerifiedTutorAbout(@Param('id') id: string): Promise<TutorAboutDto> {
+    await this.validateVerifiedTutor(id)
+    return this.tutorProfileService.getVerifiedTutorAbout(id)
   }
 
   @Get(':id/schedule')
-  async getTutorSchedule(@Param('id') id: string): Promise<TutorScheduleDto> {
-    return this.tutorProfileService.getTutorSchedule(id)
+  async getVerifiedTutorSchedule(@Param('id') id: string): Promise<TutorScheduleDto> {
+    await this.validateVerifiedTutor(id)
+    return this.tutorProfileService.getVerifiedTutorSchedule(id)
   }
 
   @Get(':id/reviews')
-  async getTutorReviews(@Param('id') id: string): Promise<TutorReviewsDto> {
-    return this.tutorProfileService.getTutorReviews(id)
+  async getVerifiedTutorReviews(@Param('id') id: string): Promise<TutorReviewsDto> {
+    await this.validateVerifiedTutor(id)
+    return this.tutorProfileService.getVerifiedTutorReviews(id)
   }
 
   @Get(':id/resources')
-  async getTutorResources(@Param('id') id: string): Promise<TutorResourcesDto> {
-    return this.tutorProfileService.getTutorResources(id)
+  async getVerifiedTutorResources(@Param('id') id: string): Promise<TutorResourcesDto> {
+    await this.validateVerifiedTutor(id)
+    return this.tutorProfileService.getVerifiedTutorResources(id)
   }
 }

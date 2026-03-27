@@ -5,10 +5,10 @@ import { useParams } from 'solito/navigation'
 import { useTranslations } from 'next-intl'
 import { Container, Empty, Screen, ScrollView, Text, XStack, YStack } from '@mezon-tutors/app/ui'
 import {
-  useGetTutorAbout,
-  useGetTutorSchedule,
-  useGetTutorReviews,
-  useGetTutorResources,
+  useGetVerifiedTutorAbout,
+  useGetVerifiedTutorSchedule,
+  useGetVerifiedTutorReviews,
+  useGetVerifiedTutorResources,
 } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
 import { TUTOR_DETAIL_DEFAULT_TAB } from '@mezon-tutors/shared'
 import { useMedia } from 'tamagui'
@@ -32,10 +32,10 @@ export function TutorDetailScreen() {
   const [activeTab, setActiveTab] = useState<TutorDetailTab>(TUTOR_DETAIL_DEFAULT_TAB)
   const isInvalidTutorId = !tutorId
 
-  const { data: aboutData, isLoading: isLoadingAbout, isError: isErrorAbout } = useGetTutorAbout(tutorId)
-  const { data: scheduleData, isLoading: isLoadingSchedule } = useGetTutorSchedule(tutorId, activeTab === 'schedule')
-  const { data: reviewsData, isLoading: isLoadingReviews } = useGetTutorReviews(tutorId, activeTab === 'reviews')
-  const { data: resourcesData, isLoading: isLoadingResources } = useGetTutorResources(tutorId, activeTab === 'resources')
+  const { data: aboutData, isLoading: isLoadingAbout, isError: isErrorAbout } = useGetVerifiedTutorAbout(tutorId)
+  const { data: scheduleData, isLoading: isLoadingSchedule } = useGetVerifiedTutorSchedule(tutorId, activeTab === 'schedule')
+  const { data: reviewsData, isLoading: isLoadingReviews } = useGetVerifiedTutorReviews(tutorId, activeTab === 'reviews')
+  const { data: resourcesData, isLoading: isLoadingResources } = useGetVerifiedTutorResources(tutorId, activeTab === 'resources')
 
   const shouldShowEmpty = isInvalidTutorId || isErrorAbout || (!isLoadingAbout && !aboutData)
   const isLoading = isLoadingAbout

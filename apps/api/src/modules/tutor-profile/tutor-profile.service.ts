@@ -22,24 +22,17 @@ import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
 export class TutorProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async updateTutorRating(tutorId: string): Promise<void> {
-    const aggregate = await this.prisma.tutorReview.aggregate({
-      where: { tutorId },
-      _count: { _all: true },
-      _avg: { rating: true },
-    })
-
-    await this.prisma.tutorProfile.update({
-      where: { id: tutorId },
-      data: {
-        ratingCount: aggregate._count._all,
-        ratingAverage: aggregate._avg.rating ?? 0,
-      },
-    })
-  }
-
   async createReview(tutorId: string, reviewerId: string, rating: number, comment: string): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      const tutor = await tx.tutorProfile.findUnique({
+        where: { id: tutorId },
+        select: { ratingCount: true, ratingAverage: true },
+      })
+
+      if (!tutor) {
+        throw new NotFoundException(`Tutor with ID ${tutorId} not found`)
+      }
+
       await tx.tutorReview.create({
         data: {
           tutorId,
@@ -49,17 +42,14 @@ export class TutorProfileService {
         },
       })
 
-      const aggregate = await tx.tutorReview.aggregate({
-        where: { tutorId },
-        _count: { _all: true },
-        _avg: { rating: true },
-      })
+      const newCount = tutor.ratingCount + 1
+      const newAverage = (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount
 
       await tx.tutorProfile.update({
         where: { id: tutorId },
         data: {
-          ratingCount: aggregate._count._all,
-          ratingAverage: aggregate._avg.rating ?? 0,
+          ratingCount: newCount,
+          ratingAverage: newAverage,
         },
       })
     })
@@ -343,19 +333,16 @@ export class TutorProfileService {
     }
   }
 
-  async getTutorAbout(id: string) {
-    const tutor = await this.prisma.tutorProfile.findFirst({
-      where: {
-        id,
-        verificationStatus: VerificationStatus.APPROVED,
-      },
+  async getVerifiedTutorAbout(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
       include: {
         languages: true,
       },
     })
 
     if (!tutor) {
-      throw new NotFoundException(`Verified tutor with ID ${id} not found`)
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
     }
 
     const bookedLessonsLast48h = await this.prisma.lesson.count({
@@ -378,21 +365,7 @@ export class TutorProfileService {
     }
   }
 
-  async getTutorSchedule(id: string) {
-    const tutor = await this.prisma.tutorProfile.findFirst({
-      where: {
-        id,
-        verificationStatus: VerificationStatus.APPROVED,
-      },
-      select: {
-        id: true,
-      },
-    })
-
-    if (!tutor) {
-      throw new NotFoundException(`Verified tutor with ID ${id} not found`)
-    }
-
+  async getVerifiedTutorSchedule(id: string) {
     const availability = await this.prisma.tutorAvailability.findMany({
       where: {
         tutorId: id,
@@ -411,12 +384,9 @@ export class TutorProfileService {
     }
   }
 
-  async getTutorReviews(id: string) {
-    const tutor = await this.prisma.tutorProfile.findFirst({
-      where: {
-        id,
-        verificationStatus: VerificationStatus.APPROVED,
-      },
+  async getVerifiedTutorReviews(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
       select: {
         id: true,
         ratingCount: true,
@@ -425,7 +395,7 @@ export class TutorProfileService {
     })
 
     if (!tutor) {
-      throw new NotFoundException(`Verified tutor with ID ${id} not found`)
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
     }
 
     const reviews = await this.prisma.tutorReview.findMany({
@@ -453,12 +423,9 @@ export class TutorProfileService {
     }
   }
 
-  async getTutorResources(id: string) {
-    const tutor = await this.prisma.tutorProfile.findFirst({
-      where: {
-        id,
-        verificationStatus: VerificationStatus.APPROVED,
-      },
+  async getVerifiedTutorResources(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
       select: {
         id: true,
         videoUrl: true,
@@ -466,7 +433,7 @@ export class TutorProfileService {
     })
 
     if (!tutor) {
-      throw new NotFoundException(`Verified tutor with ID ${id} not found`)
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
     }
 
     return {
