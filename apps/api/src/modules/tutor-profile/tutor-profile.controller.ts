@@ -5,7 +5,6 @@ import type { AuthUserPayload } from '../auth/interfaces/auth.interfaces'
 import type {
   PaginatedResponse,
   SubmitTutorProfileDto,
-  TutorDetailDto,
   TutorAboutDto,
   TutorScheduleDto,
   TutorReviewsDto,
