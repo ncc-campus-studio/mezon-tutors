@@ -16600,6 +16600,8 @@ __metadata:
     lint-staged: "npm:^15.2.10"
     react-hook-form: "npm:^7.71.1"
     react-native-svg: "npm:^15.15.3"
+    reflect-metadata: "npm:^0.2.2"
+    rxjs: "npm:^7.8.1"
     turbo: "npm:^1.13.4"
     typescript: "npm:~5.8.3"
     ultra-runner: "npm:^3.10.5"
