@@ -16,7 +16,7 @@
   "PreviewCard": {
     "viewSchedule": "Xem toàn bộ lịch dạy",
     "seeProfile": "Xem hồ sơ đầy đủ",
-    "popularThisWeek": "Phổ biến tuần này · {count} học viên đã đặt trong 24h qua"
+    "popularThisWeek": "Phổ biến tuần này - {count} học viên đã đặt trong 24h qua"
   },
   "TutorCard": {
     "professional": "CHUYÊN NGHIỆP",
@@ -83,5 +83,64 @@
     "noVideo": "Không có video giới thiệu",
     "invalidVideo": "Video không hợp lệ hoặc không được hỗ trợ",
     "close": "Đóng"
+  },
+  "Detail": {
+    "loading": "Đang tải chi tiết gia sư...",
+    "notFound": "Không tìm thấy hồ sơ gia sư",
+    "professional": "CHUYÊN NGHIỆP",
+    "defaultHeadline": "Gia sư kinh nghiệm",
+    "reviewsCount": "({count} đánh giá)",
+    "tabs": {
+      "about": "Giới thiệu",
+      "schedule": "Lịch dạy",
+      "reviews": "Đánh giá",
+      "resources": "Tài nguyên"
+    },
+    "aboutTitle": "Về tôi",
+    "experienceTitle": "Kinh nghiệm",
+    "motivationTitle": "Động lực dạy học",
+    "emptySection": "Chưa có thông tin.",
+    "scheduleTitle": "Lịch dạy",
+    "scheduleEmpty": "Chưa có lịch trống.",
+    "reviewsEmpty": "Chưa có đánh giá.",
+    "resourcesTitle": "Tài nguyên",
+    "resourcesEmpty": "Chưa có tài nguyên.",
+    "openResource": "Mở",
+    "perLesson": "/ 60 phút",
+    "bookTrial": "Đặt buổi học thử",
+    "sendMessage": "Gửi tin nhắn",
+    "bookedLast48h": "{count} buổi được đặt trong 48h qua",
+    "totalStudents": "{count} học viên",
+    "totalLessons": "{count} buổi đã dạy",
+    "videoIntroTitle": "Bạn có muốn nói như người bản xứ?",
+    "languagesTitle": "Ngôn ngữ tôi nói",
+    "scheduleHint": "Khung giờ hiển thị theo múi giờ của bạn: {timezone}",
+    "scheduleUnavailable": "Không có",
+    "weekdays": {
+      "sun": "CN",
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7"
+    },
+    "reviewMetrics": {
+      "reassurance": "Độ tin cậy",
+      "clarity": "Độ rõ ràng",
+      "progress": "Tiến bộ",
+      "preparation": "Chuẩn bị"
+    },
+    "resourceTypeVideo": "Video bài học",
+    "promoTitle": "Mới đến TutorMatch?",
+    "promoDescription": "Nhận ưu đãi 15% cho 10 buổi đầu với mã LEARN15.",
+    "promoAction": "Áp dụng ngay",
+    "reviewRecentLabel": "2 ngày trước",
+    "showAllReviews": "Xem tất cả {count} đánh giá",
+    "showLessReviews": "Thu gọn đánh giá",
+    "pagination": {
+      "previous": "Trước",
+      "next": "Sau"
+    }
   }
 }

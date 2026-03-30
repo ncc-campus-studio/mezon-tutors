@@ -1,6 +1,8 @@
-import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui';
-import { CompassIcon } from '@mezon-tutors/app/ui/icons';
+﻿import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui';
+import { CompassIcon, StarOutlineIcon } from '@mezon-tutors/app/ui/icons';
+import { ROUTES } from '@mezon-tutors/shared';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { Image, useMedia, useTheme } from 'tamagui';
 import type { TutorItem } from '../types';
 
@@ -16,7 +18,13 @@ function getInitials(name: string): string {
     .join('');
 }
 
-function TutorCard({ tutor }: { tutor: TutorItem }) {
+function TutorCard({
+  tutor,
+  onOpenTutor,
+}: {
+  tutor: TutorItem;
+  onOpenTutor: (tutorId: string) => void;
+}) {
   const t = useTranslations('MyLessons');
   const displayNextLesson = tutor.nextLessonLabel || t('panels.tutors.unscheduled');
   const avatarUri = tutor.avatar?.trim() || '';
@@ -34,7 +42,14 @@ function TutorCard({ tutor }: { tutor: TutorItem }) {
       justifyContent="space-between"
       flexWrap="wrap"
     >
-      <XStack alignItems="center" gap="$3" flex={1} minWidth={260}>
+      <XStack
+        alignItems="center"
+        gap="$3"
+        flex={1}
+        minWidth={260}
+        cursor="pointer"
+        onPress={() => onOpenTutor(tutor.id)}
+      >
         {avatarUri ? (
           <Image
             source={{ uri: avatarUri }}
@@ -92,9 +107,7 @@ function TutorCard({ tutor }: { tutor: TutorItem }) {
 
       <YStack marginLeft="auto" alignItems="flex-end" gap="$2.5">
         <XStack alignItems="center" gap="$1.5">
-          <Text color="$myLessonsLessonsRatingText" fontSize={13} fontWeight="700">
-            {'☆'}
-          </Text>
+          <StarOutlineIcon size={13} color="$myLessonsLessonsRatingText" />
           <Text color="$myLessonsLessonsPrimaryText" fontSize={13} fontWeight="700">
             {tutor.ratingAverage.toFixed(1)}
           </Text>
@@ -216,8 +229,13 @@ type MyLessonsTutorsPanelProps = {
 
 export function MyLessonsTutorsPanel({ tutors }: MyLessonsTutorsPanelProps) {
   const t = useTranslations('MyLessons');
+  const router = useRouter();
   const media = useMedia();
   const isCompact = media.md || media.sm || media.xs;
+
+  const handleOpenTutor = (tutorId: string) => {
+    router.push(ROUTES.TUTOR.DETAIL(tutorId));
+  };
 
   return (
     <YStack width="100%" maxWidth={1032} alignSelf="center" gap="$5">
@@ -247,6 +265,7 @@ export function MyLessonsTutorsPanel({ tutors }: MyLessonsTutorsPanelProps) {
           height={38}
           fontSize={12}
           fontWeight="700"
+          onPress={() => router.push(ROUTES.TUTOR.INDEX)}
         >
           {t('panels.tutors.findNewTutors')}
         </Button>
@@ -254,7 +273,11 @@ export function MyLessonsTutorsPanel({ tutors }: MyLessonsTutorsPanelProps) {
 
       <YStack gap="$3">
         {tutors.map((tutor) => (
-          <TutorCard key={tutor.id} tutor={tutor} />
+          <TutorCard 
+            key={tutor.id} 
+            tutor={tutor} 
+            onOpenTutor={handleOpenTutor} 
+          />
         ))}
       </YStack>
 

@@ -13,7 +13,12 @@ import { Button } from '@mezon-tutors/app/ui';
 
 const OAUTH_CHANNEL = 'mezon-oauth-result';
 
-export function LoginButton() {
+type LoginButtonProps = {
+  label?: string;
+  redirectTo?: string;
+};
+
+export function LoginButton({ label, redirectTo }: LoginButtonProps) {
   const t = useTranslations('Common.Header');
   const isAuthenticated = useAtomValue(isAuthenticatedAtom);
   const login = useSetAtom(loginAtom);
@@ -34,6 +39,7 @@ export function LoginButton() {
     }
 
     if (channelRef.current) {
+      channelRef.current.close();
       channelRef.current = null;
     }
   }, []);
@@ -57,6 +63,10 @@ export function LoginButton() {
 
         login({ accessToken: tokens.accessToken, user: loginUser });
         cleanup('success');
+
+        if (redirectTo && window.location.pathname !== redirectTo) {
+          window.location.assign(redirectTo);
+        }
         return;
       }
 
@@ -65,7 +75,7 @@ export function LoginButton() {
         cleanup('error');
       }
     },
-    [login, cleanup]
+    [login, cleanup, redirectTo]
   );
 
   useEffect(() => {
@@ -101,15 +111,13 @@ export function LoginButton() {
     if (typeof window === 'undefined') return;
 
     try {
-      const url = await getAuthUrl();
-
       const width = 800;
       const height = 500;
       const left = window.screenX + (window.outerWidth - width) / 2;
       const top = window.screenY + (window.outerHeight - height) / 2;
 
       const popup = window.open(
-        url,
+        'about:blank',
         'mezon-oauth',
         `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
       );
@@ -121,6 +129,9 @@ export function LoginButton() {
       }
 
       popupRef.current = popup;
+
+      const url = await getAuthUrl();
+      popup.location.href = url;
 
       intervalRef.current = window.setInterval(() => {
         if (!popup || popup.closed) {
@@ -141,9 +152,9 @@ export function LoginButton() {
       onPress={() => {
         void handleLoginClick();
       }}
-      className="flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800"
+      className="flex items-center gap-2 rounded-full border border-blue-400/60 bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_22px_rgba(29,102,242,0.45)] transition-all hover:bg-blue-500 hover:shadow-[0_10px_24px_rgba(29,102,242,0.55)]"
     >
-      {t('login')}
+      {label ?? t('login')}
     </Button>
   );
 }

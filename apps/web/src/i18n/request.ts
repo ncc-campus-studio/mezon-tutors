@@ -3,6 +3,29 @@ import { hasLocale } from 'next-intl';
 import { cookies } from 'next/headers';
 import { routing } from './routing';
 
+type MessageLoaderConfig = {
+  messageKey:
+    | 'Common'
+    | 'Admin'
+    | 'TutorProfile'
+    | 'AdminTutorApplications'
+    | 'Tutors'
+    | 'MyLessons'
+    | 'BecomeTutorGuide';
+  file: string;
+  pick?: (payload: Record<string, unknown>) => unknown;
+};
+
+const MESSAGE_LOADERS: MessageLoaderConfig[] = [
+  { messageKey: 'Common', file: 'common' },
+  { messageKey: 'Admin', file: 'admin', pick: (payload) => payload.Admin },
+  { messageKey: 'TutorProfile', file: 'tutor-profile' },
+  { messageKey: 'AdminTutorApplications', file: 'admin-tutor-applications' },
+  { messageKey: 'Tutors', file: 'tutors' },
+  { messageKey: 'MyLessons', file: 'my-lessons' },
+  { messageKey: 'BecomeTutorGuide', file: 'become-tutor-guide' },
+];
+
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const cookieLocale = (await cookies()).get('NEXT_LOCALE')?.value;
@@ -12,26 +35,19 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ? preferredLocale
     : routing.defaultLocale;
 
-  const common = (await import(`@mezon-tutors/shared/locales/${locale}/common.json`)).default;
-  const adminAll = (await import(`@mezon-tutors/shared/locales/${locale}/admin.json`)).default;
-  const tutorProfile = (
-    await import(`@mezon-tutors/shared/locales/${locale}/tutor-profile.json`)
-  ).default;
-  const adminTutorApplications = (
-    await import(`@mezon-tutors/shared/locales/${locale}/admin-tutor-applications.json`)
-  ).default;
-  const tutors = (await import(`@mezon-tutors/shared/locales/${locale}/tutors.json`)).default;
-  const myLessons = (await import(`@mezon-tutors/shared/locales/${locale}/my-lessons.json`)).default;
+  const messages = Object.fromEntries(
+    await Promise.all(
+      MESSAGE_LOADERS.map(async ({ messageKey, file, pick }) => {
+        const payload = (
+          await import(`@mezon-tutors/shared/locales/${locale}/${file}.json`)
+        ).default as Record<string, unknown>;
+        return [messageKey, pick ? pick(payload) : payload];
+      })
+    )
+  );
 
   return {
     locale,
-    messages: {
-      Common: common,
-      Admin: adminAll.Admin,
-      TutorProfile: tutorProfile,
-      AdminTutorApplications: adminTutorApplications,
-      Tutors: tutors,
-      MyLessons: myLessons,
-    },
+    messages,
   };
 });

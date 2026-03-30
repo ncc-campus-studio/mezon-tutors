@@ -62,6 +62,7 @@ model User {
   createdAt      DateTime       @default(now()) @map("created_at")
   tutorProfile   TutorProfile?
   studentLessons Lesson[]       @relation("StudentLessons")
+  tutorReviews   TutorReview[]  @relation("TutorReviewAuthor")
   refreshTokens  RefreshToken[]
 
   @@map("users")
@@ -98,12 +99,31 @@ model TutorProfile {
   languages    TutorLanguage[]
   availability TutorAvailability[]
   lessons      Lesson[]
+  reviews      TutorReview[]
 
   adminNotes            TutorAdminNote[]
   professionalDocuments ProfessionalDocument[]
   identityVerification  IdentityVerification?
 
   @@map("tutor_profiles")
+}
+
+/// Reviews from students for tutors
+model TutorReview {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId    String      @map("tutor_id") @db.Uuid
+  reviewerId String      @map("reviewer_id") @db.Uuid
+  rating     Int
+  comment    String      @db.Text
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  tutor    TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  reviewer User         @relation("TutorReviewAuthor", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([tutorId, createdAt])
+  @@index([reviewerId])
+  @@map("tutor_reviews")
 }
 
 /// Tutor admin notes

@@ -1,0 +1,37 @@
+{
+  "title": "How to get started",
+  "subtitle": "Your journey to becoming a global educator is simple and transparent.",
+  "loginNow": "Create a tutor profile now",
+  "ctaNote": "Sign in now to start your tutor application.",
+  "steps": {
+    "signUp": {
+      "title": "Sign up",
+      "description": "Create your profile, upload your credentials, and tell us about your expertise."
+    },
+    "getApproved": {
+      "title": "Get approved",
+      "description": "Our team reviews your profile to ensure quality and platform fit."
+    },
+    "startEarning": {
+      "title": "Start earning",
+      "description": "Accept lesson requests and start sharing your knowledge with students."
+    }
+  },
+  "highlights": {
+    "setOwnRate": {
+      "title": "Set your own rate",
+      "description": "Choose your hourly rate and change it anytime. You are in full control of your business and earnings.",
+      "tag": "Financial Freedom"
+    },
+    "teachAnytime": {
+      "title": "Teach anytime, anywhere",
+      "description": "Decide when and how many hours you want to teach. No minimum hours, no fixed schedule. Work from home or on the go.",
+      "tag": "Full Flexibility"
+    },
+    "growProfessionally": {
+      "title": "Grow professionally",
+      "description": "Access exclusive webinars, professional development resources, and a supportive community of world-class educators.",
+      "tag": "Career Support"
+    }
+  }
+}

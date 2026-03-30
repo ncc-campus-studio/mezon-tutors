@@ -9,8 +9,9 @@ import { TutorCard } from './components/TutorCard'
 import { Select } from '@mezon-tutors/app/ui'
 import { ETutorSortBy } from '@mezon-tutors/shared'
 import { useGetVerifiedTutors } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
+import { ROUTES } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useMedia, useTheme } from 'tamagui'
 
 const DEFAULT_LIMIT = 10
@@ -22,6 +23,7 @@ export function TutorsScreen() {
   const t = useTranslations('Tutors.Screen')
   const tFilter = useTranslations('Tutors.Filter')
   const pathname = usePathname()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const media = useMedia()
   const theme = useTheme()
@@ -98,6 +100,10 @@ export function TutorsScreen() {
     setHoverTutor(tutor)
     setHoverRect(el.getBoundingClientRect())
     setAnchorRect(listRef.current?.getBoundingClientRect?.() ?? null)
+  }
+
+  const handleTutorSelect = (tutor: VerifiedTutorProfileDto) => {
+    router.push(ROUTES.TUTOR.DETAIL(tutor.id))
   }
   const previewPosition = useMemo(() => {
     if (!hoverRect || !anchorRect) return null
@@ -187,6 +193,7 @@ export function TutorsScreen() {
                     <TutorCard
                       tutor={tutor}
                       onHover={showHoverPreview ? handleTutorCardHover : undefined}
+                      onSelect={handleTutorSelect}
                       isActive={hoverTutor?.id === tutor.id}
                     />
                   </YStack>

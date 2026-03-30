@@ -1,0 +1,37 @@
+{
+  "title": "Làm thế nào để bắt đầu",
+  "subtitle": "Hành trình trở thành gia sư toàn cầu rất đơn giản và minh bạch.",
+  "loginNow": "Tạo hồ sơ gia sư ngay bây giờ",
+  "ctaNote": "Đăng nhập ngay để bắt đầu đăng ký trở thành gia sư.",
+  "steps": {
+    "signUp": {
+      "title": "Đăng ký",
+      "description": "Tạo hồ sơ, tải lên chứng chỉ và chia sẻ kinh nghiệm chuyên môn của bạn."
+    },
+    "getApproved": {
+      "title": "Xét duyệt",
+      "description": "Đội ngũ của chúng tôi sẽ xét duyệt hồ sơ để đảm bảo chất lượng và độ phù hợp."
+    },
+    "startEarning": {
+      "title": "Bắt đầu kiếm thu nhập",
+      "description": "Nhận lịch dạy và bắt đầu chia sẻ kiến thức với học viên."
+    }
+  },
+  "highlights": {
+    "setOwnRate": {
+      "title": "Tự đặt mức phí",
+      "description": "Chọn mức phí theo giờ và thay đổi bất cứ lúc nào. Bạn toàn quyền quản lý lịch dạy và thu nhập.",
+      "tag": "Chủ động thu nhập"
+    },
+    "teachAnytime": {
+      "title": "Dạy mọi lúc, mọi nơi",
+      "description": "Quyết định thời gian và số giờ bạn muốn dạy. Không yêu cầu giờ tối thiểu, không lịch cố định.",
+      "tag": "Linh hoạt tối đa"
+    },
+    "growProfessionally": {
+      "title": "Phát triển chuyên môn",
+      "description": "Tiếp cận webinar độc quyền, tài nguyên phát triển nghề nghiệp và cộng đồng gia sư chất lượng cao.",
+      "tag": "Phát triển sự nghiệp"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   CountryLabel,
@@ -12,13 +12,47 @@ import {
   TutorLanguageDto,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared';
-import { Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
-import { toVerifiedTutorProfileDto } from './tutor-profile.mapper';
+import { LessonStatus, Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
+import dayjs from 'dayjs';
+import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
 
 @Injectable()
 export class TutorProfileService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createReview(tutorId: string, reviewerId: string, rating: number, comment: string): Promise<void> {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id: tutorId },
+      select: { ratingCount: true, ratingAverage: true },
+    })
+
+    if (!tutor) {
+      throw new NotFoundException(`Tutor with ID ${tutorId} not found`)
+    }
+
+    const newCount = tutor.ratingCount + 1
+    const newAverage = (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.tutorReview.create({
+        data: {
+          tutorId,
+          reviewerId,
+          rating,
+          comment,
+        },
+      })
+
+      await tx.tutorProfile.update({
+        where: { id: tutorId },
+        data: {
+          ratingCount: newCount,
+          ratingAverage: newAverage,
+        },
+      })
+    })
+  }
 
   async createByUserId(userId: string, dto: SubmitTutorProfileDto): Promise<void> {
     const user = await this.prisma.user.findUnique({
@@ -284,7 +318,7 @@ export class TutorProfileService {
 
     return {
       data: {
-        items: data.map(toVerifiedTutorProfileDto),
+        items: data.map((item) => toVerifiedTutorProfileDto(item)),
         meta: {
           page,
           limit,
@@ -295,6 +329,123 @@ export class TutorProfileService {
         },
       },
       error: null,
+    }
+  }
+
+  async getVerifiedTutorAbout(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+      include: {
+        languages: true,
+      },
+    })
+
+    if (!tutor) {
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
+    }
+
+    const bookedLessonsLast48h = await this.prisma.lesson.count({
+      where: {
+        tutorId: tutor.id,
+        status: LessonStatus.BOOKED,
+        startsAt: {
+          gte: dayjs().subtract(48, 'hour').toDate(),
+        },
+      },
+    })
+
+    return {
+      ...toVerifiedTutorProfileDto(tutor),
+      stats: {
+        bookedLessonsLast48h,
+        totalLessonsTaught: tutor.totalLessonsTaught,
+        totalStudents: tutor.totalStudents,
+      },
+    }
+  }
+
+  async getVerifiedTutorSchedule(id: string) {
+    const availability = await this.prisma.tutorAvailability.findMany({
+      where: {
+        tutorId: id,
+        isActive: true,
+      },
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+    })
+
+    return {
+      availability: availability.map((slot) => ({
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        isActive: slot.isActive,
+      })),
+    }
+  }
+
+  async getVerifiedTutorReviews(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        ratingCount: true,
+        ratingAverage: true,
+      },
+    })
+
+    if (!tutor) {
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
+    }
+
+    const reviews = await this.prisma.tutorReview.findMany({
+      where: {
+        tutorId: id,
+      },
+      include: {
+        reviewer: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    return {
+      reviews: reviews.map(toTutorReviewDto),
+      ratingCount: tutor.ratingCount,
+      ratingAverage: Number(tutor.ratingAverage),
+    }
+  }
+
+  async getVerifiedTutorResources(id: string) {
+    const tutor = await this.prisma.tutorProfile.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        videoUrl: true,
+      },
+    })
+
+    if (!tutor) {
+      throw new NotFoundException(`Tutor with ID ${id} not found`)
+    }
+
+    return {
+      resources: tutor.videoUrl
+        ? [
+            {
+              id: `${tutor.id}-intro-video`,
+              title: 'Intro video',
+              type: 'video' as const,
+              url: tutor.videoUrl,
+            },
+          ]
+        : [],
     }
   }
 }

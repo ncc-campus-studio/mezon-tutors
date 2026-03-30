@@ -9,6 +9,11 @@ import {
   ECountry,
   ESubject,
   VerifiedTutorProfileDto,
+  TutorDetailDto,
+  TutorAboutDto,
+  TutorScheduleDto,
+  TutorReviewsDto,
+  TutorResourcesDto,
   SubmitTutorProfileDto,
 } from '@mezon-tutors/shared'
 
@@ -43,6 +48,28 @@ export const tutorProfileApi = {
     return response.data
   },
 
+  getVerifiedTutorAbout(id: string): Promise<TutorAboutDto> {
+    return apiClient.get<ApiResponse<TutorAboutDto>, TutorAboutDto>(`/tutor-profiles/${id}/about`)
+  },
+
+  getVerifiedTutorSchedule(id: string): Promise<TutorScheduleDto> {
+    return apiClient.get<ApiResponse<TutorScheduleDto>, TutorScheduleDto>(
+      `/tutor-profiles/${id}/schedule`
+    )
+  },
+
+  getVerifiedTutorReviews(id: string): Promise<TutorReviewsDto> {
+    return apiClient.get<ApiResponse<TutorReviewsDto>, TutorReviewsDto>(
+      `/tutor-profiles/${id}/reviews`
+    )
+  },
+
+  getVerifiedTutorResources(id: string): Promise<TutorResourcesDto> {
+    return apiClient.get<ApiResponse<TutorResourcesDto>, TutorResourcesDto>(
+      `/tutor-profiles/${id}/resources`
+    )
+  },
+
   submit(payload: SubmitTutorProfileDto): Promise<boolean> {
     return apiClient.post<ApiResponse<boolean>, boolean>('/tutor-profiles', payload)
   },
@@ -63,6 +90,38 @@ const useGetVerifiedTutors = (page: number, limit: number, filters: VerifiedTuto
   })
 }
 
+const useGetVerifiedTutorAbout = (id: string) => {
+  return useQuery({
+    queryKey: tutorProfileQueryKey.tutorAbout(id),
+    queryFn: () => tutorProfileApi.getVerifiedTutorAbout(id),
+    enabled: !!id,
+  })
+}
+
+const useGetVerifiedTutorSchedule = (id: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: tutorProfileQueryKey.tutorSchedule(id),
+    queryFn: () => tutorProfileApi.getVerifiedTutorSchedule(id),
+    enabled: !!id && enabled,
+  })
+}
+
+const useGetVerifiedTutorReviews = (id: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: tutorProfileQueryKey.tutorReviews(id),
+    queryFn: () => tutorProfileApi.getVerifiedTutorReviews(id),
+    enabled: !!id && enabled,
+  })
+}
+
+const useGetVerifiedTutorResources = (id: string, enabled: boolean = false) => {
+  return useQuery({
+    queryKey: tutorProfileQueryKey.tutorResources(id),
+    queryFn: () => tutorProfileApi.getVerifiedTutorResources(id),
+    enabled: !!id && enabled,
+  })
+}
+
 const useSubmitTutorProfileMutation = () => {
   const queryClient = useQueryClient()
 
@@ -78,4 +137,11 @@ export function submitTutorProfile(payload: SubmitTutorProfileDto): Promise<bool
   return tutorProfileApi.submit(payload)
 }
 
-export { useGetVerifiedTutors, useSubmitTutorProfileMutation }
+export {
+  useGetVerifiedTutors,
+  useGetVerifiedTutorAbout,
+  useGetVerifiedTutorSchedule,
+  useGetVerifiedTutorReviews,
+  useGetVerifiedTutorResources,
+  useSubmitTutorProfileMutation,
+}

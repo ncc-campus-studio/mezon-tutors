@@ -1,17 +1,14 @@
 'use client'
 import Link from 'next/link'
 import styles from './Header.module.css'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { getAuthUrlAtom, isAuthenticatedAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
+import { useAtomValue } from 'jotai'
+import { isAuthenticatedAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton'
 import { LogoutButton } from '@mezon-tutors/app/components/auth/LogoutButton'
 import { ROUTES } from '@mezon-tutors/shared'
-import { useCallback, useEffect, useMemo, useState, type CSSProperties, type MouseEvent } from 'react'
-import { useLocale } from 'next-intl'
-import { useRouter } from 'next/navigation'
-import { useTheme } from 'tamagui'
-
-const POST_LOGIN_REDIRECT_KEY = 'post-login-redirect'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 function ThemeIcon({ isDark }: { isDark: boolean }) {
   if (isDark) {
@@ -54,14 +51,46 @@ function ThemeIcon({ isDark }: { isDark: boolean }) {
 }
 
 export default function Header() {
-  const router = useRouter()
   const locale = useLocale()
-  const theme = useTheme()
+  const t = useTranslations('Common.Header')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const isAuthenticated = useAtomValue(isAuthenticatedAtom)
   const user = useAtomValue(userAtom)
-  const getAuthUrl = useSetAtom(getAuthUrlAtom)
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light')
   const [showUserMenu, setShowUserMenu] = useState(false)
+
+  const headerThemeVarsByMode = {
+    light: {
+      '--header-bg-start': '#0b1628',
+      '--header-bg-end': '#101f3f',
+      '--header-border': 'rgba(255, 255, 255, 0.10)',
+      '--header-logo-text': '#ffffff',
+      '--header-nav-text': '#cbd5e1',
+      '--header-nav-hover': '#ffffff',
+      '--header-toggle-border': 'rgba(255, 255, 255, 0.22)',
+      '--header-toggle-bg': 'rgba(255, 255, 255, 0.04)',
+      '--header-toggle-text': '#e7eeff',
+      '--header-toggle-hover': 'rgba(255, 255, 255, 0.12)',
+      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.75)',
+      '--header-locale-active-text': '#ffffff',
+    } as CSSProperties,
+    dark: {
+      '--header-bg-start': '#050d19',
+      '--header-bg-end': '#0b1628',
+      '--header-border': 'rgba(148, 163, 184, 0.20)',
+      '--header-logo-text': '#f8fafc',
+      '--header-nav-text': '#cbd5e1',
+      '--header-nav-hover': '#ffffff',
+      '--header-toggle-border': 'rgba(148, 163, 184, 0.35)',
+      '--header-toggle-bg': 'rgba(15, 23, 42, 0.45)',
+      '--header-toggle-text': '#e2e8f0',
+      '--header-toggle-hover': 'rgba(148, 163, 184, 0.18)',
+      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.82)',
+      '--header-locale-active-text': '#ffffff',
+    } as CSSProperties,
+  }
 
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute('data-theme')
@@ -76,45 +105,10 @@ export default function Header() {
     }
   }, [])
 
-  const handleStartLogin = useCallback(async () => {
-    try {
-      const url = await getAuthUrl()
-      const width = 800
-      const height = 500
-      const left = window.screenX + (window.outerWidth - width) / 2
-      const top = window.screenY + (window.outerHeight - height) / 2
-
-      window.open(
-        url,
-        'mezon-oauth',
-        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-      )
-    } catch (error) {
-      console.error('[OAUTH] start login error:', error)
-    }
-  }, [getAuthUrl])
-
-  const handleBecomeTutorClick = useCallback(
-    (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-      if (isAuthenticated) return
-      event.preventDefault()
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, ROUTES.BECOME_TUTOR.INDEX)
-      }
-      void handleStartLogin()
-    },
-    [handleStartLogin, isAuthenticated]
-  )
-
   useEffect(() => {
-    if (!isAuthenticated || typeof window === 'undefined') return
-
-    const redirectPath = window.sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY)
-    if (!redirectPath) return
-
-    window.sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY)
-    router.push(redirectPath)
-  }, [isAuthenticated, router])
+    // Prevent accidental dropdown open right after auth state changes/navigation.
+    setShowUserMenu(false)
+  }, [isAuthenticated, pathname])
 
   const toggleTheme = useCallback(() => {
     const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
@@ -129,30 +123,15 @@ export default function Header() {
       // Persist selected locale for next-intl middleware/request config.
       document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`
 
-      // Re-render current route with the updated locale cookie.
+      const query = searchParams.toString()
+      const nextPath = query ? `${pathname}?${query}` : pathname
+      router.replace(nextPath)
       router.refresh()
     },
-    [locale, router]
+    [locale, pathname, router, searchParams]
   )
 
-  const headerCssVars = useMemo(
-    () =>
-      ({
-        '--header-bg-start': theme.webHeaderBgStart?.get(),
-        '--header-bg-end': theme.webHeaderBgEnd?.get(),
-        '--header-border': theme.webHeaderBorder?.get(),
-        '--header-logo-text': theme.webHeaderLogoText?.get(),
-        '--header-nav-text': theme.webHeaderNavText?.get(),
-        '--header-nav-hover': theme.webHeaderNavHover?.get(),
-        '--header-toggle-border': theme.webHeaderToggleBorder?.get(),
-        '--header-toggle-bg': theme.webHeaderToggleBg?.get(),
-        '--header-toggle-text': theme.webHeaderToggleText?.get(),
-        '--header-toggle-hover': theme.webHeaderToggleHover?.get(),
-        '--header-locale-active-bg': theme.webHeaderLocaleActiveBg?.get(),
-        '--header-locale-active-text': theme.webHeaderLocaleActiveText?.get(),
-      }) as CSSProperties,
-    [theme]
-  )
+  const headerCssVars = useMemo(() => headerThemeVarsByMode[themeMode], [themeMode])
 
   return (
     <header className={styles.header} style={headerCssVars}>
@@ -169,15 +148,9 @@ export default function Header() {
       </div>
 
       <nav className={styles.nav}>
-        <Link href={ROUTES.TUTOR.INDEX}>Find Tutor</Link>
-        <Link href={ROUTES.MY_LESSONS.INDEX}>My Lessons</Link>
-        {isAuthenticated ? (
-          <Link href={ROUTES.BECOME_TUTOR.INDEX}>Become a Tutor</Link>
-        ) : (
-          <button type="button" className={styles.navLinkButton} onClick={handleBecomeTutorClick}>
-            Become a Tutor
-          </button>
-        )}
+        <Link href={ROUTES.TUTOR.INDEX}>{t('findTutors')}</Link>
+        <Link href={ROUTES.MY_LESSONS.INDEX}>{t('myLessons')}</Link>
+        <Link href={ROUTES.BECOME_TUTOR.INDEX}>{t('becomeTutor')}</Link>
       </nav>
 
       <div className={styles.actions}>

@@ -194,3 +194,55 @@ export interface VerifiedTutorProfileDto {
   timezone: string
   languages: TutorLanguageDto[]
 }
+
+export interface TutorReviewDto {
+  id: string
+  reviewerId: string
+  reviewerName: string
+  reviewerAvatar: string
+  rating: number
+  comment: string
+  createdAt: string
+}
+
+export interface TutorResourceDto {
+  id: string
+  title: string
+  type: 'video'
+  url: string
+}
+
+export interface TutorDetailStatsDto {
+  bookedLessonsLast48h: number
+  totalLessonsTaught: number
+  totalStudents: number
+}
+
+export interface TutorDetailAvailabilitySlotDto extends TutorAvailabilitySlotDto {
+  isActive: boolean
+}
+
+export interface TutorDetailDto extends VerifiedTutorProfileDto {
+  availability: TutorDetailAvailabilitySlotDto[]
+  reviews: TutorReviewDto[]
+  resources: TutorResourceDto[]
+  stats: TutorDetailStatsDto
+}
+
+export interface TutorAboutDto extends VerifiedTutorProfileDto {
+  stats: TutorDetailStatsDto
+}
+
+export interface TutorScheduleDto {
+  availability: TutorDetailAvailabilitySlotDto[]
+}
+
+export interface TutorReviewsDto {
+  reviews: TutorReviewDto[]
+  ratingCount: number
+  ratingAverage: number
+}
+
+export interface TutorResourcesDto {
+  resources: TutorResourceDto[]
+}

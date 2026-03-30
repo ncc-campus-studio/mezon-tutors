@@ -1,6 +1,5 @@
 import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import { useTranslations } from 'next-intl';
-import { useMedia } from 'tamagui';
 import type { MyLessonsTab } from '../types';
 
 type MyLessonsHeaderProps = {
@@ -16,23 +15,27 @@ const TAB_ITEMS: { value: MyLessonsTab; label: string }[] = [
 
 export function MyLessonsHeader({ activeTab, onTabChange }: MyLessonsHeaderProps) {
   const t = useTranslations('MyLessons');
-  const media = useMedia();
-  const isCompact = media.md || media.sm || media.xs;
 
   return (
     <YStack gap="$4">
       <XStack
         width="100%"
         justifyContent="space-between"
-        alignItems={isCompact ? 'flex-start' : 'center'}
-        flexDirection={isCompact ? 'column' : 'row'}
+        alignItems="center"
+        flexDirection="row"
         gap="$3"
+        $xs={{ alignItems: 'flex-start', flexDirection: 'column' }}
+        $sm={{ alignItems: 'flex-start', flexDirection: 'column' }}
+        $md={{ alignItems: 'flex-start', flexDirection: 'column' }}
       >
         <Text
           color="$myLessonsHeaderTitle"
-          fontSize={isCompact ? 38 : 52}
-          lineHeight={isCompact ? 42 : 56}
+          fontSize={52}
+          lineHeight={56}
           fontWeight="800"
+          $xs={{ fontSize: 38, lineHeight: 42 }}
+          $sm={{ fontSize: 38, lineHeight: 42 }}
+          $md={{ fontSize: 38, lineHeight: 42 }}
         >
           {t('header.title')}
         </Text>
@@ -47,7 +50,10 @@ export function MyLessonsHeader({ activeTab, onTabChange }: MyLessonsHeaderProps
           }}
           color="$myLessonsPrimaryButtonText"
           paddingHorizontal="$5"
-          alignSelf={isCompact ? 'stretch' : 'auto'}
+          alignSelf="auto"
+          $xs={{ alignSelf: 'stretch' }}
+          $sm={{ alignSelf: 'stretch' }}
+          $md={{ alignSelf: 'stretch' }}
         >
           {t('header.scheduleLesson')}
         </Button>

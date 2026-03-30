@@ -22,10 +22,12 @@ function Tag({ children }: { children: React.ReactNode }) {
 export function TutorCard({
   tutor,
   onHover,
+  onSelect,
   isActive,
 }: {
   tutor: VerifiedTutorProfileDto
   onHover?: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void
+  onSelect?: (tutor: VerifiedTutorProfileDto) => void
   isActive?: boolean
 }) {
   const t = useTranslations('Tutors.TutorCard')
@@ -45,6 +47,7 @@ export function TutorCard({
       borderWidth={2}
       maxWidth="100%"
       overflow="hidden"
+      onPress={() => onSelect?.(tutor)}
       onMouseEnter={(e) => onHover?.(tutor, e.currentTarget as unknown as HTMLElement)}
     >
       <XStack
@@ -76,12 +79,12 @@ export function TutorCard({
               </Chip>
             )}
             <XStack alignItems="center" gap="$6" flexWrap="wrap" minWidth={0}>
-            <XStack alignItems="center" gap="$1" minWidth={0} flexShrink={1}>
-            <StarOutlineIcon />
-            <Text size="xl" fontWeight="700">
-              {tutor.ratingAverage}
+            <XStack alignItems="center" gap="$1" flexShrink={0}>
+            <StarOutlineIcon flexShrink={0} />
+            <Text size="xl" fontWeight="700" flexShrink={0}>
+              {tutor.ratingAverage.toFixed(2)}
             </Text>
-            <Text variant="muted">{t('reviews', { count: tutor.ratingCount })}</Text>
+            <Text variant="muted" flexShrink={0} whiteSpace="nowrap">{t('reviews', { count: tutor.ratingCount })}</Text>
           </XStack>
           <XStack alignItems="baseline" gap="$1">
             <Text size="xl" fontWeight="700">
@@ -158,21 +161,21 @@ export function TutorCard({
 
         <YStack
           gap="$3"
-          alignItems="flex-start"
-          minWidth={0}
-          flexShrink={1}
+          alignItems="flex-end"
+          justifyContent="flex-start"
+          minWidth={200}
+          flexShrink={0}
           width={isVertical ? '100%' : undefined}
-          maxWidth={isVertical ? '100%' : '35%'}
         >
           {!isVertical && (
-            <><XStack alignItems="center" gap="$1">
-            <StarOutlineIcon />
-            <Text size="xl" fontWeight="700">
-              {tutor.ratingAverage}
+            <><XStack alignItems="center" gap="$1" flexShrink={0} justifyContent="flex-end">
+            <StarOutlineIcon flexShrink={0} />
+            <Text size="xl" fontWeight="700" flexShrink={0}>
+              {tutor.ratingAverage.toFixed(2)}
             </Text>
-            <Text variant="muted">{t('reviews', { count: tutor.ratingCount })}</Text>
+            <Text variant="muted" flexShrink={0} whiteSpace="nowrap">{t('reviews', { count: tutor.ratingCount })}</Text>
           </XStack>
-          <XStack alignItems="baseline" gap="$1">
+          <XStack alignItems="baseline" gap="$1" justifyContent="flex-end">
             <Text size="xl" fontWeight="700">
               ${tutor.pricePerHour}
             </Text>
@@ -180,8 +183,8 @@ export function TutorCard({
           </XStack></>
           )}
 
-          <YStack gap="$3" width="100%">
-          <Button variant="primary" width="100%">
+          <YStack gap="$3" width="100%" minWidth={200}>
+          <Button variant="primary" width="100%" onPress={() => onSelect?.(tutor)}>
             {t('bookTrial')}
           </Button>
           <Button variant="outline" width="100%" size="sm">

@@ -12,6 +12,7 @@ export * from './features/tutor-profile/completion.screen';
 export * from './features/admin/tutor-detail/detail.screen';
 
 export * from './features/tutors/screen';
+export * from './features/tutors/detail.screen';
 
 export * from './features/admin/tutor-applications/screen';
 export * from './provider';

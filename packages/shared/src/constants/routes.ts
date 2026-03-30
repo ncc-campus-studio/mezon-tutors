@@ -9,6 +9,7 @@ export const ROUTES = {
   },
   TUTOR: {
     INDEX: '/tutors',
+    DETAIL: (id: string | number) => `/tutors/${id}`,
   },
   BECOME_TUTOR: {
     INDEX: '/become-tutor',
