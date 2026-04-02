@@ -17,7 +17,7 @@
     "@mezon-tutors/shared": "0.0.1",
     "@tamagui/config": "^1.144.2",
     "@tamagui/next-theme": "^1.144.2",
-    "next": "16.1.1",
+    "next": "16.1.7",
     "raf": "^3.4.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -34,6 +34,7 @@
     "autoprefixer": "^10.4.27",
     "next-compose-plugins": "^2.2.1",
     "next-transpile-modules": "^10.0.1",
+    "postcss": "^8.4.49",
     "tree-kill": "^1.2.2",
     "vitest": "^2.1.1"
   }
