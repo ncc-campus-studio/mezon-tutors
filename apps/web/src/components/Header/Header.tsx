@@ -121,7 +121,7 @@ export default function Header() {
       if (nextLocale === locale) return
 
       // Persist selected locale for next-intl middleware/request config.
-      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax`
+      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax; secure`
 
       const query = searchParams.toString()
       const nextPath = query ? `${pathname}?${query}` : pathname

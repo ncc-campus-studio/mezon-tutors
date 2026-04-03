@@ -1,0 +1,19 @@
+name: Securox Security Scan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  securox-scan:
+    name: Securox Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Securox Scanner
+        uses: duy6019/securox-tool@main
+        with:
+          fail-on: 'none'
+          format: 'terminal'
+          targetPath: '.'
