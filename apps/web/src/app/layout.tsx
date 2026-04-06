@@ -6,6 +6,9 @@ import { AppProviders } from './providers';
 import AuthInitializer from '@mezon-tutors/app/components/AuthInitializer';
 import { DEFAULT_THEME } from '@mezon-tutors/app';
 import { getLocale } from 'next-intl/server';
+import { hasLocale } from 'next-intl';
+import { cookies } from 'next/headers';
+import { routing } from 'src/i18n/routing';
 import Header from 'src/components/Header/Header';
 import Footer from 'src/components/Footer/Footer';
 
@@ -30,7 +33,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
+  const requestedLocale = await getLocale();
+  const cookieLocale = (await cookies()).get('NEXT_LOCALE')?.value;
+  const preferredLocale = cookieLocale ?? requestedLocale;
+  const locale = hasLocale(routing.locales, preferredLocale)
+    ? preferredLocale
+    : routing.defaultLocale;
 
   return (
     <html

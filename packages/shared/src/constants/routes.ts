@@ -30,4 +30,8 @@ export const ROUTES = {
   MY_LESSONS: {
     INDEX: '/my-lessons',
   },
+  DASHBOARD: {
+    INDEX: '/dashboard',
+    MY_LESSONS: '/dashboard/my-lessons',
+  },
 } as const;

@@ -13,7 +13,7 @@ import {
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared';
 import { LessonStatus, Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
-import dayjs from 'dayjs';
+import dayjs = require('dayjs');
 import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
 
