@@ -1,21 +1,19 @@
-'use client';
-
+import type { ComponentType } from 'react';
 import { YStack } from '@mezon-tutors/app/ui';
 import { themes } from '@mezon-tutors/app/theme/theme';
 import { useTranslations } from 'next-intl';
 import { useThemeName } from 'tamagui';
 import type { FooterSocialConfig } from '@mezon-tutors/shared';
-import { FOOTER_SOCIAL_ICON_COMPONENTS } from './constants';
 
 type FooterSocialButtonProps = {
   social: FooterSocialConfig;
+  Icon: ComponentType<{ color?: string; width?: number; height?: number; 'aria-label'?: string }>;
 };
 
-export default function FooterSocialButton({ social }: FooterSocialButtonProps) {
+export default function FooterSocialButton({ social, Icon }: FooterSocialButtonProps) {
   const t = useTranslations('Common.Footer');
   const themeName = useThemeName();
   const activeTheme = themeName === 'dark' ? themes.dark : themes.light;
-  const Icon = FOOTER_SOCIAL_ICON_COMPONENTS[social.iconKey];
 
   return (
     <YStack

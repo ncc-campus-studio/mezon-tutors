@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { Text } from '@mezon-tutors/app/ui'
 

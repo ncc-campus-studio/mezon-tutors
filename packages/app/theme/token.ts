@@ -50,6 +50,8 @@ export const tokens = createTokens({
     appHomeFeatureCardText: '#B8C5D9',
     appHomeFeatureIconBackground: '#1A3A7D',
     appHomeFeatureIconBorder: '#2F5A9E',
+    appHomeFeatureIconColor: '#1D66F2',
+    appHomeFeatureIconPrimary: '#FFFFFF',
     appHomeFeatureExploreBorder: '#2F5A9E',
     appHomeFeatureExploreBackground: 'rgba(18, 83, 213, 0.1)',
     appHomeStatsBackground: '#1253D5',

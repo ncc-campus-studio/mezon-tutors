@@ -1,5 +1,3 @@
-'use client';
-
 import { useTranslations } from 'next-intl';
 import { Text, YStack, XStack } from '@mezon-tutors/app/ui';
 import { SeamlessInstantMessagingIcon, SeamlessVirtualClassroomIcon } from '@mezon-tutors/app/ui/icons';

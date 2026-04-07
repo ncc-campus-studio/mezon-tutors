@@ -1,5 +1,3 @@
-'use client';
-
 import { useTranslations } from 'next-intl';
 import { Text, YStack } from '@mezon-tutors/app/ui';
 import {
@@ -8,6 +6,7 @@ import {
   FeatureLearnViaMezonIcon,
 } from '@mezon-tutors/app/ui/icons';
 import { HomeFeatureItem, HOME_FEATURE_ICON_COMPONENTS } from '@mezon-tutors/shared';
+import { useTheme } from 'tamagui';
 
 type HomeFeatureCardProps = {
   feature: HomeFeatureItem;
@@ -22,6 +21,7 @@ const HOME_FEATURE_ICON_REGISTRY = {
 
 export default function HomeFeatureCard({ feature, isCompact = false }: HomeFeatureCardProps) {
   const t = useTranslations('Home.Features');
+  const theme = useTheme();
   const iconName = HOME_FEATURE_ICON_COMPONENTS[feature.iconKey];
   const Icon = HOME_FEATURE_ICON_REGISTRY[iconName];
 
@@ -47,7 +47,13 @@ export default function HomeFeatureCard({ feature, isCompact = false }: HomeFeat
         marginBottom="$homeFeatureIconMargin"
         className="feature-icon-wrapper"
       >
-        <Icon width={96} height={96} aria-label={t(feature.titleKey)} />
+        <Icon 
+          width={96} 
+          height={96}
+          color={theme.homeFeatureIconCircle?.get()}
+          primary={theme.homeFeatureIconGlyph?.get()}
+          aria-label={t(feature.titleKey)} 
+        />
       </YStack>
 
       <YStack flex={1} width="100%">

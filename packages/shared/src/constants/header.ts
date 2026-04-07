@@ -2,7 +2,7 @@ import { ROUTES } from './routes';
 
 export const HEADER_NAV = [
   { labelKey: 'findTutors', href: ROUTES.TUTOR.INDEX },
-  { labelKey: 'myLessons', href: ROUTES.DASHBOARD.MY_LESSONS },
+  { labelKey: 'myLessons', href: ROUTES.MY_LESSONS.INDEX },
   { labelKey: 'becomeTutor', href: ROUTES.BECOME_TUTOR.INDEX },
 ] as const;
 

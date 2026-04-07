@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { Text, YStack } from '@mezon-tutors/app/ui';
 import { useTranslations } from 'next-intl';

@@ -4,9 +4,14 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ROUTES, FOOTER_COLUMNS, FOOTER_SOCIALS } from '@mezon-tutors/shared';
 import { XStack, YStack, Text, useMedia } from '@mezon-tutors/app/ui';
-import { LogoIcon } from '@mezon-tutors/app/ui/icons';
+import { AtSignIcon, GlobeIcon, LogoIcon } from '@mezon-tutors/app/ui/icons';
 import FooterSocialButton from './FooterSocialButton';
 import FooterLinkColumn from './FooterLinkColumn';
+
+const FOOTER_SOCIAL_ICON_COMPONENTS = {
+  globe: GlobeIcon,
+  atSign: AtSignIcon,
+} as const;
 
 export default function Footer() {
   const t = useTranslations('Common.Footer');
@@ -47,7 +52,11 @@ export default function Footer() {
 
           <XStack gap="$2.5">
             {FOOTER_SOCIALS.map((social) => (
-              <FooterSocialButton key={social.iconKey} social={social} />
+              <FooterSocialButton
+                key={social.iconKey}
+                social={social}
+                Icon={FOOTER_SOCIAL_ICON_COMPONENTS[social.iconKey]}
+              />
             ))}
           </XStack>
         </YStack>

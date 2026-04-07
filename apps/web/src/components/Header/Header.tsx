@@ -27,10 +27,6 @@ export default function Header() {
   const themeMode: 'light' | 'dark' = themeName === 'dark' ? 'dark' : 'light'
   const headerTheme = themeMode === 'dark' ? themes.dark : themes.light
 
-  const goToDashboard = useCallback(() => {
-    router.push(ROUTES.DASHBOARD.INDEX)
-  }, [router])
-
   const toggleTheme = useCallback(() => {
     const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
     window.dispatchEvent(new CustomEvent('app-theme-change', { detail: nextTheme }))
@@ -115,47 +111,26 @@ export default function Header() {
 
         <HeaderThemeToggle isDark={themeMode === 'dark'} onToggleAction={toggleTheme} />
 
-        {isAuthenticated ? (
-          <Button
-            onPress={goToDashboard}
+        {isAuthenticated && user?.avatar ? (
+          <XStack
             borderWidth={1}
             borderColor="$myLessonsTopNavBorder"
             borderRadius={999}
             backgroundColor="transparent"
             padding={4}
-            style={{ cursor: 'pointer', transition: 'all 220ms cubic-bezier(0.22,1,0.36,1)' }}
-            hoverStyle={{ backgroundColor: '$myLessonsSwitcherBackground', borderColor: '$myLessonsPrimaryButton', y: -1 }}
           >
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.username ?? 'User avatar'}
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '999px',
-                  objectFit: 'cover',
-                  border: `2px solid ${headerTheme.webHeaderAvatarBorder}`,
-                }}
-              />
-            ) : (
-              <XStack
-                width={36}
-                height={36}
-                borderRadius={999}
-                alignItems="center"
-                justifyContent="center"
-                style={{
-                  background: `linear-gradient(135deg, ${headerTheme.webHeaderAvatarGradientStart} 0%, ${headerTheme.webHeaderAvatarGradientEnd} 100%)`,
-                  border: `2px solid ${headerTheme.webHeaderAvatarBorder}`,
-                }}
-              >
-                <Text color="$myLessonsPrimaryButtonText" fontSize={14} fontWeight="600" lineHeight={20}>
-                  {user?.username?.substring(0, 2).toUpperCase() || 'U'}
-                </Text>
-              </XStack>
-            )}
-          </Button>
+            <img
+              src={user.avatar}
+              alt={user.username ?? 'User avatar'}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '999px',
+                objectFit: 'cover',
+                border: `2px solid ${headerTheme.webHeaderAvatarBorder}`,
+              }}
+            />
+          </XStack>
         ) : null}
       </XStack>
     </XStack>

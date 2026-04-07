@@ -1,5 +1,3 @@
-'use client'
-
 import { HEADER_LOCALES } from '@mezon-tutors/shared'
 import { Button, Text, XStack } from '@mezon-tutors/app/ui'
 import { WorldIcon } from '@mezon-tutors/app/ui/icons'

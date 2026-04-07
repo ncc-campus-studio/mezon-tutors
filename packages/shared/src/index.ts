@@ -23,7 +23,6 @@ export * from './constants/urls';
 export * from './constants/home';
 export * from './constants/footer';
 export * from './constants/header';
-export * from './constants/dashboard';
 
 // Utils
 export * from './utils/utils';
