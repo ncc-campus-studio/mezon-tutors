@@ -1,0 +1,57 @@
+{
+  "Home": {
+    "Hero": {
+      "badge": "Học trực tuyến dễ dàng",
+      "title": "Học cùng",
+      "titleHighlight": "Gia sư chuyên môn",
+      "description": "Kết nối với gia sư uy tín, cá nhân hóa lộ trình học và học theo tốc độ phù hợp của bạn.",
+      "startNow": "Bắt đầu ngay",
+      "watchDemo": "Xem demo",
+      "match": "Phù hợp",
+      "profile": "Hồ sơ",
+      "connect": "Kết nối"
+    },
+    "Features": {
+      "title": "Học tập dành cho người bận rộn",
+      "description": "Lịch học linh hoạt, công cụ thực tiễn và mô hình dạy học phù hợp nhịp sống hiện đại.",
+      "exploreAll": "Xem tất cả",
+      "eveningClasses": {
+        "title": "Lớp buổi tối",
+        "description": "Học sau giờ làm với các buổi học phù hợp lịch sinh hoạt buổi tối."
+      },
+      "flexibleWeekends": {
+        "title": "Cuối tuần linh hoạt",
+        "description": "Đặt lịch học cuối tuần khi bạn có nhiều thời gian hơn."
+      },
+      "learnViaMezon": {
+        "title": "Học qua Mezon",
+        "description": "Tham gia lớp học trên một nền tảng với chat, tài liệu và hỗ trợ từ gia sư."
+      }
+    },
+    "BecomeTutor": {
+      "badgeAmount": "+15M VND",
+      "badgeLabel": "Thu nhập trung bình hàng tháng",
+      "title": "Tìm gia sư cho",
+      "titleHighlight": "Mọi mục tiêu học tập",
+      "description": "Từ luyện thi đến nâng cao kỹ năng giao tiếp, chọn gia sư phù hợp mục tiêu và lịch học của bạn.",
+      "benefits": {
+        "payment": "Giá minh bạch và thanh toán an toàn",
+        "tools": "Công cụ tương tác giúp buổi học hiệu quả",
+        "schedule": "Lịch học linh hoạt, dễ dàng đổi lịch"
+      },
+      "registerButton": "Đăng ký làm gia sư"
+    },
+    "Seamless": {
+      "title": "Trải nghiệm học tập liền mạch",
+      "description": "Mọi thứ bạn cần để học hiệu quả trong một môi trường đồng bộ.",
+      "virtualClassroom": {
+        "title": "Lớp học trực tuyến",
+        "description": "Học trực tiếp với bảng viết, tài liệu và hướng dẫn từ gia sư theo thời gian thực."
+      },
+      "instantMessaging": {
+        "title": "Nhắn tin tức thời",
+        "description": "Trao đổi nhanh với gia sư để nhận phản hồi và hỗ trợ học tập."
+      }
+    }
+  }
+}
