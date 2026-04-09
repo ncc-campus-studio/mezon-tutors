@@ -12,7 +12,8 @@ type MessageLoaderConfig = {
     | 'Tutors'
     | 'MyLessons'
     | 'BecomeTutorGuide'
-    | 'Home';
+    | 'Home'
+    | 'Dashboard';
   file: string;
   pick?: (payload: Record<string, unknown>) => unknown;
 };
@@ -26,6 +27,7 @@ const MESSAGE_LOADERS: MessageLoaderConfig[] = [
   { messageKey: 'MyLessons', file: 'my-lessons' },
   { messageKey: 'BecomeTutorGuide', file: 'become-tutor-guide' },
   { messageKey: 'Home', file: 'home', pick: (payload) => payload.Home },
+  { messageKey: 'Dashboard', file: 'dashboard', pick: (payload) => payload.Dashboard },
 ];
 
 export default getRequestConfig(async ({ requestLocale }) => {

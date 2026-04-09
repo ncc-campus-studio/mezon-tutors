@@ -36,7 +36,6 @@ export default function Header() {
     (nextLocale: 'en' | 'vi') => {
       if (nextLocale === locale) return
 
-      // Persist selected locale for next-intl middleware/request config.
       const isHttps = window.location.protocol === 'https:'
       document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax${isHttps ? '; secure' : ''}`
 
@@ -52,6 +51,10 @@ export default function Header() {
     const nextLocale = locale === 'en' ? 'vi' : 'en'
     void switchLocale(nextLocale)
   }, [locale, switchLocale])
+
+  const goToDashboard = useCallback(() => {
+    router.push(ROUTES.DASHBOARD.INDEX)
+  }, [router])
 
   return (
     <XStack
@@ -118,6 +121,8 @@ export default function Header() {
             borderRadius={999}
             backgroundColor="transparent"
             padding={4}
+            cursor="pointer"
+            onPress={goToDashboard}
           >
             <img
               src={user.avatar}
@@ -128,6 +133,7 @@ export default function Header() {
                 borderRadius: '999px',
                 objectFit: 'cover',
                 border: `2px solid ${headerTheme.webHeaderAvatarBorder}`,
+                cursor: 'pointer',
               }}
             />
           </XStack>

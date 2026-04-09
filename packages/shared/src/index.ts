@@ -23,6 +23,9 @@ export * from './constants/urls';
 export * from './constants/home';
 export * from './constants/footer';
 export * from './constants/header';
+export * from './constants/dashboard';
+export * from './constants/dashboard-booking-request';
+export * from './constants/calendar';
 
 // Utils
 export * from './utils/utils';
