@@ -16,3 +16,5 @@ export * from './features/tutors/detail.screen';
 
 export * from './features/admin/tutor-applications/screen';
 export * from './provider';
+
+export * from './features/calendar';
