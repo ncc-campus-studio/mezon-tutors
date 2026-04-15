@@ -7,6 +7,8 @@ import {
 } from '@mezon-tutors/app/services'
 import {
   buildTimeSlotsForDay,
+  ETrialLessonBookingPaymentStatus,
+  ETrialLessonBookingStatus,
   jsDayToDbDayOfWeek,
   parseYyyyMmDdToLocalDate,
   timeToMinutes,
@@ -26,10 +28,19 @@ export type TrialBookingPayload = {
   time: TrialTimeSlot
 }
 
+export type TrialResumePaymentPayload = {
+  tutorId: string
+  startAt: string
+  durationMinutes: number
+  dayOfWeek: number
+  resumePayment: true
+}
+
 export interface TrialBookingModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onConfirm?: (payload: TrialBookingPayload) => void | Promise<void>
+  onResumePayment?: (payload: TrialResumePaymentPayload) => void | Promise<void>
   tutor: {
     id: string
     name: string
@@ -51,6 +62,7 @@ export function TrialBookingModal({
   open,
   onOpenChange,
   onConfirm,
+  onResumePayment,
   tutor,
 }: TrialBookingModalProps) {
   const t = useTranslations('Tutors.TrialBookingModal')
@@ -76,17 +88,25 @@ export function TrialBookingModal({
     [theme]
   )
 
-  const periodLabelKeyByPeriod: Record<EPeriod, 'period.morning' | 'period.noon' | 'period.afternoon' | 'period.evening'> =
-    {
-      [EPeriod.MORNING]: 'period.morning',
-      [EPeriod.NOON]: 'period.noon',
-      [EPeriod.AFTERNOON]: 'period.afternoon',
-      [EPeriod.EVENING]: 'period.evening',
-    }
+  const periodLabelKeyByPeriod: Record<
+    EPeriod,
+    'period.morning' | 'period.noon' | 'period.afternoon' | 'period.evening'
+  > = {
+    [EPeriod.MORNING]: 'period.morning',
+    [EPeriod.NOON]: 'period.noon',
+    [EPeriod.AFTERNOON]: 'period.afternoon',
+    [EPeriod.EVENING]: 'period.evening',
+  }
 
   const weekdayLabelKeyByWeekday: Record<
     EDayOfWeek,
-    'weekday.mon' | 'weekday.tue' | 'weekday.wed' | 'weekday.thu' | 'weekday.fri' | 'weekday.sat' | 'weekday.sun'
+    | 'weekday.mon'
+    | 'weekday.tue'
+    | 'weekday.wed'
+    | 'weekday.thu'
+    | 'weekday.fri'
+    | 'weekday.sat'
+    | 'weekday.sun'
   > = {
     [EDayOfWeek.MON]: 'weekday.mon',
     [EDayOfWeek.TUE]: 'weekday.tue',
@@ -138,13 +158,10 @@ export function TrialBookingModal({
     return `${y}-${m}-${d}`
   }, [selectedDate])
 
-  const dbDayOfWeek = useMemo(
-    () => {
-      const fullDate = parseYyyyMmDdToLocalDate(selectedDate.id)
-      return jsDayToDbDayOfWeek(fullDate.getDay())
-    },
-    [selectedDate]
-  )
+  const dbDayOfWeek = useMemo(() => {
+    const fullDate = parseYyyyMmDdToLocalDate(selectedDate.id)
+    return jsDayToDbDayOfWeek(fullDate.getDay())
+  }, [selectedDate])
 
   const timeSlots = useMemo(() => {
     const rows = schedule?.availability ?? []
@@ -159,14 +176,35 @@ export function TrialBookingModal({
   const { data: alreadyBookedResponse, isPending: isAlreadyBookedPending } =
     useGetAlreadyBookedTrialLesson(tutor.id, open && Boolean(tutor.id) && isAuthenticated)
   const alreadyBookedStatus = alreadyBookedResponse?.status ?? null
+  const paymentStatus = alreadyBookedResponse?.paymentStatus ?? null
   const isAlreadyBooked = Boolean(alreadyBookedResponse?.hasBooked)
+
+  const canResumePendingPayment = useMemo(
+    () =>
+      isAlreadyBooked &&
+      paymentStatus === ETrialLessonBookingPaymentStatus.PENDING &&
+      Boolean(alreadyBookedResponse?.startAt) &&
+      typeof alreadyBookedResponse?.durationMinutes === 'number',
+    [
+      alreadyBookedResponse?.durationMinutes,
+      alreadyBookedResponse?.startAt,
+      isAlreadyBooked,
+      paymentStatus,
+    ]
+  )
 
   const confirmButtonLabel = useMemo(() => {
     if (!isAlreadyBooked) {
       return t('confirmBooking')
     }
-    return alreadyBookedStatus === 'PENDING' ? t('requestSentWait') : t('alreadyBooked')
-  }, [alreadyBookedStatus, isAlreadyBooked, t])
+    if (canResumePendingPayment) {
+      return t('continueToPayment')
+    }
+    if (alreadyBookedStatus === ETrialLessonBookingStatus.PENDING) {
+      return t('requestSentWait')
+    }
+    return t('alreadyBooked')
+  }, [alreadyBookedStatus, canResumePendingPayment, isAlreadyBooked, t])
 
   const selectedTime = useMemo(
     () => timeSlots.find((slot) => slot.id === timeId),
@@ -262,9 +300,12 @@ export function TrialBookingModal({
   }, [timeSlots])
 
   const dateRows = useMemo(() => {
-    const rows: (typeof calendarDates[number] | null)[][] = []
+    const rows: ((typeof calendarDates)[number] | null)[][] = []
     for (let i = 0; i < calendarDates.length; i += DATE_COLUMNS) {
-      const row: (typeof calendarDates[number] | null)[] = calendarDates.slice(i, i + DATE_COLUMNS)
+      const row: ((typeof calendarDates)[number] | null)[] = calendarDates.slice(
+        i,
+        i + DATE_COLUMNS
+      )
       while (row.length < DATE_COLUMNS) row.push(null)
       rows.push(row)
     }
@@ -282,6 +323,29 @@ export function TrialBookingModal({
   }, [calendarDates, dateId])
 
   const handleConfirm = async () => {
+    if (
+      canResumePendingPayment &&
+      alreadyBookedResponse?.startAt &&
+      alreadyBookedResponse.durationMinutes != null
+    ) {
+      if (!onResumePayment) return
+      const datePart = alreadyBookedResponse.startAt.includes('T')
+        ? (alreadyBookedResponse.startAt.split('T')[0] ?? '')
+        : alreadyBookedResponse.startAt.slice(0, 10)
+      const fullDate = parseYyyyMmDdToLocalDate(datePart)
+      const dayOfWeekForResume = jsDayToDbDayOfWeek(fullDate.getDay())
+      await Promise.resolve(
+        onResumePayment({
+          tutorId: tutor.id,
+          startAt: alreadyBookedResponse.startAt,
+          durationMinutes: alreadyBookedResponse.durationMinutes,
+          dayOfWeek: dayOfWeekForResume,
+          resumePayment: true,
+        })
+      )
+      onOpenChange(false)
+      return
+    }
     if (!onConfirm || !selectedTime) return
     const startAt = `${selectedDateString}T${selectedTime.startTime}:00Z`
     await onConfirm({
@@ -301,7 +365,10 @@ export function TrialBookingModal({
   }
 
   const isConfirmDisabled =
-    isAvailabilityPending || isAlreadyBookedPending || isAlreadyBooked || !selectedTime
+    isAvailabilityPending ||
+    isAlreadyBookedPending ||
+    (canResumePendingPayment && !onResumePayment) ||
+    (!canResumePendingPayment && (isAlreadyBooked || !selectedTime))
 
   return (
     <Dialog modal open={open} onOpenChange={onOpenChange}>
@@ -373,10 +440,17 @@ export function TrialBookingModal({
                     {tutor.name}
                   </Text>
                   <Text color="$trialBookingMetaText">
-                    {t('expertTutorTitle', { subject: tutor.title })} - ${tutor.pricePerHour}{t('perHour')}
+                    {t('expertTutorTitle', { subject: tutor.title })} - ${tutor.pricePerHour}
+                    {t('perHour')}
                   </Text>
                 </YStack>
               </XStack>
+
+              {canResumePendingPayment ? (
+                <Text size="sm" color="#FBBF24" fontWeight="600">
+                  {t('paymentPendingNotice')}
+                </Text>
+              ) : null}
 
               <YStack gap="$2">
                 <Text fontWeight="700" letterSpacing={1} color="$trialBookingSectionLabel">
@@ -399,7 +473,11 @@ export function TrialBookingModal({
                         borderRadius={10}
                         borderWidth={0}
                         backgroundColor={selected ? '$appPrimary' : 'transparent'}
-                        color={selected ? '$trialBookingOnPrimaryText' : '$trialBookingControlInactiveText'}
+                        color={
+                          selected
+                            ? '$trialBookingOnPrimaryText'
+                            : '$trialBookingControlInactiveText'
+                        }
                         onPress={() => setDuration(option)}
                         fontWeight="700"
                       >

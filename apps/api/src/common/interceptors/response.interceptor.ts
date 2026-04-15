@@ -15,6 +15,11 @@ export class ResponseInterceptor<T>
       .switchToHttp()
       .getRequest<{ originalUrl?: string; url?: string; path?: string }>();
 
+    const path = request.path ?? request.url ?? '';
+    if (path.includes('/webhooks/payos')) {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => {
         return {

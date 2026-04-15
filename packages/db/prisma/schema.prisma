@@ -62,9 +62,25 @@ enum EPaymentStatus {
   REFUNDED
 }
 
-enum EPaymentReferenceType {
-  TRIAL_LESSON
-  SUBSCRIPTION
+enum EWalletTransactionType {
+  BOOKING_PAYMENT
+  RELEASE
+  WITHDRAWAL
+  REFUND
+  PLATFORM_FEE
+}
+
+enum EWalletTransactionDirection {
+  CREDIT
+  DEBIT
+}
+
+enum EWithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
 }
 
 /// Application users table mapped to `users`
@@ -78,9 +94,10 @@ model User {
   createdAt           DateTime             @default(now()) @map("created_at")
   tutorProfile        TutorProfile?
   trialLessonBookings TrialLessonBooking[]
-  payments            Payment[]
   tutorReviews        TutorReview[]        @relation("TutorReviewAuthor")
   refreshTokens       RefreshToken[]
+  wallet              Wallet?
+  withdrawals         Withdrawal[]
 
   @@map("users")
 }
@@ -101,7 +118,7 @@ model TutorProfile {
   experience         String             @default("")
   motivate           String             @default("")
   headline           String             @default("")
-  pricePerHour       Decimal            @map("price_per_hour") @db.Decimal(10, 2)
+  pricePerHour       BigInt             @map("price_per_hour")
   isProfessional     Boolean            @default(false) @map("is_professional")
   verificationStatus VerificationStatus @map("verification_status")
   totalLessonsTaught Int                @default(0) @map("total_lessons_taught")
@@ -222,21 +239,33 @@ model TutorAvailability {
 
 /// Student booked/completed lesson sessions
 model TrialLessonBooking {
-  id                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tutorId             String            @map("tutor_id") @db.Uuid
-  studentId           String            @map("student_id") @db.Uuid
-  startAt             DateTime          @map("start_at")
-  durationMinutes     Int               @map("duration_minutes")
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId             String             @map("tutor_id") @db.Uuid
+  studentId           String             @map("student_id") @db.Uuid
+  startAt             DateTime           @map("start_at")
+  durationMinutes     Int                @map("duration_minutes")
   status              ETrialLessonStatus @default(PENDING)
-  priceAtBooking      Decimal           @map("price_at_booking") @db.Decimal(10, 2)
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  grossAmount         BigInt              @map("gross_amount")
+  platformFee         BigInt              @map("platform_fee")
+  tutorAmount         BigInt              @map("tutor_amount")
+  paymentStatus    EPaymentStatus  @default(PENDING) @map("payment_status")
+  idempotencyKey   String?         @unique @map("idempotency_key")
+  payosOrderCode   String?         @map("payos_order_code") @db.VarChar(50) @unique
+  payosPaymentLink String?         @map("payos_payment_link")
+  paidAt           DateTime?       @map("paid_at")
+  failedAt         DateTime?       @map("failed_at")
+  refundedAt       DateTime?       @map("refunded_at")
+  
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")  
 
-  tutor               TutorProfile       @relation(fields: [tutorId], references: [id], onDelete: Cascade)
-  student             User               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   TutorProfile         @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  student User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  walletTransactions Transaction[]
 
-  @@index([tutorId])
+  @@index([payosOrderCode])
   @@index([studentId])
+  @@index([tutorId])
   @@index([tutorId, startAt])
   @@map("trial_lesson_booking")
 }
@@ -256,23 +285,75 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model Payment {
-  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  studentId      String               @map("student_id") @db.Uuid
-  amount         Decimal              @db.Decimal(10, 2)
-  status         EPaymentStatus        @default(PENDING)
-  method         String
-  referenceType  EPaymentReferenceType @map("reference_type")
-  referenceId    String               @map("reference_id") @db.Uuid
-  createdAt      DateTime             @default(now()) @map("created_at")
-  paidAt         DateTime?            @map("paid_at")
-  failedAt       DateTime?            @map("failed_at")
-  refundedAt     DateTime?            @map("refunded_at")
-  idempotencyKey String?              @map("idempotency_key")
+model Wallet {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  balance            BigInt   @default(0)
+  pendingBalance     BigInt   @default(0)
+  totalEarned        BigInt   @default(0)
+  totalWithdrawn     BigInt   @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user          User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  withdrawals   Withdrawal[]
 
-  @@index([studentId])
-  @@index([referenceType, referenceId])
-  @@map("payments")
+  @@map("wallets")
+}
+
+model Transaction {
+  id            String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  walletId      String                     @map("wallet_id") @db.Uuid
+  bookingId     String?                    @map("booking_id") @db.Uuid
+  withdrawalId  String?                    @map("withdrawal_id") @db.Uuid
+  type          EWalletTransactionType
+  amount        BigInt
+  direction     EWalletTransactionDirection
+  description   String?                    @db.Text
+  createdAt     DateTime                   @default(now()) @map("created_at")
+
+  wallet     Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  booking    TrialLessonBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  withdrawal Withdrawal?         @relation(fields: [withdrawalId], references: [id], onDelete: SetNull)
+
+  @@index([walletId, createdAt])
+  @@index([bookingId])
+  @@index([withdrawalId])
+  @@map("transactions")
+}
+
+model Withdrawal {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId            String            @map("tutor_id") @db.Uuid
+  walletId           String            @map("wallet_id") @db.Uuid
+  amount             BigInt
+  bankName           String            @map("bank_name") @db.VarChar(100)
+  bankAccountNumber  String            @map("bank_account_number") @db.VarChar(50)
+  bankAccountName    String            @map("bank_account_name") @db.VarChar(255)
+  status             EWithdrawalStatus @default(PENDING)
+  adminNote          String?           @map("admin_note") @db.Text
+  processedAt        DateTime?         @map("processed_at")
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  tutor        User                @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  wallet       Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([tutorId, status])
+  @@index([walletId])
+  @@map("withdrawals")
+}
+
+model WebhookLog {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderCode   String    @map("order_code") @db.VarChar(50)
+  eventType   String    @map("event_type") @db.VarChar(100)
+  rawPayload  Json      @map("raw_payload")
+  isProcessed Boolean   @default(false) @map("is_processed")
+  processedAt DateTime? @map("processed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([orderCode, isProcessed])
+  @@map("webhook_logs")
 }

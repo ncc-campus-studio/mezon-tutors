@@ -6,7 +6,9 @@ export interface TutorTrialLessonBookingRequestDto {
   studentAvatarUrl?: string
   startAt: string
   durationMinutes: number
-  priceAtBooking: number
+  grossAmount: number
+  platformFee: number
+  tutorAmount: number
   status: ETrialLessonStatus
   createdAt: string
 }

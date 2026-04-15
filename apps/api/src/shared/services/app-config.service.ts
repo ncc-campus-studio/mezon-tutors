@@ -61,6 +61,9 @@ export class AppConfigService {
       REDIRECT_URI: this.configService.get('REDIRECT_URI'),
       RESEND_API_KEY: this.configService.get('RESEND_API_KEY'),
       RESEND_FROM_EMAIL: this.configService.get('RESEND_FROM_EMAIL'),
+      PAYOS_CLIENT_ID: this.configService.get('PAYOS_CLIENT_ID'),
+      PAYOS_API_KEY: this.configService.get('PAYOS_API_KEY'),
+      PAYOS_CHECKSUM_KEY: this.configService.get('PAYOS_CHECKSUM_KEY'),
     };
 
     try {

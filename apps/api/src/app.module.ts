@@ -11,6 +11,7 @@ import { TutorAvailabilityModule } from './modules/tutor-availability/tutor-avai
 import { MyLessonsModule } from './modules/my-lessons/my-lessons.module';
 import { TutorApplicationModule } from './modules/tutor-application/tutor-application.module';
 import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-lesson-booking.module';
+import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-l
     TutorApplicationModule,
     MyLessonsModule,
     TrialLessonBookingModule,
+    PayosWebhookModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -28,6 +28,13 @@ export class TrialLessonBookingController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('current-booking')
+  async getCurrentBooking(@Req() req: Request, @Query('tutorId') tutorId: string) {
+    const user = req.user as AuthUserPayload
+    return this.trialLessonBookingService.getCurrentStudentTutorBooking(user.sub, tutorId)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Req() req: Request, @Body() body: CreateTrialLessonBookingDto) {
     const user = req.user as AuthUserPayload

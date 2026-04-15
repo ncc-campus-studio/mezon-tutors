@@ -13,7 +13,10 @@ type MessageLoaderConfig = {
     | 'MyLessons'
     | 'BecomeTutorGuide'
     | 'Home'
-    | 'Dashboard';
+    | 'Dashboard'
+    | 'TrialLessonCheckout'
+    | 'SubscriptionPlan'
+    | 'SubscriptionCheckout';
   file: string;
   pick?: (payload: Record<string, unknown>) => unknown;
 };
@@ -28,6 +31,21 @@ const MESSAGE_LOADERS: MessageLoaderConfig[] = [
   { messageKey: 'BecomeTutorGuide', file: 'become-tutor-guide' },
   { messageKey: 'Home', file: 'home', pick: (payload) => payload.Home },
   { messageKey: 'Dashboard', file: 'dashboard', pick: (payload) => payload.Dashboard },
+  {
+    messageKey: 'TrialLessonCheckout',
+    file: 'trial-lesson-checkout',
+    pick: (payload) => payload.TrialLessonCheckout,
+  },
+  {
+    messageKey: 'SubscriptionPlan',
+    file: 'subscription-plan',
+    pick: (payload) => payload.SubscriptionPlan,
+  },
+  {
+    messageKey: 'SubscriptionCheckout',
+    file: 'subscription-checkout',
+    pick: (payload) => payload.SubscriptionCheckout,
+  },
 ];
 
 export default getRequestConfig(async ({ requestLocale }) => {

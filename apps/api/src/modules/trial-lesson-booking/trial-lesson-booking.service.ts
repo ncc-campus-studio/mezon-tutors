@@ -1,20 +1,32 @@
+import { PLATFORM_FEE_PERCENTAGE, ROUTES } from '@mezon-tutors/shared'
 import {
+  BadGatewayException,
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common'
-import { ETrialLessonStatus, VerificationStatus } from '@mezon-tutors/db'
+import { randomInt } from 'node:crypto'
+import { APIError } from '@payos/node'
+import { EPaymentStatus, ETrialLessonStatus, VerificationStatus } from '@mezon-tutors/db'
 import { timeToMinutes, utcDateToHHmm, utcDateToMinutes } from '@mezon-tutors/shared'
 import type { PaginatedResponse } from '@mezon-tutors/shared'
 import dayjs = require('dayjs')
 import { PrismaService } from '../../prisma/prisma.service'
+import { AppConfigService } from '../../shared/services/app-config.service'
+import { PayosService } from '../payos/payos.service'
 import { CreateTrialLessonBookingDto } from './dto/create-trial-lesson-booking.dto'
 import type { TutorTrialLessonBookingRequestDto } from './dto/tutor-trial-lesson-booking-request.dto'
 
 @Injectable()
 export class TrialLessonBookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payosService: PayosService,
+    private readonly appConfig: AppConfigService
+  ) {}
 
   async getTutorBookingRequests(
     tutorUserId: string,
@@ -65,7 +77,9 @@ export class TrialLessonBookingService {
           studentAvatarUrl: item.student.avatar,
           startAt: item.startAt.toISOString(),
           durationMinutes: item.durationMinutes,
-          priceAtBooking: Number(item.priceAtBooking),
+          grossAmount: Number(item.grossAmount),
+          platformFee: Number(item.platformFee),
+          tutorAmount: Number(item.tutorAmount),
           status: item.status,
           createdAt: item.createdAt.toISOString(),
         })),
@@ -94,6 +108,9 @@ export class TrialLessonBookingService {
       select: {
         id: true,
         status: true,
+        paymentStatus: true,
+        startAt: true,
+        durationMinutes: true,
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -102,6 +119,36 @@ export class TrialLessonBookingService {
       hasBooked: Boolean(booking),
       bookingId: booking?.id ?? null,
       status: booking?.status ?? null,
+      paymentStatus: booking?.paymentStatus ?? null,
+      startAt: booking?.startAt?.toISOString() ?? null,
+      durationMinutes: booking?.durationMinutes ?? null,
+    }
+  }
+
+  async getCurrentStudentTutorBooking(studentId: string, tutorId: string) {
+    const booking = await this.prisma.trialLessonBooking.findFirst({
+      where: {
+        studentId,
+        tutorId,
+        status: {
+          not: ETrialLessonStatus.CANCELLED,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        paymentStatus: true,
+        payosPaymentLink: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    return {
+      hasBooked: Boolean(booking),
+      bookingId: booking?.id ?? null,
+      status: booking?.status ?? null,
+      paymentStatus: booking?.paymentStatus ?? null,
+      payosPaymentLink: booking?.payosPaymentLink ?? null,
     }
   }
 
@@ -229,25 +276,128 @@ export class TrialLessonBookingService {
       throw new ConflictException('Selected time overlaps an existing booking')
     }
 
+    const grossAmount = (tutor.pricePerHour * BigInt(dto.durationMinutes)) / 60n
+    const platformFeeBps = BigInt(Math.round(PLATFORM_FEE_PERCENTAGE * 10_000))
+    const platformFee = (grossAmount * platformFeeBps) / 10_000n
+    const tutorAmount = grossAmount - platformFee
+
+    const amountVnd = Number(grossAmount)
+    if (!Number.isFinite(amountVnd) || amountVnd < 1) {
+      throw new BadRequestException('Invalid payment amount for this lesson')
+    }
+
+    if (!this.payosService.isConfigured()) {
+      throw new ServiceUnavailableException(
+        'PayOS is not configured; cannot create trial lesson payment'
+      )
+    }
+
+    const orderCode = await this.allocatePayosOrderCode()
+    const baseFrontend = this.appConfig.frontendUrl.replace(/\/$/, '')
+    const checkoutPath = ROUTES.CHECKOUT.TRIAL_LESSON
+
     const booking = await this.prisma.trialLessonBooking.create({
       data: {
         tutorId: dto.tutorId,
         studentId,
         startAt: startAt.toDate(),
         durationMinutes: dto.durationMinutes,
-        priceAtBooking: tutor.pricePerHour,
+        grossAmount,
+        platformFee,
+        tutorAmount,
+        status: ETrialLessonStatus.PENDING,
+        paymentStatus: EPaymentStatus.PENDING,
       },
-      select: {
-        id: true,
-        tutorId: true,
-        studentId: true,
-        startAt: true,
-        durationMinutes: true,
-        status: true,
-        priceAtBooking: true,
-      },
+      select: { id: true },
     })
 
-    return booking
+    const returnUrl = `${baseFrontend}${checkoutPath}?tutorId=${dto.tutorId}&startAt=${dto.startAt}&durationMinutes=${dto.durationMinutes}&dayOfWeek=${dto.dayOfWeek}`
+    const cancelUrl = `${baseFrontend}${checkoutPath}?tutorId=${dto.tutorId}&startAt=${dto.startAt}&durationMinutes=${dto.durationMinutes}&dayOfWeek=${dto.dayOfWeek}`
+    const description = `Trial ${booking.id.slice(0, 8)}`
+
+    try {
+      const { checkoutUrl } = await this.payosService.createPaymentLink({
+        orderCode,
+        amount: amountVnd,
+        description,
+        returnUrl,
+        cancelUrl,
+      })
+
+      const updated = await this.prisma.trialLessonBooking.update({
+        where: { id: booking.id },
+        data: {
+          payosOrderCode: String(orderCode),
+          payosPaymentLink: checkoutUrl,
+        },
+        select: {
+          id: true,
+          tutorId: true,
+          studentId: true,
+          startAt: true,
+          durationMinutes: true,
+          status: true,
+          paymentStatus: true,
+          grossAmount: true,
+          platformFee: true,
+          tutorAmount: true,
+          payosOrderCode: true,
+          payosPaymentLink: true,
+        },
+      })
+
+      return this.serializeTrialLessonBookingResponse(updated)
+    } catch (err) {
+      if (err instanceof APIError) {
+        throw new BadGatewayException(
+          err.message || 'PayOS could not create the payment link'
+        )
+      }
+      throw err
+    }
+  }
+
+  private async allocatePayosOrderCode(): Promise<number> {
+    for (let attempt = 0; attempt < 12; attempt++) {
+      const orderCode = randomInt(1_000_000_000, 2_147_483_647)
+      const existing = await this.prisma.trialLessonBooking.findFirst({
+        where: { payosOrderCode: String(orderCode) },
+        select: { id: true },
+      })
+      if (!existing) {
+        return orderCode
+      }
+    }
+    throw new InternalServerErrorException('Could not allocate a unique PayOS order code')
+  }
+
+  private serializeTrialLessonBookingResponse(booking: {
+    id: string
+    tutorId: string
+    studentId: string
+    startAt: Date
+    durationMinutes: number
+    status: ETrialLessonStatus
+    paymentStatus: EPaymentStatus
+    grossAmount: bigint
+    platformFee: bigint
+    tutorAmount: bigint
+    payosOrderCode: string | null
+    payosPaymentLink: string | null
+  }) {
+    return {
+      id: booking.id,
+      tutorId: booking.tutorId,
+      studentId: booking.studentId,
+      startAt: booking.startAt.toISOString(),
+      durationMinutes: booking.durationMinutes,
+      status: booking.status,
+      paymentStatus: booking.paymentStatus,
+      grossAmount: Number(booking.grossAmount),
+      platformFee: Number(booking.platformFee),
+      tutorAmount: Number(booking.tutorAmount),
+      payosOrderCode: booking.payosOrderCode,
+      payosPaymentLink: booking.payosPaymentLink,
+    }
   }
 }

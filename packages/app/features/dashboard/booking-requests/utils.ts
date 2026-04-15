@@ -85,8 +85,9 @@ export function mapBookingRequestsToViewData(
 ): BookingRequestsViewData {
   return {
     requests: items.map((item) => {
-      const rate = Number(item.priceAtBooking);
-      const totalPrice = (rate * item.durationMinutes) / 60;
+      const totalPrice = Number(item.grossAmount)
+      const rate =
+        item.durationMinutes > 0 ? (totalPrice * 60) / item.durationMinutes : 0
       return {
         id: item.id,
         studentName: item.studentName,

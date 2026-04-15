@@ -1,0 +1,57 @@
+{
+  "SubscriptionCheckout": {
+    "Screen": {
+      "headline": "Good choice. Last step!",
+      "subtitle": "Enter your details to confirm your monthly subscription.",
+      "paymentMethods": {
+        "payos": {
+          "title": "payOS",
+          "subtitle": "VietQR, Napas 24/7"
+        }
+      }
+    },
+    "LearningPlanCard": {
+      "title": "Your learning plan",
+      "items": [
+        {
+          "title": "3 lessons per week",
+          "subtitle": "Personalized curriculum"
+        },
+        {
+          "title": "Flexible rescheduling",
+          "subtitle": "Up to 24h before lesson"
+        },
+        {
+          "title": "Expert Certified Tutors",
+          "subtitle": "Top 5% of global applicants"
+        }
+      ]
+    },
+    "OrderSummaryCard": {
+      "title": "Order Summary",
+      "selectedPlan": "Selected Plan (12 lessons/mo)",
+      "processingFee": "Processing Fee",
+      "totalMonthlyPrice": "Total Monthly Price",
+      "billedMonthly": "Billed monthly",
+      "promoPlaceholder": "Promo code",
+      "apply": "Apply"
+    },
+    "PaymentMethodCard": {
+      "title": "Payment Method",
+      "confirm": "Confirm monthly subscription",
+      "termsNotice": "By clicking confirm, you agree to our Terms of Service and Privacy Policy."
+    },
+    "TrustCards": {
+      "items": [
+        {
+          "title": "Free Tutor Replacement",
+          "subtitle": "Not happy with your first lesson? We'll replace your tutor for free."
+        },
+        {
+          "title": "Secure SSL Encryption",
+          "subtitle": "Your data is protected by industry-standard 256-bit SSL encryption."
+        }
+      ]
+    }
+  }
+}

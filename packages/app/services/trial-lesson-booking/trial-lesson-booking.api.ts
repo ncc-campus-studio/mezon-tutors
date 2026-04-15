@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import type {
   ApiResponse,
   ETrialLessonBookingStatus,
+  ETrialLessonBookingPaymentStatus,
   PaginatedData,
   PaginatedResponse,
 } from '@mezon-tutors/shared'
@@ -15,14 +16,19 @@ export type CreateTrialLessonBookingPayload = {
   durationMinutes: number
 }
 
-type TrialLessonBooking = {
+export type TrialLessonBooking = {
   id: string
   tutorId: string
   studentId: string
   startAt: string
   durationMinutes: number
   status: string
-  priceAtBooking: string | number
+  paymentStatus: string
+  grossAmount: number
+  platformFee: number
+  tutorAmount: number
+  payosOrderCode: string | null
+  payosPaymentLink: string | null
 }
 
 
@@ -39,7 +45,18 @@ export type OccupiedTrialLessonSlotsResponse = {
 export type AlreadyBookedTrialLessonResponse = {
   hasBooked: boolean
   bookingId: string | null
-  status: ETrialLessonBookingStatus
+  status: ETrialLessonBookingStatus | null
+  paymentStatus: ETrialLessonBookingPaymentStatus | null
+  startAt: string | null
+  durationMinutes: number | null
+}
+
+export type CurrentTrialLessonBookingResponse = {
+  hasBooked: boolean
+  bookingId: string | null
+  status: ETrialLessonBookingStatus | null
+  paymentStatus: ETrialLessonBookingPaymentStatus | null
+  payosPaymentLink: string | null
 }
 
 export type TrialLessonBookingRequestItem = {
@@ -48,7 +65,9 @@ export type TrialLessonBookingRequestItem = {
   studentAvatarUrl?: string
   startAt: string
   durationMinutes: number
-  priceAtBooking: number
+  grossAmount: number
+  platformFee: number
+  tutorAmount: number
   status: ETrialLessonBookingStatus
   createdAt: string
 }
@@ -70,6 +89,15 @@ export const trialLessonBookingApi = {
   getAlreadyBookedStatus(tutorId: string): Promise<AlreadyBookedTrialLessonResponse> {
     return apiClient.get<ApiResponse<AlreadyBookedTrialLessonResponse>, AlreadyBookedTrialLessonResponse>(
       '/trial-lesson-bookings/already-booked',
+      {
+        params: { tutorId },
+      }
+    )
+  },
+
+  getCurrentBookingStatus(tutorId: string): Promise<CurrentTrialLessonBookingResponse> {
+    return apiClient.get<ApiResponse<CurrentTrialLessonBookingResponse>, CurrentTrialLessonBookingResponse>(
+      '/trial-lesson-bookings/current-booking',
       {
         params: { tutorId },
       }
@@ -124,6 +152,14 @@ export function useGetAlreadyBookedTrialLesson(tutorId: string, enabled = true) 
   return useQuery({
     queryKey: trialLessonBookingQueryKey.alreadyBooked(tutorId),
     queryFn: () => trialLessonBookingApi.getAlreadyBookedStatus(tutorId),
+    enabled: Boolean(tutorId) && enabled,
+  })
+}
+
+export function useGetCurrentTrialLessonBooking(tutorId: string, enabled = true) {
+  return useQuery({
+    queryKey: trialLessonBookingQueryKey.currentBooking(tutorId),
+    queryFn: () => trialLessonBookingApi.getCurrentBookingStatus(tutorId),
     enabled: Boolean(tutorId) && enabled,
   })
 }

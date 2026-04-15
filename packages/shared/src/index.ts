@@ -13,6 +13,8 @@ export * from './enums/filters';
 export * from './enums/tutor-profile';
 export * from './enums/date-time';
 export * from './enums/trial-lesson-booking';
+export * from './enums/locale';
+export * from './enums/currency';
 
 // Constants
 export * from './constants/admin-tutor-application';
@@ -29,6 +31,7 @@ export * from './constants/footer';
 export * from './constants/header';
 export * from './constants/dashboard';
 export * from './constants/dashboard-booking-request';
+export * from './constants/payment';
 
 // Utils
 export * from './utils/utils';
@@ -39,3 +42,4 @@ export * from './utils/date-time';
 export * from './utils/rating';
 export * from './utils/pagination';
 export * from './utils/tutor-availability-time-slots';
+export * from './utils/currency';

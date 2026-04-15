@@ -1,4 +1,9 @@
-import { ABOUT_PROFICIENCY_LEVELS, ROUTES, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
+import {
+  ABOUT_PROFICIENCY_LEVELS,
+  formatToVND,
+  ROUTES,
+  VerifiedTutorProfileDto,
+} from '@mezon-tutors/shared'
 import { Button, Card, Chip, ChipText, Paragraph, Text, XStack, YStack } from '@mezon-tutors/app/ui'
 import {
   GraduationCapIcon,
@@ -8,10 +13,9 @@ import {
 } from '@mezon-tutors/app/ui/icons'
 import {
   TrialBookingModal,
-  TrialBookingPayload,
+  type TrialBookingPayload,
+  type TrialResumePaymentPayload,
 } from '@mezon-tutors/app/features/tutors/components/TrialBookingModal'
-import { useCreateTrialLessonBookingMutation } from '@mezon-tutors/app/services'
-import { useAppToast } from '@mezon-tutors/app/hooks/useAppToast'
 import { H2, Image, Separator, useMedia, useTheme } from 'tamagui'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'solito/navigation'
@@ -40,9 +44,7 @@ export function TutorCard({
   const media = useMedia()
   const theme = useTheme()
   const router = useRouter()
-  const toast = useAppToast()
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false)
-  const createTrialLessonBookingMutation = useCreateTrialLessonBookingMutation()
 
   const isVertical = media.sm
   const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280'
@@ -59,20 +61,27 @@ export function TutorCard({
     setIsTrialModalOpen(true)
   }
 
-  const handleConfirmBooking = async (payload: TrialBookingPayload) => {
-    try {
-      await createTrialLessonBookingMutation.mutateAsync({
-        tutorId: tutor.id,
-        startAt: payload.startAt,
-        dayOfWeek: payload.dayOfWeek,
-        durationMinutes: payload.duration,
-      })
-      toast.success('Booking confirmed', 'Your trial lesson has been created.')
-      setIsTrialModalOpen(false)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create booking'
-      toast.error('Booking failed', message)
+  const handleConfirmBooking = (payload: TrialBookingPayload) => {
+    const sp = new URLSearchParams()
+    sp.set('tutorId', tutor.id)
+    sp.set('startAt', payload.startAt)
+    sp.set('durationMinutes', String(payload.duration))
+    sp.set('dayOfWeek', String(payload.dayOfWeek))
+    setIsTrialModalOpen(false)
+    router.push(`${ROUTES.CHECKOUT.TRIAL_LESSON}?${sp.toString()}`)
+  }
+
+  const handleResumePayment = (payload: TrialResumePaymentPayload) => {
+    const sp = new URLSearchParams()
+    sp.set('tutorId', payload.tutorId)
+    sp.set('startAt', payload.startAt)
+    sp.set('durationMinutes', String(payload.durationMinutes))
+    sp.set('dayOfWeek', String(payload.dayOfWeek))
+    if (payload.resumePayment) {
+      sp.set('resumePayment', '1')
     }
+    setIsTrialModalOpen(false)
+    router.push(`${ROUTES.CHECKOUT.TRIAL_LESSON}?${sp.toString()}`)
   }
 
   return (
@@ -126,7 +135,7 @@ export function TutorCard({
                   </XStack>
                   <XStack alignItems="baseline" gap="$1">
                     <Text size="xl" fontWeight="700">
-                      ${tutor.pricePerHour}
+                      {formatToVND(tutor.pricePerHour)}
                     </Text>
                     <Text variant="muted">{t('perLesson')}</Text>
                   </XStack>
@@ -218,7 +227,7 @@ export function TutorCard({
                 </XStack>
                 <XStack alignItems="baseline" gap="$1" justifyContent="flex-end">
                   <Text size="xl" fontWeight="700">
-                    ${tutor.pricePerHour}
+                    {formatToVND(tutor.pricePerHour)}
                   </Text>
                   <Text variant="muted">{t('perLesson')}</Text>
                 </XStack>
@@ -255,6 +264,7 @@ export function TutorCard({
           avatar: tutor.avatar,
         }}
         onConfirm={handleConfirmBooking}
+        onResumePayment={handleResumePayment}
       />
     </>
   )
