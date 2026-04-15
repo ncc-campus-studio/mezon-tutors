@@ -44,6 +44,8 @@ export type CalendarPresetData = {
   companyLabel?: string;
   primaryDurationLabel?: string;
   secondaryDurationLabel?: string;
+  onPrevWeek?: () => void;
+  onNextWeek?: () => void;
 };
 
 export type CalendarCardPresetRenderContext = {

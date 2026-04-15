@@ -15,12 +15,16 @@ function MyLessonsPresetHeader({
   monthLabel,
   showMonthNav = true,
   isCompact,
+  onPrevWeek,
+  onNextWeek,
 }: {
   title: string;
   weekLabel: string;
   monthLabel: string;
   showMonthNav?: boolean;
   isCompact: boolean;
+  onPrevWeek?: () => void;
+  onNextWeek?: () => void;
 }) {
   return (
     <XStack
@@ -28,12 +32,16 @@ function MyLessonsPresetHeader({
       alignItems="center"
       gap="$3"
       flexWrap="wrap"
+      paddingTop="$3"
+      paddingBottom="$4"
     >
       <XStack
         alignItems="center"
         gap="$2.5"
       >
         <Text
+        
+          paddingLeft="$3"
           color="$myLessonsCalendarTitle"
           fontSize={isCompact ? 32 : 40}
           fontWeight="700"
@@ -50,12 +58,16 @@ function MyLessonsPresetHeader({
             <Text
               color="$myLessonsMonthNav"
               fontSize={18}
+              cursor={onPrevWeek ? 'pointer' : 'default'}
+              onPress={onPrevWeek}
             >
               {'<'}
             </Text>
             <Text
               color="$myLessonsMonthNav"
               fontSize={18}
+              cursor={onNextWeek ? 'pointer' : 'default'}
+              onPress={onNextWeek}
             >
               {'>'}
             </Text>
@@ -64,40 +76,19 @@ function MyLessonsPresetHeader({
       </XStack>
 
       <XStack
-        backgroundColor="$myLessonsSwitcherBackground"
-        borderWidth={1}
-        borderColor="$myLessonsSwitcherBorder"
+        backgroundColor="$myLessonsSwitcherActiveBackground"
         borderRadius={999}
-        padding={4}
-        gap={4}
+        paddingHorizontal="$3"
+        paddingVertical="$1.5"
+        marginRight="$3"
       >
-        <YStack
-          backgroundColor="$myLessonsSwitcherActiveBackground"
-          borderRadius={999}
-          paddingHorizontal="$3"
-          paddingVertical="$1.5"
+        <Text
+          color="$myLessonsSwitcherActiveText"
+          fontSize={12}
+          fontWeight="600"
         >
-          <Text
-            color="$myLessonsSwitcherActiveText"
-            fontSize={12}
-            fontWeight="600"
-          >
-            {weekLabel}
-          </Text>
-        </YStack>
-        <YStack
-          paddingHorizontal="$3"
-          paddingVertical="$1.5"
-          borderRadius={999}
-        >
-          <Text
-            color="$myLessonsSwitcherInactiveText"
-            fontSize={12}
-            fontWeight="600"
-          >
-            {monthLabel}
-          </Text>
-        </YStack>
+          {weekLabel}
+        </Text>
       </XStack>
     </XStack>
   );
@@ -122,6 +113,7 @@ function MyLessonsPresetFooter({
       >
         {legendItems.map((item) => (
           <XStack
+            paddingBottom="$2"
             key={item.key}
             alignItems="center"
             gap="$2"
@@ -334,6 +326,8 @@ const CALENDAR_CARD_PRESET_RENDERERS: Partial<
         monthLabel={data.monthLabel ?? 'Month'}
         showMonthNav={data.showMonthNav}
         isCompact={isCompact}
+        onPrevWeek={data.onPrevWeek}
+        onNextWeek={data.onNextWeek}
       />
     ) : undefined,
     footer: (
