@@ -246,15 +246,22 @@
       },
       "from": "Từ",
       "to": "Đến",
-      "addSlot": "Thêm khung giờ dạy"
+      "addSlot": "Thêm khung giờ dạy",
+      "hour": "Giờ",
+      "minute": "Phút"
     },
     "back": "Quay lại",
     "continue": "Xem lại & Gửi",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "saving": "Đang lưu...",
     "validation": {
       "hourlyRateRequired": "Vui lòng nhập giá theo giờ.",
       "hourlyRateInvalidFormat": "Giá theo giờ phải là số hợp lệ (tối đa 2 chữ số thập phân).",
       "hourlyRateGreaterThanZero": "Giá theo giờ phải lớn hơn 0.",
-      "weeklySlotsRequired": "Vui lòng thêm ít nhất 1 khung giờ dạy trong tuần trước khi tiếp tục."
+      "weeklySlotsRequired": "Vui lòng thêm ít nhất 1 khung giờ dạy trong tuần trước khi tiếp tục.",
+      "timeRequired": "Giờ bắt đầu và giờ kết thúc là bắt buộc.",
+      "endTimeMustBeAfterStartTime": "Giờ kết thúc phải sau giờ bắt đầu."
     }
   },
   "Completion": {

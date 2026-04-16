@@ -20,13 +20,14 @@ export * from './constants/tutor-profile';
 export * from './constants/tutor-detail';
 export * from './constants/pagination';
 export * from './constants/urls';
+export * from './constants/calendar';
 export * from './constants/regex';
 export * from './constants/home';
 export * from './constants/footer';
 export * from './constants/header';
 export * from './constants/dashboard';
 export * from './constants/dashboard-booking-request';
-export * from './constants/calendar';
+export * from './constants/my-schedule';
 
 // Utils
 export * from './utils/utils';

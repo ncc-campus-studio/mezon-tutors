@@ -557,6 +557,7 @@ export const themes = {
     myScheduleEventBorder: 'rgba(255, 255, 255, 0.08)',
     myScheduleEventStudent: '#D1D5DB',
     myScheduleEventTime: '#9CA3AF',
+    myScheduleLegendText: '#8DA3CD',
     myScheduleSlotEmptyBackground: 'rgba(12, 25, 48, 0.55)',
     myScheduleSlotEmptyBorder: 'rgba(90, 118, 171, 0.55)',
     myScheduleSlotEmptyText: '#7891BF',

@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TutorProfileModule } from './modules/tutor-profile/tutor-profile.module';
 import { MyLessonsModule } from './modules/my-lessons/my-lessons.module';
 import { TutorApplicationModule } from './modules/tutor-application/tutor-application.module';
+import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TutorApplicationModule } from './modules/tutor-application/tutor-applic
     TutorProfileModule,
     TutorApplicationModule,
     MyLessonsModule,
+    MyScheduleModule,
   ],
   controllers: [HealthController],
   providers: [
