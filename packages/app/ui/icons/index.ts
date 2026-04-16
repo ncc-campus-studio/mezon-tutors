@@ -20,6 +20,7 @@ export * from './InfoIcon';
 export * from './MailIcon';
 export * from './MessageDotsIcon';
 export * from './PlusCircleIcon';
+export * from './PlusIcon';
 export * from './ProfileCameraIcon';
 export * from './ScanIcon';
 export * from './ShieldCheckIcon';

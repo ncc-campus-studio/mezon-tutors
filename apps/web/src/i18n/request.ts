@@ -11,6 +11,7 @@ type MessageLoaderConfig = {
     | 'AdminTutorApplications'
     | 'Tutors'
     | 'MyLessons'
+    | 'MySchedule'
     | 'BecomeTutorGuide'
     | 'Home'
     | 'Dashboard';
@@ -25,6 +26,7 @@ const MESSAGE_LOADERS: MessageLoaderConfig[] = [
   { messageKey: 'AdminTutorApplications', file: 'admin-tutor-applications' },
   { messageKey: 'Tutors', file: 'tutors' },
   { messageKey: 'MyLessons', file: 'my-lessons' },
+  { messageKey: 'MySchedule', file: 'my-schedule' },
   { messageKey: 'BecomeTutorGuide', file: 'become-tutor-guide' },
   { messageKey: 'Home', file: 'home', pick: (payload) => payload.Home },
   { messageKey: 'Dashboard', file: 'dashboard', pick: (payload) => payload.Dashboard },

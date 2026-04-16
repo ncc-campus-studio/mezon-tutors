@@ -1,0 +1,37 @@
+{
+  "loading": "Đang tải...",
+  "error": "Không thể tải lịch",
+  "header": {
+    "title": "Quản lý lịch dạy",
+    "subtitle": "Tối ưu hóa giờ dạy của bạn. Đặt lịch trống và quản lý các buổi học sắp tới.",
+    "syncCalendar": "Đồng bộ lịch",
+    "addAvailability": "Thêm lịch trống"
+  },
+  "weekGrid": {
+    "emptyHours": "Trống {hours}h"
+  },
+  "legend": {
+    "upcomingSession": "Buổi học sắp tới",
+    "pendingRequest": "Yêu cầu chờ",
+    "availableSlot": "Lịch trống",
+    "blockedBreak": "Đã chặn/Nghỉ"
+  },
+  "sidebar": {
+    "weeklyInsight": "Thống kê tuần",
+    "insightDescription": "Thời gian đặt lịch phổ biến nhất của bạn là chiều thứ Ba. Hãy mở thêm lịch trống để tăng thu nhập.",
+    "hoursTaught": "Giờ đã dạy"
+  },
+  "modal": {
+    "title": "Chi tiết buổi học",
+    "subject": "Môn học",
+    "time": "Thời gian",
+    "student": "Học sinh",
+    "status": "Trạng thái",
+    "close": "Đóng"
+  },
+  "availability": {
+    "title": "Quản lý lịch trống",
+    "description": "Đặt lịch dạy hàng tuần của bạn. Học sinh có thể đặt lịch trong các khung giờ này.",
+    "loading": "Đang tải..."
+  }
+}
