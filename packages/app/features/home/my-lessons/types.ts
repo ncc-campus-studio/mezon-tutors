@@ -39,8 +39,8 @@ export type MyLessonsCalendarMeta = {
   title: string;
   weekDays: WeekDay[];
   weekHours: number[];
-  currentDayIndex: number;
-  currentHour: number;
+  currentDayIndex?: number;
+  currentHour?: number;
 };
 
 export type MyLessonsViewData = {
