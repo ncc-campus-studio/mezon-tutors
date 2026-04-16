@@ -18,3 +18,4 @@ export * from './features/admin/tutor-applications/screen';
 export * from './provider';
 
 export * from './features/calendar';
+export * from './features/dashboard/tutor/my-schedule/screen';

@@ -10,14 +10,11 @@ import { Screen, XStack, YStack, Text, Button } from '@mezon-tutors/app/ui'
 import { type DashboardMenuIconKey, type DashboardMenuItem, DASHBOARD_MENU_ITEMS } from '@mezon-tutors/shared/src/constants/dashboard'
 import { ROUTES } from '@mezon-tutors/shared/src/constants/routes'
 import { isLoadingAtom, logoutAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
-import {
-  BookingRequestIcon,
-  CalendarIcon,
-  DocumentIcon,
-  LogoutIcon,
-} from '@mezon-tutors/app/ui/icons'
+import { BookingRequestIcon, CalendarIcon, DocumentIcon, LogoutIcon } from '@mezon-tutors/app/ui/icons'
 import { useThemeName } from 'tamagui'
 import { themes } from '@mezon-tutors/app/theme/theme'
+
+type AppTheme = (typeof themes)[keyof typeof themes]
 
 const DASHBOARD_ICON_COMPONENTS: Record<
   DashboardMenuIconKey,
@@ -32,14 +29,13 @@ const DASHBOARD_ICON_COMPONENTS: Record<
 function getDashboardMenuDisplay(
   item: DashboardMenuItem,
   pathname: string,
-  dashboardTheme: (typeof themes)['light']
+  dashboardTheme: AppTheme
 ) {
   const active = item.type === 'link' && !!item.href && pathname === item.href
   const isLogoutItem = item.type === 'action'
 
   return {
     active,
-    isLogoutItem,
     Icon: DASHBOARD_ICON_COMPONENTS[item.iconKey],
     iconColor: isLogoutItem
       ? dashboardTheme.myLessonsSidebarLogoutIcon
@@ -143,11 +139,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               )
             }
 
-            return (
-              <YStack key={item.key}>
-                {content}
-              </YStack>
-            )
+            return <YStack key={item.key}>{content}</YStack>
           })}
 
           <YStack marginTop="auto" width="100%" />

@@ -1,0 +1,37 @@
+{
+  "header": {
+    "title": "Schedule Management",
+    "subtitle": "Optimize your teaching hours. Set your availability and manage upcoming sessions at a glance.",
+    "syncCalendar": "Sync Calendar",
+    "addAvailability": "Add Availability"
+  },
+  "weekGrid": {
+    "emptyHours": "Empty {hours}h"
+  },
+  "legend": {
+    "upcomingSession": "Upcoming Session",
+    "pendingRequest": "Pending Request",
+    "availableSlot": "Available Slot",
+    "blockedBreak": "Blocked/Break"
+  },
+  "sidebar": {
+    "weeklyInsight": "Weekly Insight",
+    "insightDescription": "Your most popular booking times are Tuesday afternoon. Consider opening more slots there to increase earnings.",
+    "hoursTaught": "Hours Taught"
+  },
+  "modal": {
+    "title": "Lesson Details",
+    "subject": "Subject",
+    "time": "Time",
+    "student": "Student",
+    "status": "Status",
+    "close": "Close"
+  },
+  "availability": {
+    "title": "Manage Availability",
+    "description": "Set your weekly teaching schedule. Students can book lessons during these time slots.",
+    "loading": "Loading..."
+  },
+  "loading": "Loading...",
+  "error": "Failed to load schedule"
+}
