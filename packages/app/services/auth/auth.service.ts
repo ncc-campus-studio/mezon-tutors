@@ -12,6 +12,7 @@ export type AuthUser = {
   username?: string;
   email?: string | null;
   avatar?: string | null;
+  role?: string;
 };
 
 export type ExchangeResponse = {
@@ -26,6 +27,7 @@ export type MeResponse = {
   email?: string;
   username?: string;
   avatar?: string | null;
+  role?: string;
 };
 
 type AuthUrlResponse = {

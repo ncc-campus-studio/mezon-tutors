@@ -12,11 +12,11 @@ export type FieldProps = {
   value?: string;
   onChangeText?: (value: string) => void;
   error?: string;
-  /** Gợi ý hiển thị khi nhập (dùng native input + datalist trên web). */
   suggestions?: readonly string[];
   backgroundColor?: ColorTokens | string;
   borderWidth?: number;
   height?: number | string;
+  width?: number | string;
 };
 
 export function Field({
@@ -32,6 +32,7 @@ export function Field({
   backgroundColor,
   borderWidth,
   height,
+  width,
 }: FieldProps) {
   const theme = useTheme();
   const inputId = id ?? label;
@@ -96,9 +97,13 @@ export function Field({
           color="$color"
           paddingHorizontal="$4"
           height={height ?? 48}
+          width={width}
           borderRadius="$5"
           value={value}
           onChangeText={onChangeText}
+          focusVisibleStyle={{
+            outlineColor: error ? '$red9' : '',
+          }}
         />
       )}
       {normalizedError ? (

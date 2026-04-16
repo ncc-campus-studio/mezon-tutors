@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -30,8 +30,8 @@ import {
   slotsByDayAtom,
   defaultSlot,
   type TimeSlot,
-  submitTutorProfileAtom,
   buildSubmitTutorProfilePayload,
+  resetTutorProfileAfterSubmitAtom,
   tutorProfileAboutAtom,
   tutorProfilePhotoAtom,
   tutorProfileCertificationAtom,
@@ -41,8 +41,9 @@ import {
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { DAY_KEYS, getDayKey, formatLastSavedTime } from '@mezon-tutors/shared';
+import { DAY_KEYS, getDayKey, formatLastSavedTime, HOURLY_RATE_REGEX } from '@mezon-tutors/shared';
 import { TutorProfileStickyActions } from '@mezon-tutors/app/features/tutor-profile/components/tutor-profile-sticky-actions';
+import { useSubmitTutorProfileMutation } from '@mezon-tutors/app/services';
 
 const ICON_COLOR = '#1253D5';
 const CURRENT_STEP = 5;
@@ -67,7 +68,8 @@ export function TutorProfileAvailabilityScreen() {
   const initialSlotsByDay = useAtomValue(slotsByDayAtom);
   const setHourlyRate = useSetAtom(hourlyRateAtom);
   const setSlotsByDay = useSetAtom(slotsByDayAtom);
-  const submitProfile = useSetAtom(submitTutorProfileAtom);
+  const submitMutation = useSubmitTutorProfileMutation();
+  const resetAfterSubmit = useSetAtom(resetTutorProfileAfterSubmitAtom);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
@@ -79,7 +81,32 @@ export function TutorProfileAvailabilityScreen() {
     mode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, watch, setValue } = form;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = form;
+
+  const availabilityCardRef = useRef<HTMLDivElement | null>(null);
+
+  const validateWeeklySlots = (values: AvailabilityFormValues): boolean => {
+    const slotsByDay = values.slotsByDay ?? {};
+    const hasAnySlot = DAY_KEYS.some((day) => (slotsByDay[day] ?? []).length > 0);
+
+    if (!hasAnySlot) {
+      setError('slotsByDay', { type: 'manual', message: t('validation.weeklySlotsRequired') });
+      availabilityCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
+
+    clearErrors('slotsByDay');
+    return true;
+  };
 
   useEffect(() => {
     reset({
@@ -94,16 +121,13 @@ export function TutorProfileAvailabilityScreen() {
   const slots = slotsByDayForm?.[dayKey] ?? [];
 
   const onSaveExit = () => {
+    if (submitMutation.isPending) return;
     form.handleSubmit((values) => {
-      const payload = buildSubmitTutorProfilePayload({
-        ...about,
-        ...photo,
-        ...certification,
-        videoUrl: video.videoLink,
-        hourlyRate: values.hourlyRate,
-        slotsByDay: values.slotsByDay,
-      });
-      submitProfile(payload);
+      if (!validateWeeklySlots(values)) return;
+
+      setHourlyRate(values.hourlyRate);
+      setSlotsByDay(values.slotsByDay);
+      setLastSavedAt(new Date().toISOString());
       router.push('/');
     })();
   };
@@ -120,6 +144,7 @@ export function TutorProfileAvailabilityScreen() {
       [dayKey]: [...(prev[dayKey] ?? []), { ...defaultSlot }],
     }));
     setLastSavedAt(new Date().toISOString());
+    clearErrors('slotsByDay');
   };
 
   const removeSlot = (index: number) => {
@@ -158,6 +183,24 @@ export function TutorProfileAvailabilityScreen() {
       : '';
 
   const dayTabs = t.raw('availability.tabs') as string[];
+
+  const handleContinue = async (values: AvailabilityFormValues) => {
+    if (!validateWeeklySlots(values)) return;
+
+    const payload = buildSubmitTutorProfilePayload({
+      ...about,
+      ...photo,
+      ...identity,
+      ...certification,
+      videoUrl: video.videoLink,
+      hourlyRate: values.hourlyRate,
+      slotsByDay: values.slotsByDay,
+    });
+
+    await submitMutation.mutateAsync(payload);
+    resetAfterSubmit();
+    router.push('/become-tutor/final');
+  };
 
   return (
     <Screen backgroundColor="$background">
@@ -259,6 +302,25 @@ export function TutorProfileAvailabilityScreen() {
                       <Controller
                         control={control}
                         name="hourlyRate"
+                        rules={{
+                          validate: (value) => {
+                            const trimmed = value.trim();
+
+                            if (!trimmed) {
+                              return t('validation.hourlyRateRequired');
+                            }
+
+                            if (!HOURLY_RATE_REGEX.test(trimmed)) {
+                              return t('validation.hourlyRateInvalidFormat');
+                            }
+
+                            if (Number(trimmed) <= 0) {
+                              return t('validation.hourlyRateGreaterThanZero');
+                            }
+
+                            return true;
+                          },
+                        }}
                         render={({ field: { value, onChange } }) => (
                           <Input
                             flex={1}
@@ -301,10 +363,19 @@ export function TutorProfileAvailabilityScreen() {
                   >
                     {t('rate.recommended')}
                   </Text>
+                  {errors.hourlyRate?.message && (
+                    <Text
+                      size="md"
+                      color="#EF4444"
+                    >
+                      {errors.hourlyRate?.message}
+                    </Text>
+                  )}
                 </YStack>
               </YStack>
 
               <YStack
+                ref={availabilityCardRef}
                 backgroundColor="$backgroundCard"
                 borderRadius="$4"
                 padding="$6"
@@ -444,44 +515,16 @@ export function TutorProfileAvailabilityScreen() {
                       </Text>
                     </XStack>
                   </Button>
+                  {errors.slotsByDay?.message && (
+                    <Text
+                      size="md"
+                      color="#EF4444"
+                    >
+                      {errors.slotsByDay?.message}
+                    </Text>
+                  )}
                 </YStack>
               </YStack>
-
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                marginTop="$4"
-                $xs={{
-                  flexDirection: 'column',
-                  alignItems: 'stretch',
-                  gap: '$3',
-                }}
-              >
-                <Button
-                  variant="outline"
-                  onPress={() => router.push('/become-tutor/video')}
-                >
-                  {t('back')}
-                </Button>
-                <Button
-                  variant="primary"
-                  onPress={handleSubmit((values) => {
-                    const payload = buildSubmitTutorProfilePayload({
-                      ...about,
-                      ...photo,
-                      ...certification,
-                      videoUrl: video.videoLink,
-                      hourlyRate: values.hourlyRate,
-                      slotsByDay: values.slotsByDay,
-                    });
-
-                    submitProfile(payload);
-                    router.push('/become-tutor/final');
-                  })}
-                >
-                  {t('continue')}
-                </Button>
-              </XStack>
             </Container>
           </YStack>
         </ScrollView>
@@ -494,20 +537,8 @@ export function TutorProfileAvailabilityScreen() {
           </Button>
           <Button
             variant="primary"
-            onPress={handleSubmit((values) => {
-              const payload = buildSubmitTutorProfilePayload({
-                ...about,
-                ...photo,
-                ...identity,
-                ...certification,
-                videoUrl: video.videoLink,
-                hourlyRate: values.hourlyRate,
-                slotsByDay: values.slotsByDay,
-              });
-
-              submitProfile(payload);
-              router.push('/become-tutor/final');
-            })}
+            disabled={submitMutation.isPending}
+            onPress={handleSubmit(handleContinue)}
           >
             {t('continue')}
           </Button>

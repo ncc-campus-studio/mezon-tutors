@@ -16,18 +16,20 @@ import {
   YStack,
   ScrollView,
   InputField,
-  SelectInputField,
+  Select,
 } from '@mezon-tutors/app/ui';
 import { ShieldCheckIcon } from '@mezon-tutors/app/ui/icons/ShieldCheckIcon';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import {
-  ABOUT_COUNTRIES,
-  ABOUT_LANGUAGES,
-  ABOUT_PROFICIENCY_LEVELS,
-  ABOUT_SUBJECTS,
+  ECountry,
+  ELanguage,
+  ESubject,
+  EProficiencyLevel,
   joinLanguagesArray,
   parseLanguagesString,
   formatLastSavedTime,
+  
+  VIETNAM_PHONE_REGEX,
 } from '@mezon-tutors/shared';
 import {
   tutorProfileAboutAtom,
@@ -56,6 +58,11 @@ function joinProficienciesArray(proficiencies: string[]): string {
 
 export function TutorProfileAboutScreen() {
   const t = useTranslations('TutorProfile.About');
+  const tCountry = useTranslations('Tutors.Filter.Country');
+  const tSubject = useTranslations('Tutors.Filter.Subject');
+  const tLanguage = useTranslations('Tutors.Filter.Language');
+  const tProficiency = useTranslations('Tutors.Filter.Proficiency');
+
   const router = useRouter();
   const [about, setAbout] = useAtom(tutorProfileAboutAtom);
   const [, markStepCompleted] = useAtom(markStepCompletedAtom);
@@ -71,14 +78,21 @@ export function TutorProfileAboutScreen() {
         country: z
           .string()
           .min(1, t('validation.countryRequired'))
-          .refine((v) => (ABOUT_COUNTRIES as readonly string[]).includes(v), {
+          .refine((v) => (Object.values(ECountry) as readonly string[]).includes(v), {
             message: t('validation.countryFromList'),
           }),
-        phone: z.string().min(1, t('validation.phoneRequired')),
+        phone: z
+          .string()
+          .min(1, t('validation.phoneRequired'))
+          .transform((value) => value.replace(/[\s-]/g, ''))
+          .refine(
+            (value) => VIETNAM_PHONE_REGEX.test(value),
+            { message: t('validation.phoneInvalid') },
+          ),
         subject: z
           .string()
           .min(1, t('validation.subjectRequired'))
-          .refine((v) => (ABOUT_SUBJECTS as readonly string[]).includes(v), {
+          .refine((v) => (Object.values(ESubject) as readonly string[]).includes(v), {
             message: t('validation.subjectFromList'),
           }),
         languageEntries: z
@@ -86,18 +100,62 @@ export function TutorProfileAboutScreen() {
             z.object({
               language: z
                 .string()
-                .refine((v) => !v || (ABOUT_LANGUAGES as readonly string[]).includes(v), {
+                .refine((v) => !v || (Object.values(ELanguage) as readonly string[]).includes(v), {
                   message: t('validation.languagesFromList'),
                 }),
               proficiency: z
                 .string()
-                .refine((v) => !v || (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(v), {
+                .refine((v) => !v || (Object.values(EProficiencyLevel) as readonly string[]).includes(v), {
                   message: t('validation.proficiencyFromList'),
                 }),
             })
           )
-          .refine((arr) => arr.filter((e) => e.language && e.proficiency).length >= 1, {
-            message: t('validation.languagesRequired'),
+          .superRefine((arr, ctx) => {
+            const hasAnyCompletePair = arr.some((e) => e.language && e.proficiency);
+
+            if (!hasAnyCompletePair) {
+              const idx = arr.findIndex((e) => !e.language || !e.proficiency) ?? 0;
+              const entry = arr[idx] ?? { language: '', proficiency: '' };
+
+              if (!entry.language) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: [idx, 'language'],
+                  message: t('validation.languagesRequired'),
+                });
+              }
+
+              if (!entry.proficiency) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: [idx, 'proficiency'],
+                  message: t('validation.proficiencyRequired'),
+                });
+              }
+
+              return;
+            }
+
+            arr.forEach((entry, idx) => {
+              const hasAnyValue = entry.language || entry.proficiency;
+              if (!hasAnyValue) return;
+
+              if (!entry.language) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: [idx, 'language'],
+                  message: t('validation.languagesRequired'),
+                });
+              }
+
+              if (!entry.proficiency) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  path: [idx, 'proficiency'],
+                  message: t('validation.proficiencyRequired'),
+                });
+              }
+            });
           }),
       }),
     [t]
@@ -281,34 +339,40 @@ export function TutorProfileAboutScreen() {
 
                   <XStack
                     gap="$4"
-                    $xs={{
-                      flexDirection: 'column',
-                    }}
+                    flexDirection="row"
                   >
-                    <InputField
+                    <Select
                       control={control}
                       name="country"
                       label={t('fields.countryLabel')}
-                      placeholder={t('fields.countryPlaceholder')}
-                      suggestions={ABOUT_COUNTRIES}
+                      options={Object.values(ECountry).slice(1).map((country) => ({
+                        label: tCountry(country),
+                        value: country as string,
+                      }))}
                       flex={1}
+                      width="100%"
                     />
-                    <InputField
-                      control={control}
-                      name="phone"
-                      label={t('fields.phoneLabel')}
-                      placeholder={t('fields.phonePlaceholder')}
-                      flex={1}
-                    />
+                    <YStack flex={1} width="100%">
+                      <InputField
+                        control={control}
+                        name="phone"
+                        label={t('fields.phoneLabel')}
+                        placeholder={t('fields.phonePlaceholder')}
+                      />
+                    </YStack>
                   </XStack>
 
-                  <InputField
+                  <Select
                     control={control}
                     name="subject"
                     label={t('fields.subjectLabel')}
                     placeholder={t('fields.subjectPlaceholder')}
                     helperText={t('fields.subjectHelper')}
-                    suggestions={ABOUT_SUBJECTS}
+                    width="100%"
+                    options={Object.values(ESubject).slice(1).map((value) => ({
+                      label: tSubject(value),
+                      value: value,
+                    }))}
                   />
 
                   <YStack gap="$3">
@@ -343,36 +407,64 @@ export function TutorProfileAboutScreen() {
                       <XStack
                         key={field.id}
                         gap="$3"
-                        alignItems="flex-end"
+                        alignItems="flex-start"
                         $xs={{
                           flexDirection: 'column',
                           alignItems: 'stretch',
                         }}
                       >
-                        <SelectInputField
+                        <Select
                           control={control}
                           name={`languageEntries.${index}.language`}
                           label={t('fields.languageLabel')}
                           placeholder={t('fields.languagesPlaceholder')}
-                          options={[...ABOUT_LANGUAGES]}
+                          width="100%"
+                          options={Object.values(ELanguage).slice(1).map((language) => ({
+                            label: tLanguage(language),
+                            value: language,
+                          }))}
                           flex={1}
                         />
-                        <SelectInputField
+                        <Select
                           control={control}
                           name={`languageEntries.${index}.proficiency`}
                           label={t('fields.proficiencyLabel')}
                           placeholder={t('fields.proficiencyPlaceholder')}
-                          options={[...ABOUT_PROFICIENCY_LEVELS]}
+                          width="100%"
+                          options={Object.values(EProficiencyLevel).map((proficiency) => ({
+                            label: tProficiency(proficiency),
+                            value: proficiency,
+                          }))}
                           flex={1}
                         />
                         {fields.length > 1 ? (
-                          <Button
-                            variant="outline"
-                            onPress={() => remove(index)}
-                            $xs={{ alignSelf: 'flex-start' }}
+                          <YStack
+                            gap="$1"
+                            flexShrink={0}
+                            alignSelf="flex-start"
+                            $xs={{ alignSelf: 'stretch' }}
                           >
-                            {t('removeLanguage')}
-                          </Button>
+                            <Text
+                              fontSize="$3"
+                              fontWeight="500"
+                              color="$colorMuted"
+                              opacity={0}
+                              pointerEvents="none"
+                              userSelect="none"
+                              aria-hidden
+                              numberOfLines={1}
+                              $xs={{ display: 'none' }}
+                            >
+                              {t('fields.languageLabel')}
+                            </Text>
+                            <Button
+                              variant="outline"
+                              onPress={() => remove(index)}
+                              $xs={{ alignSelf: 'center' }}
+                            >
+                              {t('removeLanguage')}
+                            </Button>
+                          </YStack>
                         ) : null}
                       </XStack>
                     ))}

@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import {
   Button,
@@ -19,6 +19,7 @@ import {
   Card,
   InputField,
   SkeletonCard,
+  UploadImage,
 } from '@mezon-tutors/app/ui';
 import {
   UserIcon,
@@ -42,63 +43,144 @@ import { formatLastSavedTime } from '@mezon-tutors/shared';
 const CURRENT_STEP = 2;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 const MAX_SIZE_MB = 5;
-
-type PhotoTextFormValues = {
-  introduce: string;
-  headline: string;
-  motivate: string;
-};
+const ACCEPT_PROFILE_IMAGE = 'image/jpeg,image/png,image/jpg';
 
 export function TutorProfilePhotoScreen() {
   const t = useTranslations('TutorProfile.Photo');
+  const locale = useLocale();
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoCardRef = useRef<HTMLDivElement | null>(null);
+  const identityCardRef = useRef<HTMLDivElement | null>(null);
   const formCardRef = useRef<HTMLDivElement | null>(null);
   const [photo, setPhoto] = useAtom(tutorProfilePhotoAtom);
   const [identity, setIdentity] = useAtom(tutorProfileIdentityAtom);
-  const identityFileInputRef = useRef<HTMLInputElement>(null);
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(photo.dataUrl);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
-  const photoTextSchema = useMemo(
+  const allowedImageExt = useMemo(() => new Set(['jpg', 'jpeg', 'png']), []);
+
+  const photoFormSchema = useMemo(
     () =>
       z.object({
-        introduce: z.string().min(1, t('validation.introduceRequired')),
-        headline: z.string().min(1, t('validation.headlineRequired')),
-        motivate: z.string().min(1, t('validation.motivateRequired')),
-      }),
-    [t]
+          introduce: z.string().min(1, t('validation.introduceRequired')),
+          headline: z.string().min(1, t('validation.headlineRequired')),
+          motivate: z.string().min(1, t('validation.motivateRequired')),
+          profilePhotoFile: z.instanceof(File).nullable(),
+          identityPhotoFile: z.instanceof(File).nullable(),
+        })
+        .superRefine((data, ctx) => {
+          const bytesLimit = MAX_SIZE_MB * 1024 * 1024;
+
+          const checkImageFile = (
+            file: File | null,
+            path: 'profilePhotoFile' | 'identityPhotoFile',
+            msgType: 'photo' | 'identity'
+          ) => {
+            if (!file) return;
+            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+            const mimeOk = file.type.startsWith('image/');
+            if (!allowedImageExt.has(ext) || !mimeOk) {
+              ctx.addIssue({
+                path: [path],
+                code: z.ZodIssueCode.custom,
+                message:
+                  msgType === 'photo'
+                    ? t('validation.photoInvalidType')
+                    : t('validation.identityInvalidType'),
+              });
+              return;
+            }
+            if (file.size > bytesLimit) {
+              ctx.addIssue({
+                path: [path],
+                code: z.ZodIssueCode.custom,
+                message:
+                  msgType === 'photo'
+                    ? t('validation.photoInvalidSize', { max: MAX_SIZE_MB })
+                    : t('validation.identityInvalidSize', { max: MAX_SIZE_MB }),
+              });
+            }
+          };
+
+          if (!photo.dataUrl && !data.profilePhotoFile) {
+            ctx.addIssue({
+              path: ['profilePhotoFile'],
+              code: z.ZodIssueCode.custom,
+              message: t('validation.photoRequired'),
+            });
+          }
+          if (data.profilePhotoFile) {
+            checkImageFile(data.profilePhotoFile, 'profilePhotoFile', 'photo');
+          }
+
+          if (!identity.dataUrl && !data.identityPhotoFile) {
+            ctx.addIssue({
+              path: ['identityPhotoFile'],
+              code: z.ZodIssueCode.custom,
+              message: t('validation.identityRequired'),
+            });
+          }
+          if (data.identityPhotoFile) {
+            checkImageFile(data.identityPhotoFile, 'identityPhotoFile', 'identity');
+          }
+        }),
+    [t, locale, photo.dataUrl, identity.dataUrl, allowedImageExt]
   );
 
-  const form = useForm<PhotoTextFormValues>({
+  type PhotoFormValues = z.infer<typeof photoFormSchema>;
+
+  const form = useForm<PhotoFormValues>({
     defaultValues: {
       introduce: photo.introduce,
       headline: photo.headline,
       motivate: photo.motivate,
+      profilePhotoFile: null,
+      identityPhotoFile: null,
     },
-    resolver: zodResolver(photoTextSchema),
-    mode: 'onChange',
+    resolver: zodResolver(photoFormSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   });
 
-  const { control, handleSubmit, setFocus } = form;
+  const { control, handleSubmit, setFocus, getValues } = form;
+  const { touchedFields, submitCount } = useFormState({ control });
+
+  const prevLocaleRef = useRef(locale);
+  useEffect(() => {
+    if (prevLocaleRef.current === locale) return;
+    prevLocaleRef.current = locale;
+    if (submitCount > 0) {
+      void form.trigger();
+      return;
+    }
+    const names = Object.keys(touchedFields);
+    if (names.length > 0) {
+      void form.trigger(names as (keyof PhotoFormValues)[]);
+    }
+  }, [locale, form, touchedFields, submitCount]);
+
+  const profilePhotoFile = useWatch({ control, name: 'profilePhotoFile' });
+  const identityPhotoFile = useWatch({ control, name: 'identityPhotoFile' });
 
   useEffect(() => {
     setPreviewPhotoUrl(photo.dataUrl);
   }, [photo.dataUrl]);
 
   useEffect(() => {
+    const currentProfile = getValues('profilePhotoFile');
+    const currentIdentity = getValues('identityPhotoFile');
     form.reset({
       introduce: photo.introduce,
       headline: photo.headline,
       motivate: photo.motivate,
+      profilePhotoFile: currentProfile,
+      identityPhotoFile: currentIdentity,
     });
-  }, [photo.introduce, photo.headline, photo.motivate]);
+  }, [photo.introduce, photo.headline, photo.motivate, getValues, form]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) return;
+  useEffect(() => {
+    if (!profilePhotoFile) return;
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
@@ -106,37 +188,44 @@ export function TutorProfilePhotoScreen() {
       setPreviewPhotoUrl(dataUrl);
       setLastSavedAt(new Date().toISOString());
     };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
+    reader.readAsDataURL(profilePhotoFile);
+  }, [profilePhotoFile, setPhoto, setLastSavedAt]);
 
-  const handleIdentityFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) return;
-
+  useEffect(() => {
+    if (!identityPhotoFile) return;
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
       setIdentity({ dataUrl });
       setLastSavedAt(new Date().toISOString());
     };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
+    reader.readAsDataURL(identityPhotoFile);
+  }, [identityPhotoFile, setIdentity, setLastSavedAt]);
 
-  const onSaveContinue = (values: PhotoTextFormValues) => {
-    setPhoto((prev) => ({ ...prev, ...values }));
+  const onSaveContinue = (values: PhotoFormValues) => {
+    const { profilePhotoFile: _pp, identityPhotoFile: _ip, ...textValues } = values;
+    setPhoto((prev) => ({ ...prev, ...textValues }));
     setLastSavedAt(new Date().toISOString());
     router.push('/become-tutor/certification');
   };
 
-  const onValidationError = (
-    errors: Partial<Record<keyof PhotoTextFormValues, { message?: string }>>
-  ) => {
+  const textFields = new Set<keyof PhotoFormValues>(['headline', 'motivate', 'introduce']);
+
+  const onValidationError = (errors: Partial<Record<keyof PhotoFormValues, { message?: string }>>) => {
+    const firstError = Object.keys(errors)[0] as keyof PhotoFormValues | undefined;
+    if (!firstError) return;
+
+    if (firstError === 'profilePhotoFile') {
+      photoCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (firstError === 'identityPhotoFile') {
+      identityCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const firstError = (Object.keys(errors) as (keyof PhotoTextFormValues)[])[0];
-    if (firstError) setFocus(firstError);
+    if (textFields.has(firstError)) setFocus(firstError);
   };
 
   const draftSavedLabel =
@@ -252,6 +341,7 @@ export function TutorProfilePhotoScreen() {
 
               {/* Upload photo frame */}
               <YStack
+                ref={photoCardRef}
                 backgroundColor="$backgroundCard"
                 borderRadius="$4"
                 padding="$6"
@@ -267,13 +357,6 @@ export function TutorProfilePhotoScreen() {
                   gap="$4"
                   alignItems="center"
                 >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/jpg"
-                    onChange={handleFileChange}
-                    style={{ display: 'none' }}
-                  />
                   {/* Avatar + camera badge wrapper */}
                   <YStack
                     position="relative"
@@ -353,35 +436,19 @@ export function TutorProfilePhotoScreen() {
                     ) : null}
                   </YStack>
 
-                  <YStack
-                    width="100%"
-                    maxWidth={420}
-                    gap="$2"
-                    $xs={{ maxWidth: '100%' }}
-                  >
-                    <Button
-                      variant="primary"
-                      onPress={() => fileInputRef.current?.click()}
-                    >
-                      <XStack
-                        alignItems="center"
-                        gap="$2"
-                      >
-                        <UploadIcon
-                          size={20}
-                          color="white"
-                        />
-                        <Text color="white">{t('uploadButton')}</Text>
-                      </XStack>
-                    </Button>
-                    <Text
-                      size="sm"
-                      variant="muted"
-                      textAlign="center"
-                    >
-                      {t('uploadHint')}
-                    </Text>
-                  </YStack>
+                  <UploadImage
+                    control={control}
+                    name="profilePhotoFile"
+                    accept={ACCEPT_PROFILE_IMAGE}
+                    uploadLabel={t('uploadButton')}
+                    hint={t('uploadHint')}
+                    icon={
+                      <UploadIcon
+                        size={20}
+                        color="white"
+                      />
+                    }
+                  />
                 </YStack>
               </YStack>
 
@@ -476,6 +543,7 @@ export function TutorProfilePhotoScreen() {
 
               {/* Update identity frame */}
               <YStack
+                ref={identityCardRef}
                 backgroundColor="$backgroundCard"
                 borderRadius="$4"
                 padding="$6"
@@ -489,14 +557,6 @@ export function TutorProfilePhotoScreen() {
                   gap: '$4',
                 }}
               >
-                <input
-                  ref={identityFileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg"
-                  onChange={handleIdentityFileChange}
-                  style={{ display: 'none' }}
-                />
-
                 {!identity.dataUrl ? (
                   <YStack
                     width="55%"
@@ -542,35 +602,19 @@ export function TutorProfilePhotoScreen() {
                   </YStack>
                 )}
 
-                <YStack
-                  width="100%"
-                  maxWidth={420}
-                  gap="$2"
-                  $xs={{ maxWidth: '100%' }}
-                >
-                  <Button
-                    variant="primary"
-                    onPress={() => identityFileInputRef.current?.click()}
-                  >
-                    <XStack
-                      alignItems="center"
-                      gap="$2"
-                    >
-                      <UploadIcon
-                        size={20}
-                        color="white"
-                      />
-                      <Text color="white">{t('identity.uploadButton')}</Text>
-                    </XStack>
-                  </Button>
-                  <Text
-                    size="sm"
-                    variant="muted"
-                    textAlign="center"
-                  >
-                    {t('uploadHint')}
-                  </Text>
-                </YStack>
+                <UploadImage
+                  control={control}
+                  name="identityPhotoFile"
+                  accept={ACCEPT_PROFILE_IMAGE}
+                  uploadLabel={t('identity.uploadButton')}
+                  hint={t('uploadHint')}
+                  icon={
+                    <UploadIcon
+                      size={20}
+                      color="white"
+                    />
+                  }
+                />
               </YStack>
 
               {/* Identity tips section */}

@@ -1,0 +1,57 @@
+{
+  "Home": {
+    "Hero": {
+      "badge": "Online Learning Made Easy",
+      "title": "Learn with",
+      "titleHighlight": "Expert Tutors",
+      "description": "Connect with trusted tutors, personalize your learning path, and study at your own pace from anywhere.",
+      "startNow": "Start Now",
+      "watchDemo": "Watch Demo",
+      "match": "Match",
+      "profile": "Profile",
+      "connect": "Connect"
+    },
+    "Features": {
+      "title": "Learning Built for Busy People",
+      "description": "Flexible sessions, practical tools, and a tutoring format designed for modern schedules.",
+      "exploreAll": "Explore all",
+      "eveningClasses": {
+        "title": "Evening Classes",
+        "description": "Study after work with sessions that fit your evening routine."
+      },
+      "flexibleWeekends": {
+        "title": "Flexible Weekends",
+        "description": "Book sessions on weekends when your calendar is less crowded."
+      },
+      "learnViaMezon": {
+        "title": "Learn via Mezon",
+        "description": "Join classes in one place with messaging, files, and tutor support."
+      }
+    },
+    "BecomeTutor": {
+      "badgeAmount": "+$600",
+      "badgeLabel": "Average monthly income",
+      "title": "Find Tutors for",
+      "titleHighlight": "Every Learning Goal",
+      "description": "From exam preparation to speaking confidence, choose tutors who match your goals and schedule.",
+      "benefits": {
+        "payment": "Transparent pricing and secure payments",
+        "tools": "Interactive tools to keep lessons engaging",
+        "schedule": "Flexible schedules with easy rescheduling"
+      },
+      "registerButton": "Register as a Tutor"
+    },
+    "Seamless": {
+      "title": "A Seamless Learning Experience",
+      "description": "Everything you need to learn effectively in one integrated environment.",
+      "virtualClassroom": {
+        "title": "Virtual Classroom",
+        "description": "Live sessions with whiteboard, materials, and tutor guidance in real time."
+      },
+      "instantMessaging": {
+        "title": "Instant Messaging",
+        "description": "Chat with tutors quickly for feedback, follow-ups, and study support."
+      }
+    }
+  }
+}

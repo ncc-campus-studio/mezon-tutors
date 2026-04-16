@@ -41,6 +41,7 @@
       "countryRequired": "Vui lòng chọn quốc gia",
       "countryFromList": "Vui lòng chọn quốc gia từ danh sách",
       "phoneRequired": "Vui lòng nhập số điện thoại",
+        "phoneInvalid": "Số điện thoại không hợp lệ",
       "subjectRequired": "Vui lòng chọn môn dạy",
       "subjectFromList": "Vui lòng chọn môn từ danh sách",
       "languagesRequired": "Vui lòng chọn ngôn ngữ",
@@ -119,7 +120,13 @@
     "validation": {
       "headlineRequired": "Vui lòng nhập tiêu đề hồ sơ",
       "motivateRequired": "Vui lòng nhập điều thúc đẩy bạn dạy học",
-      "introduceRequired": "Vui lòng nhập phần giới thiệu bản thân"
+      "introduceRequired": "Vui lòng nhập phần giới thiệu bản thân",
+      "photoRequired": "Vui lòng tải lên ảnh hồ sơ",
+      "photoInvalidType": "Ảnh hồ sơ chỉ hỗ trợ JPG hoặc PNG",
+      "photoInvalidSize": "Ảnh hồ sơ phải nhỏ hơn {max}MB",
+      "identityRequired": "Vui lòng tải lên ảnh giấy tờ tùy thân",
+      "identityInvalidType": "Ảnh giấy tờ tùy thân chỉ hỗ trợ JPG hoặc PNG",
+      "identityInvalidSize": "Ảnh giấy tờ tùy thân phải nhỏ hơn {max}MB"
     }
   },
   "Certification": {
@@ -151,7 +158,8 @@
       "specializationLabel": "Chuyên ngành",
       "specializationPlaceholder": "VD: Khoa học máy tính, Ngôn ngữ học",
       "uploadTitle": "Tải lên bằng cấp",
-      "uploadPrompt": "Nhấn để tải bản sao bằng tốt nghiệp"
+      "uploadPrompt": "Nhấn để tải bản sao bằng tốt nghiệp",
+      "uploadHint": "PDF, JPG hoặc PNG (tối đa 5MB)"
     },
     "back": "Quay lại",
     "continue": "Tiếp tục tới bước video",
@@ -161,7 +169,13 @@
       "yearInvalid": "Năm phải đúng định dạng YYYY",
       "universityRequired": "Vui lòng nhập trường đại học",
       "degreeRequired": "Vui lòng chọn loại bằng",
-      "specializationRequired": "Vui lòng nhập chuyên ngành"
+      "specializationRequired": "Vui lòng nhập chuyên ngành",
+      "certificateFileRequired": "Vui lòng tải lên file chứng chỉ",
+      "certificateFileInvalidType": "File chứng chỉ chỉ hỗ trợ PDF, JPG hoặc PNG",
+      "certificateFileTooLarge": "File chứng chỉ phải nhỏ hơn {max}MB",
+      "educationFileRequired": "Vui lòng tải lên file bằng cấp",
+      "educationFileInvalidType": "File bằng cấp chỉ hỗ trợ PDF, JPG hoặc PNG",
+      "educationFileTooLarge": "File bằng cấp phải nhỏ hơn {max}MB"
     }
   },
   "Video": {
@@ -173,6 +187,7 @@
     "progressPercent": 75,
     "title": "Video giới thiệu",
     "subtitle": "Hãy giới thiệu bản thân với học viên bằng một đoạn video ngắn để tăng độ hiển thị hồ sơ của bạn lên gấp 3 lần.",
+    "previewPlaceholder": "Dán liên kết YouTube hoặc Vimeo hợp lệ bên dưới để xem trước video tại đây.",
     "tabs": {
       "record": "Ghi hình trực tiếp",
       "pasteLink": "Dán liên kết"
@@ -234,7 +249,13 @@
       "addSlot": "Thêm khung giờ dạy"
     },
     "back": "Quay lại",
-    "continue": "Xem lại & Gửi"
+    "continue": "Xem lại & Gửi",
+    "validation": {
+      "hourlyRateRequired": "Vui lòng nhập giá theo giờ.",
+      "hourlyRateInvalidFormat": "Giá theo giờ phải là số hợp lệ (tối đa 2 chữ số thập phân).",
+      "hourlyRateGreaterThanZero": "Giá theo giờ phải lớn hơn 0.",
+      "weeklySlotsRequired": "Vui lòng thêm ít nhất 1 khung giờ dạy trong tuần trước khi tiếp tục."
+    }
   },
   "Completion": {
     "headerTitle": "TutorHub",

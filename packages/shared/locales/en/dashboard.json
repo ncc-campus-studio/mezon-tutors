@@ -1,0 +1,81 @@
+{
+  "Dashboard": {
+    "sidebar": {
+      "bookingRequests": "Booking Requests",
+      "mySchedule": "My Schedule",
+      "students": "Students",
+      "earnings": "Earnings",
+      "myLessons": "My Lessons",
+      "logout": "Logout"
+    },
+    "bookingRequests": {
+      "title": "Booking Requests",
+      "subtitle": "Manage your upcoming tutoring sessions. You have {count} new pending requests this morning.",
+      "levels": {
+        "undergraduateStudent": "Undergraduate Student",
+        "highSchoolJunior": "High School Junior",
+        "postGradPreparation": "Post-Grad Preparation"
+      },
+      "subjects": {
+        "advancedCalculus": "Advanced Calculus",
+        "apPhysics1": "AP Physics 1",
+        "dataScience": "Data Science",
+        "biochemistry2": "Biochemistry II"
+      },
+      "dates": {
+        "dateTomorrow": "Tomorrow, Oct 24",
+        "dateFriday": "Friday, Oct 25",
+        "dateMonday": "Monday, Oct 28",
+        "datePastSession": "Oct 21, 2023",
+        "dateSaturday": "Saturday, Oct 26"
+      },
+      "times": {
+        "slot0400To0530": "4:00 PM - 5:30 PM",
+        "slot0200To0300": "2:00 PM - 3:00 PM",
+        "slotCompletedSession": "Completed session",
+        "slot1000To1200": "10:00 AM - 12:00 PM"
+      },
+      "filters": {
+        "all": "All Requests",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed"
+      },
+      "table": {
+        "student": "Student",
+        "subject": "Subject",
+        "requestedTime": "Requested Time",
+        "rate": "Rate",
+        "status": "Status",
+        "actions": "Actions",
+        "noResults": "No booking requests found for this filter."
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "completed": "Completed"
+      },
+      "actions": {
+        "approve": "Approve",
+        "decline": "Decline",
+        "message": "Message",
+        "feedback": "Feedback"
+      },
+      "summary": {
+        "conversionRate": "Conversion Rate",
+        "responseTime": "Response Time",
+        "nextPayout": "Next Payout",
+        "conversionRateHint": "Approval rate this month",
+        "responseTimeHint": "Average response to new leads",
+        "nextPayoutHint": "Scheduled for Oct 28",
+        "conversionHint": "Approval rate this month",
+        "responseHint": "Average response to new leads",
+        "payoutHint": "Scheduled for Oct 28"
+      }
+    },
+    "placeholder": {
+      "title": "Feature Coming Soon",
+      "description": "This dashboard section is under construction."
+    }
+  }
+}

@@ -10,6 +10,7 @@ export type AuthUser = {
   email: string | null;
   username: string | null;
   avatar?: string | null;
+  role?: string | null;
 };
 
 type AuthUserSource = {
@@ -19,6 +20,7 @@ type AuthUserSource = {
   email?: string | null;
   username?: string | null;
   avatar?: string | null;
+  role?: string | null;
 };
 
 function toAuthUser(source: AuthUserSource): AuthUser {
@@ -28,6 +30,7 @@ function toAuthUser(source: AuthUserSource): AuthUser {
     email: source.email ?? '',
     username: source.username ?? '',
     avatar: source.avatar ?? null,
+    role: source.role ?? null,
   };
 }
 

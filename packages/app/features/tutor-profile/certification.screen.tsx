@@ -2,10 +2,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useRef } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormState, useWatch } from 'react-hook-form';
 import {
   Button,
   Container,
@@ -16,6 +16,7 @@ import {
   YStack,
   ScrollView,
   InputField,
+  UploadFile,
 } from '@mezon-tutors/app/ui';
 import { VerifiedIcon, InfoIcon, UploadIcon, WalletIcon } from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
@@ -24,6 +25,7 @@ import { TutorProfileStickyActions } from './components/tutor-profile-sticky-act
 import {
   tutorProfileCertificationAtom,
   markStepCompletedAtom,
+  defaultCertificationState,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { formatLastSavedTime } from '@mezon-tutors/shared';
@@ -37,29 +39,103 @@ const ACCEPT_CERT = '.pdf,.jpg,.jpeg,.png';
 
 export function TutorProfileCertificationScreen() {
   const t = useTranslations('TutorProfile.Certification');
+  const locale = useLocale();
   const router = useRouter();
-  const certInputRef = useRef<HTMLInputElement>(null);
-  const educationInputRef = useRef<HTMLInputElement>(null);
-  const [certFile, setCertFile] = useState<File | null>(null);
-  const [educationFile, setEducationFile] = useState<File | null>(null);
   const [certification, setCertification] = useAtom(tutorProfileCertificationAtom);
   const [, markStepCompleted] = useAtom(markStepCompletedAtom);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+  const teachingCardRef = useRef<HTMLDivElement>(null);
+  const educationCardRef = useRef<HTMLDivElement | null>(null);
+
+  const certificationMerged = useMemo(
+    () => ({ ...defaultCertificationState, ...certification }),
+    [certification]
+  );
 
   const certificationSchema = useMemo(
     () =>
       z.object({
-        teachingCertificateName: z.string().min(1, t('validation.certificateRequired')),
-        teachingYear: z
-          .string()
-          .min(4, t('validation.yearRequired'))
-          .regex(/^\d{4}$/, t('validation.yearInvalid')),
-        university: z.string().min(1, t('validation.universityRequired')),
-        degree: z.string().min(1, t('validation.degreeRequired')),
-        specialization: z.string().min(1, t('validation.specializationRequired')),
-      }),
-    [t]
+          teachingCertificateName: z.string().min(1, t('validation.certificateRequired')),
+          teachingYear: z
+            .string()
+            .min(4, t('validation.yearRequired'))
+            .regex(/^\d{4}$/, t('validation.yearInvalid')),
+          university: z.string().min(1, t('validation.universityRequired')),
+          degree: z.string().min(1, t('validation.degreeRequired')),
+          specialization: z.string().min(1, t('validation.specializationRequired')),
+          teachingCertificateFile: z.instanceof(File).nullable(),
+          educationFile: z.instanceof(File).nullable(),
+        })
+        .superRefine((data, ctx) => {
+          const allowedExt = new Set(['pdf', 'jpg', 'jpeg', 'png']);
+          const bytesLimit = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+          const validateFile = (
+            file: File,
+            path: 'teachingCertificateFile' | 'educationFile',
+            invalidTypeMsg: string,
+            tooLargeMsg: string
+          ) => {
+            const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+            if (!allowedExt.has(ext)) {
+              ctx.addIssue({
+                path: [path],
+                code: z.ZodIssueCode.custom,
+                message: invalidTypeMsg,
+              });
+              return;
+            }
+            if (file.size > bytesLimit) {
+              ctx.addIssue({
+                path: [path],
+                code: z.ZodIssueCode.custom,
+                message: tooLargeMsg,
+              });
+            }
+          };
+
+          const hasTeaching =
+            data.teachingCertificateFile !== null ||
+            !!certificationMerged.teachingCertificateFileDataUrl;
+          if (!hasTeaching) {
+            ctx.addIssue({
+              path: ['teachingCertificateFile'],
+              code: z.ZodIssueCode.custom,
+              message: t('validation.certificateFileRequired'),
+            });
+          } else if (data.teachingCertificateFile) {
+            validateFile(
+              data.teachingCertificateFile,
+              'teachingCertificateFile',
+              t('validation.certificateFileInvalidType'),
+              t('validation.certificateFileTooLarge', { max: MAX_FILE_SIZE_MB })
+            );
+          }
+
+          const hasEducation =
+            data.educationFile !== null || !!certificationMerged.educationFileDataUrl;
+          if (!hasEducation) {
+            ctx.addIssue({
+              path: ['educationFile'],
+              code: z.ZodIssueCode.custom,
+              message: t('validation.educationFileRequired'),
+            });
+          } else if (data.educationFile) {
+            validateFile(
+              data.educationFile,
+              'educationFile',
+              t('validation.educationFileInvalidType'),
+              t('validation.educationFileTooLarge', { max: MAX_FILE_SIZE_MB })
+            );
+          }
+        }),
+    [
+      t,
+      locale,
+      certificationMerged.teachingCertificateFileDataUrl,
+      certificationMerged.educationFileDataUrl,
+    ]
   );
 
   type CertificationFormValues = z.infer<typeof certificationSchema>;
@@ -70,65 +146,124 @@ export function TutorProfileCertificationScreen() {
       : '';
 
   const form = useForm<CertificationFormValues>({
-    defaultValues: certification,
+    defaultValues: {
+      teachingCertificateName: certificationMerged.teachingCertificateName,
+      teachingYear: certificationMerged.teachingYear,
+      university: certificationMerged.university,
+      degree: certificationMerged.degree,
+      specialization: certificationMerged.specialization,
+      teachingCertificateFile: null,
+      educationFile: null,
+    },
     resolver: zodResolver(certificationSchema),
-    mode: 'onChange',
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
   });
 
-  const { control, handleSubmit, setFocus } = form;
-  const teachingCardRef = useRef<HTMLDivElement>(null);
-  const educationCardRef = useRef<HTMLDivElement | null>(null);
+  const { control, handleSubmit, setFocus, getValues } = form;
+  const { touchedFields, submitCount } = useFormState({ control });
+
+  const prevLocaleRef = useRef(locale);
+  useEffect(() => {
+    if (prevLocaleRef.current === locale) return;
+    prevLocaleRef.current = locale;
+    if (submitCount > 0) {
+      void form.trigger();
+      return;
+    }
+    const names = Object.keys(touchedFields);
+    if (names.length > 0) {
+      void form.trigger(names as (keyof CertificationFormValues)[]);
+    }
+  }, [locale, form, touchedFields, submitCount]);
+
+  const teachingCertificateFile = useWatch({ control, name: 'teachingCertificateFile' });
+  const educationFile = useWatch({ control, name: 'educationFile' });
 
   useEffect(() => {
-    form.reset(certification);
+    if (!teachingCertificateFile) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCertification((prev) => ({
+        ...prev,
+        teachingCertificateFileDataUrl: reader.result as string,
+        teachingCertificateFileName: teachingCertificateFile.name,
+      }));
+      setLastSavedAt(new Date().toISOString());
+    };
+    reader.readAsDataURL(teachingCertificateFile);
+  }, [teachingCertificateFile, setCertification, setLastSavedAt]);
+
+  useEffect(() => {
+    if (!educationFile) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCertification((prev) => ({
+        ...prev,
+        educationFileDataUrl: reader.result as string,
+        educationFileName: educationFile.name,
+      }));
+      setLastSavedAt(new Date().toISOString());
+    };
+    reader.readAsDataURL(educationFile);
+  }, [educationFile, setCertification, setLastSavedAt]);
+
+  useEffect(() => {
+    const currentTeachingFile = getValues('teachingCertificateFile');
+    const currentEducationFile = getValues('educationFile');
+    form.reset({
+      teachingCertificateName: certificationMerged.teachingCertificateName,
+      teachingYear: certificationMerged.teachingYear,
+      university: certificationMerged.university,
+      degree: certificationMerged.degree,
+      specialization: certificationMerged.specialization,
+      teachingCertificateFile: currentTeachingFile,
+      educationFile: currentEducationFile,
+    });
   }, [
-    certification.teachingCertificateName,
-    certification.teachingYear,
-    certification.university,
-    certification.degree,
-    certification.specialization,
+    certificationMerged.teachingCertificateName,
+    certificationMerged.teachingYear,
+    certificationMerged.university,
+    certificationMerged.degree,
+    certificationMerged.specialization,
+    getValues,
   ]);
 
   const onSubmit = (values: CertificationFormValues) => {
-    setCertification(values);
+    const { teachingCertificateFile: _tcf, educationFile: _ef, ...textFields } = values;
+    setCertification((prev) => ({
+      ...prev,
+      ...textFields,
+    }));
     setLastSavedAt(new Date().toISOString());
     markStepCompleted(CURRENT_STEP);
     router.push('/become-tutor/video');
   };
 
-  const teachingFields = ['teachingCertificateName', 'teachingYear'];
+  const teachingFields = new Set<keyof CertificationFormValues>([
+    'teachingCertificateName',
+    'teachingYear',
+    'teachingCertificateFile',
+  ]);
+  const focusableFields = new Set<keyof CertificationFormValues>([
+    'teachingCertificateName',
+    'teachingYear',
+    'university',
+    'degree',
+    'specialization',
+  ]);
+
   const onValidationError = (
     errors: Partial<Record<keyof CertificationFormValues, { message?: string }>>
   ) => {
-    const firstError = (Object.keys(errors) as (keyof CertificationFormValues)[])[0];
+    const firstError = Object.keys(errors)[0] as keyof CertificationFormValues | undefined;
     if (!firstError) return;
-    if (teachingFields.includes(firstError)) {
-      teachingCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      educationCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    setFocus(firstError);
-  };
 
-  const handleCertChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.size <= MAX_FILE_SIZE_MB * 1024 * 1024) setCertFile(file);
-    e.target.value = '';
-  };
+    const targetSectionRef = teachingFields.has(firstError) ? teachingCardRef : educationCardRef;
+    targetSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  const handleEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.size <= MAX_FILE_SIZE_MB * 1024 * 1024) setEducationFile(file);
-    e.target.value = '';
+    if (focusableFields.has(firstError)) setFocus(firstError);
   };
-
-  const handleDrop = (e: React.DragEvent, setFile: (f: File | null) => void) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.size <= MAX_FILE_SIZE_MB * 1024 * 1024) setFile(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
 
   return (
     <Screen backgroundColor="$background">
@@ -168,6 +303,7 @@ export function TutorProfileCertificationScreen() {
               />
 
               <YStack
+                ref={teachingCardRef}
                 backgroundColor="$backgroundCard"
                 borderRadius="$4"
                 padding="$6"
@@ -223,61 +359,19 @@ export function TutorProfileCertificationScreen() {
                       {t('teaching.uploadTitle')}
                     </Text>
 
-                    <input
-                      ref={certInputRef}
-                      type="file"
+                    <UploadFile
+                      control={control}
+                      name="teachingCertificateFile"
                       accept={ACCEPT_CERT}
-                      onChange={handleCertChange}
-                      style={{ display: 'none' }}
+                      icon={<UploadIcon size={32} color="#6B7280" />}
+                      prompt={t('teaching.uploadPrompt')}
+                      hint={t('teaching.uploadHint')}
+                      persistedFileName={
+                        certificationMerged.teachingCertificateFileDataUrl
+                          ? certificationMerged.teachingCertificateFileName || undefined
+                          : undefined
+                      }
                     />
-                    <button
-                      type="button"
-                      tabIndex={0}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => certInputRef.current?.click()}
-                      onKeyDown={(e) => e.key === 'Enter' && certInputRef.current?.click()}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, setCertFile)}
-                    >
-                      <YStack
-                        borderRadius="$4"
-                        borderWidth={1}
-                        borderColor="$borderSubtle"
-                        borderStyle="dashed"
-                        padding="$6"
-                        alignItems="center"
-                        justifyContent="center"
-                        backgroundColor="$fieldBackground"
-                        gap="$2"
-                      >
-                        <UploadIcon
-                          size={32}
-                          color="#6B7280"
-                        />
-                        <Text
-                          size="sm"
-                          variant="muted"
-                          textAlign="center"
-                        >
-                          {t('teaching.uploadPrompt')}
-                        </Text>
-                        <Text
-                          size="sm"
-                          variant="muted"
-                        >
-                          {t('teaching.uploadHint')}
-                        </Text>
-                        {certFile && (
-                          <Text
-                            size="sm"
-                            color="$appPrimary"
-                            fontWeight="500"
-                          >
-                            {certFile.name}
-                          </Text>
-                        )}
-                      </YStack>
-                    </button>
 
                     <XStack
                       marginTop="$2"
@@ -377,54 +471,20 @@ export function TutorProfileCertificationScreen() {
                     >
                       {t('education.uploadTitle')}
                     </Text>
-                    <input
-                      ref={educationInputRef}
-                      type="file"
+
+                    <UploadFile
+                      control={control}
+                      name="educationFile"
                       accept={ACCEPT_CERT}
-                      onChange={handleEducationChange}
-                      style={{ display: 'none' }}
+                      icon={<UploadIcon size={32} color="#6B7280" />}
+                      prompt={t('education.uploadPrompt')}
+                      hint={t('education.uploadHint')}
+                      persistedFileName={
+                        certificationMerged.educationFileDataUrl
+                          ? certificationMerged.educationFileName || undefined
+                          : undefined
+                      }
                     />
-                    <button
-                      type="button"
-                      tabIndex={0}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => educationInputRef.current?.click()}
-                      onKeyDown={(e) => e.key === 'Enter' && educationInputRef.current?.click()}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, setEducationFile)}
-                    >
-                      <YStack
-                        borderRadius="$4"
-                        borderWidth={1}
-                        borderColor="$borderSubtle"
-                        borderStyle="dashed"
-                        padding="$6"
-                        alignItems="center"
-                        justifyContent="center"
-                        backgroundColor="$fieldBackground"
-                        gap="$2"
-                      >
-                        <UploadIcon
-                          size={32}
-                          color="#6B7280"
-                        />
-                        <Text
-                          size="sm"
-                          variant="muted"
-                        >
-                          {t('education.uploadPrompt')}
-                        </Text>
-                        {educationFile && (
-                          <Text
-                            size="sm"
-                            color="$appPrimary"
-                            fontWeight="500"
-                          >
-                            {educationFile.name}
-                          </Text>
-                        )}
-                      </YStack>
-                    </button>
                   </YStack>
                 </YStack>
               </YStack>

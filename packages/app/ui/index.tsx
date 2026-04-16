@@ -1,4 +1,4 @@
-export { XStack, YStack, ScrollView, Separator, Input, Label, Paragraph,Dialog, AlertDialog } from 'tamagui';
+export { XStack, YStack, ScrollView, Separator, Input, Label, Paragraph, Dialog, AlertDialog, H1, useMedia } from 'tamagui';
 
 export { Toast, ToastProvider, useToastController } from '@tamagui/toast';
 
@@ -23,3 +23,5 @@ export * from './Select'
 export * from './Slider'
 export * from './Empty'
 export * from './loadings/OverlayLoading'
+export * from './UploadFile'
+export * from './UploadImage'

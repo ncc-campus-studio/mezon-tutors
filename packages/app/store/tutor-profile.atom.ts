@@ -94,6 +94,10 @@ export type TutorProfileCertificationState = {
   university: string;
   degree: string;
   specialization: string;
+  teachingCertificateFileDataUrl: string | null;
+  teachingCertificateFileName: string;
+  educationFileDataUrl: string | null;
+  educationFileName: string;
 };
 
 export const defaultCertificationState: TutorProfileCertificationState = {
@@ -102,6 +106,10 @@ export const defaultCertificationState: TutorProfileCertificationState = {
   university: '',
   degree: '',
   specialization: '',
+  teachingCertificateFileDataUrl: null,
+  teachingCertificateFileName: '',
+  educationFileDataUrl: null,
+  educationFileName: '',
 };
 
 export const tutorProfileCertificationAtom = atomWithStorage<TutorProfileCertificationState>(
@@ -270,12 +278,11 @@ export function buildSubmitTutorProfilePayload(
   };
 }
 
-export const submitTutorProfileAtom = atom(null, async (_, set, payload: SubmitTutorProfileDto) => {
-  await submitTutorProfile(payload);
-
+export const resetTutorProfileAfterSubmitAtom = atom(null, (_, set) => {
   set(tutorProfileAboutAtom, defaultAboutState);
   set(tutorProfilePhotoAtom, defaultPhotoState);
   set(tutorProfileCertificationAtom, defaultCertificationState);
+  set(tutorProfileIdentityAtom, defaultIdentityState);
   set(tutorProfileVideoAtom, defaultVideoState);
   set(tutorProfileLastSavedAtAtom, null);
 
@@ -291,4 +298,9 @@ export const submitTutorProfileAtom = atom(null, async (_, set, payload: SubmitT
     4: 'idle',
     5: 'idle',
   });
+});
+
+export const submitTutorProfileAtom = atom(null, async (_, set, payload: SubmitTutorProfileDto) => {
+  await submitTutorProfile(payload);
+  set(resetTutorProfileAfterSubmitAtom);
 });

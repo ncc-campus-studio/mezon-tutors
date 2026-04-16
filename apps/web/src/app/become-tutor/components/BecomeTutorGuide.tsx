@@ -7,7 +7,7 @@ import {
   ROUTES,
 } from '@mezon-tutors/shared';
 import { useTranslations } from 'next-intl';
-import { useMedia, XStack, YStack, Paragraph, H1 } from 'tamagui';
+import { useMedia, XStack, YStack, Paragraph, H1 } from '@mezon-tutors/app/ui';
 import { GuideHighlightCard } from './GuideHighlightCard';
 import { GuideStepCard } from './GuideStepCard';
 

@@ -1,43 +1,86 @@
+'use client'
+
+import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
-import { YStack, Text, Select as TamaguiSelect, SelectProps as TamaguiSelectProps } from 'tamagui'
+import {
+  YStack,
+  Text,
+  Select as TamaguiSelect,
+  SelectProps as TamaguiSelectProps,
+} from 'tamagui'
 import { Check, ChevronDown, ChevronUp } from '@tamagui/lucide-icons'
 import { LinearGradient } from 'tamagui/linear-gradient'
+import type { Control, FieldValues, Path, RegisterOptions } from 'react-hook-form'
+import { Controller } from 'react-hook-form'
 
 type Option = {
   label: string
   value: string
 }
 
-type BaseSelectProps = TamaguiSelectProps & {
+type SelectOwnProps = {
   label?: string
   options?: Option[]
-  value?: string
-  defaultValue?: string
   placeholder?: string
-  onValueChange?: (value: string) => void
-  fullWidth?: boolean
+  width?: number | string
   flex?: number
-  triggerWidth?: number
   gap?: number | string
+  helperText?: string
+  children?: ReactNode
 }
 
-export function Select({
+type SelectStandaloneProps = Omit<TamaguiSelectProps, 'value' | 'defaultValue' | 'onValueChange'> &
+  SelectOwnProps & {
+    value?: string
+    defaultValue?: string
+    onValueChange?: (value: string) => void
+  }
+
+type SelectFormProps<TFieldValues extends FieldValues> = Omit<
+  TamaguiSelectProps,
+  'value' | 'defaultValue' | 'onValueChange'
+> &
+  SelectOwnProps & {
+    name: Path<TFieldValues>
+    control: Control<TFieldValues>
+    rules?: RegisterOptions<TFieldValues, Path<TFieldValues>>
+  }
+
+export type SelectProps<TFieldValues extends FieldValues = FieldValues> =
+  | SelectStandaloneProps
+  | SelectFormProps<TFieldValues>
+
+type SelectFieldProps = {
+  label?: string
+  options?: Option[]
+  placeholder: string
+  width?: number | string
+  flex?: number
+  gap: number | string
+  helperText?: string
+  errorMessage?: string
+  selectedValue: string
+  onSelectedValueChange: (val: string) => void
+  onTriggerBlur?: () => void
+  children?: ReactNode
+  tamaguiSelectRest: Omit<TamaguiSelectProps, 'value' | 'defaultValue' | 'onValueChange'>
+}
+
+function SelectField({
   label,
   options,
-  value,
-  defaultValue,
-  placeholder = 'Select...',
-  onValueChange,
-  fullWidth = false,
+  placeholder,
+  width,
   flex,
-  triggerWidth = 220,
-  gap = '$2',
+  gap,
+  helperText,
+  errorMessage,
+  selectedValue,
+  onSelectedValueChange,
+  onTriggerBlur,
   children,
-  ...rest
-}: BaseSelectProps) {
-  const [internalValue, setInternalValue] = useState(defaultValue ?? '')
-  const isControlled = value !== undefined
-  const selectedValue = isControlled ? value : internalValue
+  tamaguiSelectRest,
+}: SelectFieldProps) {
   const selectedLabel = useMemo(() => {
     if (!options || !selectedValue) return null
     return options.find((o) => o.value === selectedValue)?.label ?? null
@@ -56,27 +99,32 @@ export function Select({
     [options]
   )
 
-  const handleChange = (val: string) => {
-    if (!isControlled) setInternalValue(val)
-    onValueChange?.(val)
-  }
+  const borderColor = errorMessage ? '$red9' : '$borderSubtle'
 
   return (
-    <YStack flex={flex} width={fullWidth ? '100%' : undefined} gap={gap}>
-      {label && (
-        <Text fontSize="$3" fontWeight="500">
+    <YStack flex={flex} width={width} gap={gap}>
+      {label ? (
+        <Text fontSize="$3" fontWeight="500" color="$colorMuted">
           {label}
         </Text>
-      )}
+      ) : null}
 
-      <TamaguiSelect value={selectedValue} onValueChange={handleChange} {...rest}>
+      <TamaguiSelect
+        value={selectedValue}
+        onValueChange={onSelectedValueChange}
+        {...tamaguiSelectRest}
+      >
         <TamaguiSelect.Trigger
-          width={triggerWidth}
-          minWidth={fullWidth ? '100%' : undefined}
+          width={width}
           iconAfter={ChevronDown}
           borderRadius="$4"
-          backgroundColor="$background"
+          backgroundColor="$fieldBackground"
           color="$appText"
+          borderWidth={1}
+          borderColor={borderColor}
+          focusVisibleStyle={{ outlineWidth: 0, outlineStyle: 'none' }}
+          focusStyle={{ borderColor }}
+          {...(onTriggerBlur ? { onBlur: onTriggerBlur } : {})}
         >
           {selectedLabel ? (
             <TamaguiSelect.Value>{selectedLabel}</TamaguiSelect.Value>
@@ -139,6 +187,96 @@ export function Select({
           </TamaguiSelect.ScrollDownButton>
         </TamaguiSelect.Content>
       </TamaguiSelect>
+
+      {errorMessage ? (
+        <Text fontSize="$3" fontWeight="500" color="$red10">
+          {errorMessage}
+        </Text>
+      ) : helperText ? (
+        <Text fontSize="$3" fontWeight="500" color="$colorMuted">
+          {helperText}
+        </Text>
+      ) : null}
     </YStack>
+  )
+}
+
+export function Select<TFieldValues extends FieldValues = FieldValues>(props: SelectProps<TFieldValues>) {
+  const {
+    label,
+    options,
+    placeholder = 'Select...',
+    flex,
+    width = 220,
+    gap = '$2',
+    helperText,
+    children,
+    control,
+    name,
+    rules,
+    value,
+    defaultValue,
+    onValueChange,
+    ...tamaguiSelectRest
+  } = props as any
+
+  const isForm = control != null && name != null
+
+  const [internalValue, setInternalValue] = useState((defaultValue ?? '') as string)
+  const isControlled = value !== undefined
+  const selectedValueStandalone = isControlled ? String(value ?? '') : internalValue
+
+  if (isForm) {
+    return (
+      <Controller
+        control={control as any}
+        name={name as any}
+        rules={rules as any}
+        render={({ field, fieldState }) => (
+          <SelectField
+            label={label}
+            options={options}
+            placeholder={placeholder}
+            width={width}
+            flex={flex}
+            gap={gap}
+            helperText={helperText}
+            errorMessage={
+              typeof fieldState.error?.message === 'string' ? fieldState.error?.message : undefined
+            }
+            selectedValue={field.value ? String(field.value) : ''}
+            onSelectedValueChange={field.onChange}
+            onTriggerBlur={field.onBlur}
+            children={children}
+            tamaguiSelectRest={tamaguiSelectRest as Omit<
+              TamaguiSelectProps,
+              'value' | 'defaultValue' | 'onValueChange'
+            >}
+          />
+        )}
+      />
+    )
+  }
+
+  return (
+    <SelectField
+      label={label}
+      options={options}
+      placeholder={placeholder}
+      width={width}
+      flex={flex}
+      gap={gap}
+      helperText={helperText}
+      selectedValue={selectedValueStandalone}
+      onSelectedValueChange={(val) => {
+        if (!isControlled) setInternalValue(val)
+        onValueChange?.(val)
+      }}
+      children={children}
+      tamaguiSelectRest={tamaguiSelectRest as Omit<
+        TamaguiSelectProps,
+        'value' | 'defaultValue' | 'onValueChange'
+      >}
+    />
   )
 }

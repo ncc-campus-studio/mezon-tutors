@@ -5,6 +5,7 @@ export * from './BackArrowIcon';
 export * from './CalendarIcon';
 export * from './CameraIcon';
 export * from './CardIcon';
+export * from './BookingRequestIcon';
 export * from './CheckIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
@@ -17,6 +18,7 @@ export * from './GalleryIcon';
 export * from './GraduationCapIcon';
 export * from './InfoIcon';
 export * from './MailIcon';
+export * from './MessageDotsIcon';
 export * from './PlusCircleIcon';
 export * from './ProfileCameraIcon';
 export * from './ScanIcon';
@@ -47,6 +49,22 @@ export * from './TrianglePlayOutlineIcon'
 export * from './WorldIcon'
 export * from './LanguageIcon'
 export * from './StarOutlineIcon'
+export * from './LogoutIcon'
+export * from './LogoIcon'
+export * from './FeatureEveningClassesIcon'
+export * from './FeatureFlexibleWeekendsIcon'
+export * from './FeatureLearnViaMezonIcon'
+export * from './FlashIcon'
+export * from './GlobeIcon'
+export * from './AtSignIcon'
+export * from './CheckBadgeIcon'
+export * from './PlayIcon'
+export * from './SeamlessInstantMessagingIcon'
+export * from './SeamlessVirtualClassroomIcon'
+export * from './StarIcon'
+export * from './WatchDemoIcon'
+export * from './TutorVideoCardIcon'
+export * from './VercelIcon'
 
 // Types
 export * from './PersonalIcon';

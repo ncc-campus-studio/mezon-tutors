@@ -37,8 +37,8 @@ export type MyLessonsApiResponse = {
   calendar_title: string
   week_days: MyLessonWeekDayApiItem[]
   week_hours: number[]
-  current_day_index: number
-  current_hour: number
+  current_day_index?: number
+  current_hour?: number
   calendar_lessons: MyLessonApiItem[]
   upcoming_lessons: MyLessonApiItem[]
   previous_lessons: MyLessonApiItem[]

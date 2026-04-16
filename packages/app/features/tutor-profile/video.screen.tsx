@@ -18,7 +18,13 @@ import {
   ScrollView,
   Input,
 } from '@mezon-tutors/app/ui';
-import { CircleCheckIcon, CheckIcon, CircleCloseIcon, CloseIcon } from '@mezon-tutors/app/ui/icons';
+import {
+  CircleCheckIcon,
+  CheckIcon,
+  CircleCloseIcon,
+  CloseIcon,
+  VideoIcon,
+} from '@mezon-tutors/app/ui/icons';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
 import { TutorProfileStickyActions } from './components/tutor-profile-sticky-actions';
@@ -244,11 +250,29 @@ export function TutorProfileVideoScreen() {
                         />
                       ) : (
                         <YStack
+                          position="absolute"
+                          top={0}
+                          right={0}
+                          bottom={0}
+                          left={0}
                           alignItems="center"
                           justifyContent="center"
-                          gap="$2"
+                          gap="$3"
+                          padding="$4"
+                          backgroundColor="$backgroundMuted"
                         >
-                          {/* Empty placeholder when no video link yet */}
+                          <VideoIcon
+                            size={44}
+                            color="rgba(100, 116, 139, 0.55)"
+                          />
+                          <Text
+                            variant="muted"
+                            size="sm"
+                            textAlign="center"
+                            maxWidth={280}
+                          >
+                            {t('previewPlaceholder')}
+                          </Text>
                         </YStack>
                       )}
                     </YStack>
@@ -288,6 +312,7 @@ export function TutorProfileVideoScreen() {
                             paddingHorizontal="$4"
                             height={48}
                             borderRadius="$5"
+                            placeholderTextColor="$colorMuted"
                           />
                         )}
                       />
