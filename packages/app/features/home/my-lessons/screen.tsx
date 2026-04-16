@@ -6,46 +6,37 @@ import { useTranslations } from 'next-intl';
 import { Screen, ScrollView, Text, YStack } from '@mezon-tutors/app/ui';
 import { isLoadingAtom, userAtom } from '@mezon-tutors/app/store/auth.atom';
 import { useMedia } from 'tamagui';
+import dayjs from 'dayjs';
 import { MyLessonsCalendarSection } from './components/MyLessonsCalendarSection';
 import { MyLessonsHeader } from './components/MyLessonsHeader';
 import { MyLessonsLessonsPanel } from './components/MyLessonsLessonsPanel';
 import { MyLessonsPromoCard } from './components/MyLessonsPromoCard';
 import { MyLessonsTutorsPanel } from './components/MyLessonsTutorsPanel';
 import { getMyLessonsDataByMezonUserId } from './data-source';
+import { useMyLessons } from './hooks/useMyLessons';
 import type { MyLessonsTab, MyLessonsViewData } from './types';
 
 export function MyLessonsScreen() {
   const t = useTranslations('MyLessons');
   const [activeTab, setActiveTab] = useState<MyLessonsTab>('calendar');
-  const [data, setData] = useState<MyLessonsViewData | null>(null);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const user = useAtomValue(userAtom);
   const isAuthLoading = useAtomValue(isLoadingAtom);
+
+  const { data, isLoading } = useMyLessons(user?.mezonUserId, selectedDate);
 
   const media = useMedia();
   const isNarrow = media.md || media.sm || media.xs;
 
-  useEffect(() => {
-    let isMounted = true;
+  const handlePrevWeek = () => {
+    setSelectedDate((prev) => prev.subtract(7, 'day'));
+  };
 
-    if (isAuthLoading) {
-      return () => {
-        isMounted = false;
-      };
-    }
+  const handleNextWeek = () => {
+    setSelectedDate((prev) => prev.add(7, 'day'));
+  };
 
-    const loadData = async () => {
-      const payload = await getMyLessonsDataByMezonUserId(user?.mezonUserId);
-      if (isMounted) {
-        setData(payload);
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isAuthLoading, user?.mezonUserId]);
+  const isDataLoading = isAuthLoading || isLoading;
 
   return (
     <Screen backgroundColor="$myLessonsPageBackground">
@@ -61,7 +52,7 @@ export function MyLessonsScreen() {
           >
             <MyLessonsHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {!data ? (
+            {isDataLoading ? (
               <YStack
                 width="100%"
                 minHeight={220}
@@ -81,10 +72,20 @@ export function MyLessonsScreen() {
             {data && activeTab === 'calendar' ? (
               isNarrow ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <MyLessonsCalendarSection calendar={data.calendar} lessons={data.calendarLessons} />
+                  <MyLessonsCalendarSection 
+                    calendar={data.calendar} 
+                    lessons={data.calendarLessons}
+                    onPrevWeek={handlePrevWeek}
+                    onNextWeek={handleNextWeek}
+                  />
                 </ScrollView>
               ) : (
-                <MyLessonsCalendarSection calendar={data.calendar} lessons={data.calendarLessons} />
+                <MyLessonsCalendarSection 
+                  calendar={data.calendar} 
+                  lessons={data.calendarLessons}
+                  onPrevWeek={handlePrevWeek}
+                  onNextWeek={handleNextWeek}
+                />
               )
             ) : null}
 
@@ -99,12 +100,6 @@ export function MyLessonsScreen() {
             ) : null}
 
             {data && activeTab === 'tutors' ? <MyLessonsTutorsPanel tutors={data.tutors} /> : null}
-
-            <YStack width="100%" alignItems="flex-end" paddingVertical="$2">
-              <Text color="$myLessonsFooterText" fontSize={12}>
-                {t('previewFooter')}
-              </Text>
-            </YStack>
           </YStack>
         </ScrollView>
       </YStack>

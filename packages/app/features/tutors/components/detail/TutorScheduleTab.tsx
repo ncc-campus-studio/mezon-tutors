@@ -1,78 +1,92 @@
-import { Text, XStack, YStack } from '@mezon-tutors/app/ui'
-import { TUTOR_DETAIL_WEEKDAY_KEYS } from '@mezon-tutors/shared'
-import { useTranslations } from 'next-intl'
-import { TutorScheduleTabProps } from './types'
+import { CalendarCard } from '@mezon-tutors/app';
+import type { CalendarEvent, CalendarWeekDay } from '@mezon-tutors/app';
+import type { TutorDetailAvailabilitySlotDto } from '@mezon-tutors/shared';
+import { getFallbackWeekHours } from '@mezon-tutors/shared';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import 'dayjs/locale/vi';
+import 'dayjs/locale/en';
+import { useLocale, useTranslations } from 'next-intl';
+import { useMedia } from 'tamagui';
+import { TutorScheduleEventCard } from './TutorScheduleEventCard';
+import type { TutorScheduleTabProps } from './types';
+
+dayjs.extend(customParseFormat);
+
+function buildTutorScheduleWeekDays(locale: string): CalendarWeekDay[] {
+  const now = dayjs();
+  const dayOfWeek = now.day();
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = now.subtract(mondayOffset, 'day');
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = monday.add(index, 'day').locale(locale);
+    return {
+      shortLabel: date.format('ddd').toUpperCase(),
+      dateLabel: date.format('DD'),
+      fullDate: date.toDate(),
+    };
+  });
+}
+
+function parseTimeToHour(time: string): number {
+  const parsed = dayjs(time, 'HH:mm');
+  return parsed.hour() + parsed.minute() / 60;
+}
+
+function convertSlotsToEvents(
+  slots: TutorDetailAvailabilitySlotDto[]
+): CalendarEvent<TutorDetailAvailabilitySlotDto>[] {
+  return slots
+    .filter((slot) => slot.isActive)
+    .map((slot) => ({
+      id: `${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`,
+      dayIndex: slot.dayOfWeek,
+      startHour: parseTimeToHour(slot.startTime),
+      endHour: parseTimeToHour(slot.endTime),
+      data: slot,
+    }));
+}
+
+function getWeekHoursFromSlots(slots: TutorDetailAvailabilitySlotDto[]): number[] {
+  if (!slots.length) return getFallbackWeekHours();
+
+  const hours = new Set<number>();
+  slots.forEach((slot) => {
+    const startHour = Math.floor(parseTimeToHour(slot.startTime));
+    const endHour = Math.floor(parseTimeToHour(slot.endTime));
+    for (let h = startHour; h < endHour; h++) {
+      hours.add(h);
+    }
+  });
+
+  return Array.from(hours).sort((a, b) => a - b);
+}
 
 export function TutorScheduleTab({ tutor }: TutorScheduleTabProps) {
-  const t = useTranslations('Tutors.Detail')
+  const t = useTranslations('Tutors.Detail');
+  const locale = useLocale();
+  const media = useMedia();
+  const isCompact = media.md || media.sm || media.xs;
 
-  const groupedByDay = TUTOR_DETAIL_WEEKDAY_KEYS.map((key, dayOfWeek) => {
-    const slots = tutor.availability
-      .filter((slot) => slot.isActive && slot.dayOfWeek === dayOfWeek)
-      .sort((a, b) => a.startTime.localeCompare(b.startTime))
-
-    return { key, dayOfWeek, slots }
-  })
+  const weekDays = buildTutorScheduleWeekDays(locale);
+  const weekHours = getWeekHoursFromSlots(tutor.availability);
+  const events = convertSlotsToEvents(tutor.availability);
 
   return (
-    <YStack gap="$3">
-      <Text color="$tutorsDetailPrimaryText" fontSize={20} fontWeight="800">
-        {t('scheduleTitle')}
-      </Text>
-      <Text color="$tutorsDetailMutedText">{t('scheduleHint', { timezone: tutor.timezone })}</Text>
-
-      <XStack gap="$2.5" flexWrap="wrap">
-        {groupedByDay.map((day) => (
-          <YStack
-            key={day.key}
-            minWidth={110}
-            flex={1}
-            maxWidth={130}
-            backgroundColor="$tutorsDetailScheduleColumnBackground"
-            borderWidth={1}
-            borderColor="$tutorsDetailScheduleColumnBorder"
-            borderRadius={12}
-            padding="$2"
-            gap="$1.5"
-          >
-            <Text color="$tutorsDetailSecondaryText" fontSize={12} fontWeight="700">
-              {t(`weekdays.${day.key}`)}
-            </Text>
-
-            {day.slots.length === 0 ? (
-              <YStack
-                borderRadius={8}
-                paddingVertical="$1.5"
-                paddingHorizontal="$2"
-                backgroundColor="$tutorsDetailScheduleSlotEmptyBackground"
-              >
-                <Text color="$tutorsDetailMutedText" fontSize={11}>
-                  {t('scheduleUnavailable')}
-                </Text>
-              </YStack>
-            ) : (
-              day.slots.map((slot) => (
-                <YStack
-                  key={`${day.dayOfWeek}-${slot.startTime}-${slot.endTime}`}
-                  borderRadius={8}
-                  paddingVertical="$1.5"
-                  paddingHorizontal="$2"
-                  backgroundColor="$tutorsDetailScheduleSlotBackground"
-                  borderWidth={1}
-                  borderColor="$tutorsDetailScheduleSlotBorder"
-                >
-                  <Text color="$tutorsDetailPrimaryText" fontSize={11} fontWeight="700">
-                    {slot.startTime}
-                  </Text>
-                  <Text color="$tutorsDetailSecondaryText" fontSize={11}>
-                    {slot.endTime}
-                  </Text>
-                </YStack>
-              ))
-            )}
-          </YStack>
-        ))}
-      </XStack>
-    </YStack>
-  )
+    <CalendarCard
+      type="tutorSchedule"
+      weekDays={weekDays}
+      weekHours={weekHours}
+      events={events}
+      enableGapCollapse
+      readonly
+      renderEvent={(event, isCompact) => <TutorScheduleEventCard slot={event.data} isCompact={isCompact} />}
+      isCompact={isCompact}
+      presetData={{
+        title: t('scheduleTitle'),
+        subtitle: t('scheduleHint', { timezone: tutor.timezone }),
+      }}
+    />
+  );
 }
