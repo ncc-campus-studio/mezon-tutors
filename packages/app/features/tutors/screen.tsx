@@ -1,21 +1,28 @@
 'use client'
 
-import { Screen, Container, YStack, XStack, Text, Pagination, Empty, OverlayLoading } from '@mezon-tutors/app/ui'
+import {
+  Screen,
+  Container,
+  YStack,
+  XStack,
+  Text,
+  Pagination,
+  Empty,
+  OverlayLoading,
+} from '@mezon-tutors/app/ui'
 import { PreviewCard } from './components/PreviewCard'
 import { TutorsFilter } from './components/TutorsFilter'
 import { ECountry, ESubject, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { TutorCard } from './components/TutorCard'
 import { Select } from '@mezon-tutors/app/ui'
 import { ETutorSortBy } from '@mezon-tutors/shared'
 import { useGetVerifiedTutors } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
-import { ROUTES } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useMedia, useTheme } from 'tamagui'
 
 const DEFAULT_LIMIT = 10
-const PREVIEW_GAP = 32
 const PREVIEW_WIDTH = 420
 const PREVIEW_ANIM_MS = 400
 
@@ -24,7 +31,6 @@ export function TutorsScreen() {
   const tSubject = useTranslations('Tutors.Filter.Subject')
 
   const pathname = usePathname()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const media = useMedia()
   const theme = useTheme()
@@ -52,76 +58,57 @@ export function TutorsScreen() {
     pricePerLesson: priceFilter,
   })
   const [hoverTutor, setHoverTutor] = useState<VerifiedTutorProfileDto | null>(null)
-  const [hoverRect, setHoverRect] = useState<DOMRect | null>(null)
-  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
-  const listRef = useRef<HTMLElement | null>(null)
+  const [previewOffsetY, setPreviewOffsetY] = useState(0)
+  const listColumnRef = useRef<HTMLElement | null>(null)
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage)
-  
+
     const params = new URLSearchParams(window.location.search)
     params.set('page', String(nextPage))
     params.set('limit', String(limit))
-  
+
     window.history.replaceState({}, '', `${pathname}?${params.toString()}`)
-  
+
     setHoverTutor(null)
-    setHoverRect(null)
+    setPreviewOffsetY(0)
   }
 
   const handleSortChange = (value: string) => {
     setSortByFilter(value as ETutorSortBy)
     setPage(1)
     setHoverTutor(null)
-    setHoverRect(null)
+    setPreviewOffsetY(0)
   }
 
   const handleSubjectChange = (value: ESubject) => {
     setSubjectFilter(value)
     setPage(1)
     setHoverTutor(null)
-    setHoverRect(null)
+    setPreviewOffsetY(0)
   }
 
   const handleCountryChange = (value: ECountry) => {
     setCountryFilter(value)
     setPage(1)
     setHoverTutor(null)
-    setHoverRect(null)
+    setPreviewOffsetY(0)
   }
 
   const handlePriceChange = (value: string) => {
     setPriceFilter(value)
     setPage(1)
     setHoverTutor(null)
-    setHoverRect(null)
+    setPreviewOffsetY(0)
   }
 
   const handleTutorCardHover = (tutor: VerifiedTutorProfileDto, el: HTMLElement) => {
     setHoverTutor(tutor)
-    setHoverRect(el.getBoundingClientRect())
-    setAnchorRect(listRef.current?.getBoundingClientRect?.() ?? null)
+    const anchor = listColumnRef.current
+    if (!anchor) return
+    const y = el.getBoundingClientRect().top - anchor.getBoundingClientRect().top
+    setPreviewOffsetY(Number.isFinite(y) ? Math.max(0, y) : 0)
   }
-
-  const handleTutorSelect = (tutor: VerifiedTutorProfileDto) => {
-    router.push(ROUTES.TUTOR.DETAIL(tutor.id))
-  }
-  const previewPosition = useMemo(() => {
-    if (!hoverRect || !anchorRect) return null
-
-    const vw = window.innerWidth
-
-    const showOnRight = hoverRect.right + PREVIEW_GAP + PREVIEW_WIDTH <= vw
-
-    const leftViewport = showOnRight
-      ? hoverRect.right + PREVIEW_GAP
-      : hoverRect.left - PREVIEW_GAP - PREVIEW_WIDTH
-
-    const left = leftViewport - anchorRect.left
-    const y = hoverRect.top - anchorRect.top
-
-    return { left, y }
-  }, [hoverRect, anchorRect])
 
   const totalTutors = verifiedTutorsResponse?.meta.total ?? 0
   const totalPages = verifiedTutorsResponse?.meta.totalPages ?? 1
@@ -144,16 +131,7 @@ export function TutorsScreen() {
             onPricePerLessonChange={handlePriceChange}
           />
           <XStack gap="$8" flexDirection="row" alignItems="flex-start" width="100%">
-            <YStack
-              ref={(node) => {
-                listRef.current = node as unknown as HTMLElement | null
-              }}
-              width="100%"
-              height="auto"
-              $gtMd={{ width: '65%' }}
-              gap="$3"
-              position="relative"
-            >
+            <YStack width="100%" minHeight="60vh" height="auto" gap="$3" position="relative">
               <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
                 <Text variant="muted">
                   {subjectFilter === ESubject.ANY_SUBJECT
@@ -176,56 +154,66 @@ export function TutorsScreen() {
                 </XStack>
               </XStack>
 
-              {showInitialLoading ? (
+              <XStack position="relative" width="100%" gap="$5" alignItems="flex-start">
                 <YStack
+                  ref={(node) => {
+                    listColumnRef.current = node as unknown as HTMLElement | null
+                  }}
                   flex={1}
-                  justifyContent="center"
-                  alignItems="center"
-                  padding={24}
-                  gap="$2"
+                  minWidth={0}
+                  gap="$3"
+                  $gtMd={{
+                    width: showHoverPreview && !hoverTutor ? '70%' : '100%',
+                    flex: 0,
+                  }}
                 >
-                  <Text variant="default">{t('loading')}</Text>
+                  {showInitialLoading ? (
+                    <YStack
+                      flex={1}
+                      justifyContent="center"
+                      alignItems="center"
+                      padding={24}
+                      gap="$2"
+                    >
+                      <Text variant="default">{t('loading')}</Text>
+                    </YStack>
+                  ) : items.length === 0 ? (
+                    <Empty title={t('empty')} />
+                  ) : (
+                    items.map((tutor) => (
+                      <YStack key={tutor.id}>
+                        <TutorCard
+                          tutor={tutor}
+                          onHover={showHoverPreview ? handleTutorCardHover : undefined}
+                          isActive={hoverTutor?.id === tutor.id}
+                        />
+                      </YStack>
+                    ))
+                  )}
                 </YStack>
-              ) : items.length === 0 ? (
-                <Empty title={t('empty')} />
-              ) : (
-                items.map((tutor) => (
-                  <YStack key={tutor.id}>
-                    <TutorCard
-                      tutor={tutor}
-                      onHover={showHoverPreview ? handleTutorCardHover : undefined}
-                      onSelect={handleTutorSelect}
-                      isActive={hoverTutor?.id === tutor.id}
-                    />
+
+                {showHoverPreview && !showInitialLoading && items.length > 0 && (
+                  <YStack width={PREVIEW_WIDTH} flexShrink={0}>
+                    {hoverTutor ? (
+                      <YStack
+                        style={{
+                          transform: `translate3d(0, ${previewOffsetY}px, 0)`,
+                          transition: `transform ${PREVIEW_ANIM_MS}ms ease`,
+                          willChange: 'transform',
+                        }}
+                      >
+                        <PreviewCard tutor={hoverTutor} isPopularWeek={false} />
+                      </YStack>
+                    ) : null}
                   </YStack>
-                ))
-              )}
+                )}
+              </XStack>
 
               <OverlayLoading isOpen={isFetching && items.length === 0 && !showInitialLoading} />
 
               <XStack justifyContent="center" alignItems="center" paddingTop="$4">
                 <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
               </XStack>
-
-              {showHoverPreview && hoverTutor && previewPosition && (
-                <YStack
-                  style={{
-                    position: 'absolute',
-                    left: previewPosition.left,
-                    top: 0,
-                    width: PREVIEW_WIDTH,
-                    zIndex: 50,
-                    pointerEvents: 'none',
-                    transform: `translate3d(0, ${previewPosition.y}px, 0)`,
-                    transition: `transform ${PREVIEW_ANIM_MS}ms ease`,
-                    willChange: 'transform',
-                  }}
-                >
-                  <YStack style={{ pointerEvents: 'auto' }}>
-                    <PreviewCard tutor={hoverTutor} isPopularWeek={false} />
-                  </YStack>
-                </YStack>
-              )}
             </YStack>
           </XStack>
         </Container>

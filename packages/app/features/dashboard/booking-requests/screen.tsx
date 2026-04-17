@@ -1,16 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { Button, Pagination, Screen, ScrollView, Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import { BOOKING_REQUEST_FILTERS } from '@mezon-tutors/shared';
+import {
+  useGetMyTrialLessonBookingRequests,
+} from '@mezon-tutors/app/services';
 import { useMedia } from 'tamagui';
 import { isLoadingAtom, userAtom } from '@mezon-tutors/app/store/auth.atom';
-import { getTutorBookingRequestsByMezonUserId } from './data-source';
 import type { BookingRequestFilter, BookingRequestsViewData } from './types';
 import { BookingRequestTable } from './components/BookingRequestTable';
 import { BookingRequestSummaryCards } from './components/BookingRequestSummaryCards';
+import { mapBookingRequestsToViewData, mapFilterToApiStatus } from './utils';
 
 export function TutorBookingRequestsScreen() {
   const t = useTranslations('Dashboard.bookingRequests');
@@ -20,37 +23,31 @@ export function TutorBookingRequestsScreen() {
   const user = useAtomValue(userAtom);
   const isAuthLoading = useAtomValue(isLoadingAtom);
 
-  const pageSize = 5;
+  const pageSize = 10;
   const [activeFilter, setActiveFilter] = useState<BookingRequestFilter>('all');
   const [page, setPage] = useState(1);
-  const [data, setData] = useState<BookingRequestsViewData | null>(null);
+  const {
+    data: bookingResponse,
+    isFetching,
+  } = useGetMyTrialLessonBookingRequests(
+    {
+      status: mapFilterToApiStatus(activeFilter),
+      page,
+      limit: pageSize,
+    },
+    !isAuthLoading && Boolean(user?.mezonUserId)
+  );
 
-  useEffect(() => {
-    let active = true;
-
-    if (isAuthLoading) {
-      return () => {
-        active = false;
-      };
-    }
-
-    const loadData = async () => {
-      const payload = await getTutorBookingRequestsByMezonUserId(user?.mezonUserId, {
-        filter: activeFilter,
-        page,
-        pageSize,
-      });
-      if (active) {
-        setData(payload);
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      active = false;
-    };
-  }, [activeFilter, isAuthLoading, page, pageSize, user?.mezonUserId]);
+  const data = useMemo<BookingRequestsViewData | null>(() => {
+    if (!bookingResponse) return null;
+    return mapBookingRequestsToViewData(
+      bookingResponse.items,
+      bookingResponse.meta.page,
+      bookingResponse.meta.limit,
+      bookingResponse.meta.total,
+      bookingResponse.meta.totalPages
+    );
+  }, [bookingResponse]);
 
   const pendingCount = useMemo(
     () => (activeFilter === 'pending' ? data?.total ?? 0 : data?.requests.filter((item) => item.status === 'pending').length ?? 0),
@@ -159,7 +156,7 @@ export function TutorBookingRequestsScreen() {
               page={data?.page ?? page}
               totalPages={data?.totalPages ?? 1}
               onPageChange={setPage}
-              disabled={!data || data.total === 0}
+              disabled={isFetching || !data || data.total === 0}
             />
 
             <BookingRequestSummaryCards metrics={data?.metrics ?? []} isCompact={isCompact} />

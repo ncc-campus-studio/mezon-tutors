@@ -12,7 +12,7 @@ import {
   TutorLanguageDto,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared';
-import { LessonStatus, Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
+import { ETrialLessonStatus, Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
 import dayjs = require('dayjs');
 import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
@@ -233,23 +233,28 @@ export class TutorProfileService {
     });
   }
 
-  private getVerifiedTutorOrderBy(sortBy: ETutorSortBy) {
+  private getVerifiedTutorOrderBy(
+    sortBy: ETutorSortBy
+  ): Prisma.TutorProfileOrderByWithRelationInput[] {
+    const defaultOrderBy: Prisma.TutorProfileOrderByWithRelationInput = { id: 'asc' as const }
+
     switch (sortBy) {
       case ETutorSortBy.HIGHEST_PRICE:
-        return [{ pricePerHour: 'desc' as const }]
+        return [{ pricePerHour: 'desc' as const }, defaultOrderBy]
       case ETutorSortBy.LOWEST_PRICE:
-        return [{ pricePerHour: 'asc' as const }]
+        return [{ pricePerHour: 'asc' as const }, defaultOrderBy]
       case ETutorSortBy.NUMBER_OF_REVIEWS:
-        return [{ ratingCount: 'desc' as const }]
+        return [{ ratingCount: 'desc' as const }, defaultOrderBy]
       case ETutorSortBy.BEST_RATING:
-        return [{ ratingAverage: 'desc' as const }]
+        return [{ ratingAverage: 'desc' as const }, defaultOrderBy]
       case ETutorSortBy.TOP_PICKS:
-        return [{ totalStudents: 'desc' as const }]
+        return [{ totalStudents: 'desc' as const }, defaultOrderBy]
       case ETutorSortBy.POPULARITY:
       default:
         return [
           { ratingAverage: 'desc' as const },
           { ratingCount: 'desc' as const },
+          defaultOrderBy,
         ]
     }
   }
@@ -344,11 +349,13 @@ export class TutorProfileService {
       throw new NotFoundException(`Tutor with ID ${id} not found`)
     }
 
-    const bookedLessonsLast48h = await this.prisma.lesson.count({
+    const bookedLessonsLast48h = await this.prisma.trialLessonBooking.count({
       where: {
         tutorId: tutor.id,
-        status: LessonStatus.BOOKED,
-        startsAt: {
+        status: {
+          in: [ETrialLessonStatus.PENDING, ETrialLessonStatus.CONFIRMED],
+        },
+        startAt: {
           gte: dayjs().subtract(48, 'hour').toDate(),
         },
       },

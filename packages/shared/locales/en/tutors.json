@@ -39,6 +39,177 @@
       "Beginner": "Beginner"
     }
   },
+  "TrialBookingModal": {
+    "title": "Book Trial Lesson",
+    "expertTutorTitle": "{subject} Tutor",
+    "perHour": "/hr",
+    "selectLessonDuration": "SELECT LESSON DURATION",
+    "durationMins": "{value} mins",
+    "selectDate": "SELECT DATE",
+    "availableTimes": "AVAILABLE TIMES",
+    "loadingAvailableTimes": "Loading available times...",
+    "noAvailableTimes": "No available times for this day.",
+    "totalPrice": "TOTAL PRICE",
+    "confirmBooking": "Confirm Booking",
+    "requestSentWait": "Request sent, please wait",
+    "alreadyBooked": "You already booked this tutor",
+    "paymentPendingNotice": "You have an unpaid trial lesson. Continue below to complete payment.",
+    "continueToPayment": "Continue to payment",
+    "weekday": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "period": {
+      "morning": "Morning",
+      "noon": "Noon",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    }
+  },
+  "TrialLessonCheckout": {
+    "Screen": {
+      "title": "Checkout",
+      "subtitle": "Complete your booking for a trial lesson with {tutorName}",
+      "loadingBooking": "Loading your booking...",
+      "trialLessonDetails": "Trial lesson details",
+      "durationLabel": "{durationMinutes} minutes",
+      "loadingPaymentSummary": "Loading payment summary...",
+      "pendingPaymentNotice": "You already have a pending payment with this tutor. Please complete payment below.",
+      "bookedLockedNotice": "You already booked this tutor and cannot create another booking.",
+      "missingInfo": {
+        "title": "Missing booking information",
+        "description": "Open this page from the trial lesson booking flow on a tutor card.",
+        "expectedQuery": "Expected query: tutorId, startAt, durationMinutes, dayOfWeek"
+      },
+      "errors": {
+        "loadTutor": "Could not load tutor profile. Please try again later.",
+        "missingRate": "This tutor has no hourly rate; checkout cannot continue."
+      },
+      "toast": {
+        "alreadyBookedTitle": "Booking already exists",
+        "alreadyBookedDescription": "You already have a booking with this tutor and cannot create another one.",
+        "bookingFailedTitle": "Booking failed",
+        "bookingFailedFallback": "Could not create booking"
+      },
+      "tutor": {
+        "professionalPrefix": "Professional ",
+        "subjectSuffix": "Tutor",
+        "emptySubtitle": "—",
+        "fallbackName": "Your tutor"
+      },
+      "paymentMethods": {
+        "payos": {
+          "title": "payOS",
+          "subtitle": "VietQR, Napas 24/7"
+        }
+      }
+    },
+    "PaymentMethodPanel": {
+      "title": "Choose how to pay",
+      "processing": "Processing...",
+      "bookAndPay": "Book lesson and pay {amount}",
+      "bookLesson": "Book lesson",
+      "securityNotice": "Secure SSL encrypted payment"
+    },
+    "PaymentSummaryCard": {
+      "title": "Payment Summary",
+      "trialLesson": "Trial Lesson ({durationMinutes} min)",
+      "total": "Total",
+      "promoCode": "Promo Code",
+      "promoPlaceholder": "Enter code",
+      "apply": "Apply"
+    },
+    "TrialLessonDetailsCard": {
+      "trialLesson": "Trial Lesson",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "policy": "Policy",
+      "freeCancellation": "Free cancellation"
+    }
+  },
+  "SubscriptionPlan": {
+    "Screen": {
+      "brand": "Subscription",
+      "headline": "Time to make real progress!",
+      "subtitle": "Subscribe to a monthly plan. Prices are for our standard lesson time of 50 mins.",
+      "selectPlan": "Select your plan"
+    },
+    "PlanSelectionList": {
+      "lessonsPerWeek": "{count} lessons per week",
+      "popular": "POPULAR",
+      "priceLine": "{monthlyPrice} ₫/mo ({perLessonPrice} ₫ per lesson)"
+    },
+    "PlanSummaryCard": {
+      "summary": "Summary",
+      "title": "Your learning plan",
+      "planCard": {
+        "title": "Standard 50m Lessons",
+        "subtitle": "Monthly Curriculum"
+      },
+      "frequency": "Frequency",
+      "lessonsPerWeek": "{count} lessons per week",
+      "benefits": {
+        "schedule": "Schedule your lessons for any time",
+        "changeTutor": "Change your tutor for free",
+        "cancelAnytime": "Cancel your plan at any time"
+      },
+      "total": "Total",
+      "perMonth": "/mo",
+      "continue": "Continue to checkout",
+      "securityNotice": "Secure 256-bit SSL encrypted payment"
+    }
+  },
+  "SubscriptionCheckout": {
+    "LearningPlanCard": {
+      "title": "Your learning plan",
+      "items": [
+        {
+          "title": "3 lessons per week",
+          "subtitle": "Personalized curriculum"
+        },
+        {
+          "title": "Flexible rescheduling",
+          "subtitle": "Up to 24h before lesson"
+        },
+        {
+          "title": "Expert Certified Tutors",
+          "subtitle": "Top 5% of global applicants"
+        }
+      ]
+    },
+    "OrderSummaryCard": {
+      "title": "Order Summary",
+      "selectedPlan": "Selected Plan (12 lessons/mo)",
+      "processingFee": "Processing Fee",
+      "totalMonthlyPrice": "Total Monthly Price",
+      "billedMonthly": "Billed monthly",
+      "promoPlaceholder": "Promo code",
+      "apply": "Apply"
+    },
+    "PaymentMethodCard": {
+      "title": "Payment Method",
+      "confirm": "Confirm monthly subscription",
+      "termsNotice": "By clicking confirm, you agree to our Terms of Service and Privacy Policy."
+    },
+    "TrustCards": {
+      "items": [
+        {
+          "title": "Free Tutor Replacement",
+          "subtitle": "Not happy with your first lesson? We'll replace your tutor for free."
+        },
+        {
+          "title": "Secure SSL Encryption",
+          "subtitle": "Your data is protected by industry-standard 256-bit SSL encryption."
+        }
+      ]
+    }
+  },
   "Filter": {
     "subjectLabel": "Subject",
     "priceLabel": "Price per lesson",

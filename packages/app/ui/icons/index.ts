@@ -66,6 +66,7 @@ export * from './StarIcon'
 export * from './WatchDemoIcon'
 export * from './TutorVideoCardIcon'
 export * from './VercelIcon'
+export * from './MoonIcon'
 
 // Types
 export * from './PersonalIcon';
