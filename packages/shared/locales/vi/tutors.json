@@ -39,6 +39,177 @@
       "Beginner": "Người mới bắt đầu"
     }
   },
+  "TrialBookingModal": {
+    "title": "Đặt buổi học thử",
+    "expertTutorTitle": "Gia sư {subject}",
+    "perHour": "/giờ",
+    "selectLessonDuration": "CHỌN THỜI LƯỢNG BUỔI HỌC",
+    "durationMins": "{value} phút",
+    "selectDate": "CHỌN NGÀY",
+    "availableTimes": "KHUNG GIỜ TRỐNG",
+    "loadingAvailableTimes": "Đang tải khung giờ trống...",
+    "noAvailableTimes": "Không có khung giờ trống cho ngày này.",
+    "totalPrice": "TỔNG GIÁ",
+    "confirmBooking": "Xác nhận đặt lịch",
+    "requestSentWait": "Yêu cầu đã được gửi, vui lòng chờ",
+    "alreadyBooked": "Bạn đã đặt gia sư này rồi",
+    "paymentPendingNotice": "Bạn có buổi học thử chưa thanh toán. Nhấn bên dưới để tiếp tục thanh toán.",
+    "continueToPayment": "Tiếp tục thanh toán",
+    "weekday": {
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7",
+      "sun": "CN"
+    },
+    "period": {
+      "morning": "Buổi sáng",
+      "noon": "Buổi trưa",
+      "afternoon": "Buổi chiều",
+      "evening": "Buổi tối"
+    }
+  },
+  "TrialLessonCheckout": {
+    "Screen": {
+      "title": "Thanh toán",
+      "subtitle": "Hoàn tất đặt buổi học thử với {tutorName}",
+      "loadingBooking": "Đang tải thông tin đặt lịch...",
+      "trialLessonDetails": "Chi tiết buổi học thử",
+      "durationLabel": "{durationMinutes} phút",
+      "loadingPaymentSummary": "Đang tải tóm tắt thanh toán...",
+      "pendingPaymentNotice": "Bạn đã có đơn chờ thanh toán với gia sư này. Vui lòng hoàn tất thanh toán bên dưới.",
+      "bookedLockedNotice": "Bạn đã đặt gia sư này rồi, không thể tạo thêm booking.",
+      "missingInfo": {
+        "title": "Thiếu thông tin đặt lịch",
+        "description": "Vui lòng mở trang này từ luồng đặt buổi học thử trên thẻ gia sư.",
+        "expectedQuery": "Query cần có: tutorId, startAt, durationMinutes, dayOfWeek"
+      },
+      "errors": {
+        "loadTutor": "Không thể tải hồ sơ gia sư. Vui lòng thử lại sau.",
+        "missingRate": "Gia sư này chưa có mức giá theo giờ; không thể tiếp tục thanh toán."
+      },
+      "toast": {
+        "alreadyBookedTitle": "Bạn đã có lịch đặt",
+        "alreadyBookedDescription": "Bạn đã có booking với gia sư này và không thể tạo thêm.",
+        "bookingFailedTitle": "Đặt lịch thất bại",
+        "bookingFailedFallback": "Không thể tạo booking"
+      },
+      "tutor": {
+        "professionalPrefix": "Chuyên nghiệp ",
+        "subjectSuffix": "Tutor",
+        "emptySubtitle": "—",
+        "fallbackName": "Gia sư của bạn"
+      },
+      "paymentMethods": {
+        "payos": {
+          "title": "payOS",
+          "subtitle": "VietQR, Napas 24/7"
+        }
+      }
+    },
+    "PaymentMethodPanel": {
+      "title": "Chọn phương thức thanh toán",
+      "processing": "Đang xử lý...",
+      "bookAndPay": "Đặt buổi học và thanh toán {amount}",
+      "bookLesson": "Đặt buổi học",
+      "securityNotice": "Thanh toán được mã hóa SSL an toàn"
+    },
+    "PaymentSummaryCard": {
+      "title": "Tóm tắt thanh toán",
+      "trialLesson": "Buổi học thử ({durationMinutes} phút)",
+      "total": "Tổng cộng",
+      "promoCode": "Mã giảm giá",
+      "promoPlaceholder": "Nhập mã",
+      "apply": "Áp dụng"
+    },
+    "TrialLessonDetailsCard": {
+      "trialLesson": "Buổi học thử",
+      "date": "Ngày",
+      "time": "Giờ",
+      "duration": "Thời lượng",
+      "policy": "Chính sách",
+      "freeCancellation": "Hủy miễn phí"
+    }
+  },
+  "SubscriptionPlan": {
+    "Screen": {
+      "brand": "Gói đăng ký",
+      "headline": "Đã đến lúc tiến bộ thật sự!",
+      "subtitle": "Đăng ký gói tháng. Giá áp dụng cho buổi học tiêu chuẩn 50 phút.",
+      "selectPlan": "Chọn gói của bạn"
+    },
+    "PlanSelectionList": {
+      "lessonsPerWeek": "{count} buổi mỗi tuần",
+      "popular": "PHỔ BIẾN",
+      "priceLine": "{monthlyPrice} ₫/tháng ({perLessonPrice} ₫ mỗi buổi)"
+    },
+    "PlanSummaryCard": {
+      "summary": "Tóm tắt",
+      "title": "Kế hoạch học của bạn",
+      "planCard": {
+        "title": "Buổi học chuẩn 50 phút",
+        "subtitle": "Lộ trình hàng tháng"
+      },
+      "frequency": "Tần suất",
+      "lessonsPerWeek": "{count} buổi mỗi tuần",
+      "benefits": {
+        "schedule": "Linh hoạt chọn thời gian học",
+        "changeTutor": "Đổi gia sư miễn phí",
+        "cancelAnytime": "Hủy gói bất cứ lúc nào"
+      },
+      "total": "Tổng cộng",
+      "perMonth": "/tháng",
+      "continue": "Tiếp tục thanh toán",
+      "securityNotice": "Thanh toán mã hóa SSL 256-bit an toàn"
+    }
+  },
+  "SubscriptionCheckout": {
+    "LearningPlanCard": {
+      "title": "Kế hoạch học của bạn",
+      "items": [
+        {
+          "title": "3 buổi học mỗi tuần",
+          "subtitle": "Lộ trình cá nhân hóa"
+        },
+        {
+          "title": "Đổi lịch linh hoạt",
+          "subtitle": "Tối đa 24h trước buổi học"
+        },
+        {
+          "title": "Gia sư chứng chỉ chuyên gia",
+          "subtitle": "Top 5% ứng viên toàn cầu"
+        }
+      ]
+    },
+    "OrderSummaryCard": {
+      "title": "Tóm tắt đơn hàng",
+      "selectedPlan": "Gói đã chọn (12 buổi/tháng)",
+      "processingFee": "Phí xử lý",
+      "totalMonthlyPrice": "Tổng giá hàng tháng",
+      "billedMonthly": "Thanh toán theo tháng",
+      "promoPlaceholder": "Mã giảm giá",
+      "apply": "Áp dụng"
+    },
+    "PaymentMethodCard": {
+      "title": "Phương thức thanh toán",
+      "confirm": "Xác nhận đăng ký theo tháng",
+      "termsNotice": "Khi nhấn xác nhận, bạn đồng ý với Điều khoản dịch vụ và Chính sách quyền riêng tư của chúng tôi."
+    },
+    "TrustCards": {
+      "items": [
+        {
+          "title": "Đổi gia sư miễn phí",
+          "subtitle": "Không hài lòng buổi đầu? Chúng tôi sẽ đổi gia sư miễn phí."
+        },
+        {
+          "title": "Mã hóa SSL an toàn",
+          "subtitle": "Dữ liệu của bạn được bảo vệ bằng mã hóa SSL 256-bit chuẩn ngành."
+        }
+      ]
+    }
+  },
   "Filter": {
     "subjectLabel": "Môn học",
     "priceLabel": "Giá mỗi buổi",

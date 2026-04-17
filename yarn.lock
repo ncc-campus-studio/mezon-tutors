@@ -3196,6 +3196,7 @@ __metadata:
     "@nestjs/schedule": "npm:^6.1.1"
     "@nestjs/schematics": "npm:^10.2.3"
     "@nestjs/swagger": "npm:^11.2.2"
+    "@payos/node": "npm:^2.0.5"
     "@types/express": "npm:^5.0.0"
     "@types/jsonwebtoken": "npm:^9.0.10"
     "@types/multer": "npm:^1.4.12"
@@ -3225,6 +3226,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:^1.9.3"
     "@mezon-tutors/shared": "npm:0.0.1"
+    "@payos/payos-checkout": "npm:^1.0.8"
     "@react-navigation/native": "npm:^6.1.17"
     "@tamagui/animations-react-native": "npm:^1.144.2"
     "@tamagui/build": "npm:^1.144.2"
@@ -4327,6 +4329,20 @@ __metadata:
     "@parcel/watcher-win32-x64":
       optional: true
   checksum: 10c0/1e1d91f92e94e4640089a7cead243b2b81ca9aa8e1c862a97a25f589e84fbf1ad93abeb503f325c43a8c0e024ae0e74b48ec42c1cd84e8e423a3a87d25ded4f2
+  languageName: node
+  linkType: hard
+
+"@payos/node@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "@payos/node@npm:2.0.5"
+  checksum: 10c0/5dd2d6c124d42aefc7836bcf0a4092fabff45b118b0f5d9907c73af00f6d92dd6b1969d2455f3699ce51557077ca610eebf05b967ef7f35440e99dcf96d0a99e
+  languageName: node
+  linkType: hard
+
+"@payos/payos-checkout@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "@payos/payos-checkout@npm:1.0.8"
+  checksum: 10c0/ede9b15c601965c0208e812376aacf26b7a104b8ae5178eb8a528c61b86a2491f0c7e89682cf6d126c352eea8edf7a9830590577fb8c85c8c886610582a07c65
   languageName: node
   linkType: hard
 

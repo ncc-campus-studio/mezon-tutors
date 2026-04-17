@@ -1,0 +1,61 @@
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common'
+import { ApiTags } from '@nestjs/swagger'
+import { ETrialLessonStatus } from '@mezon-tutors/db'
+import type { PaginatedResponse } from '@mezon-tutors/shared'
+import type { Request } from 'express'
+import type { AuthUserPayload } from '../auth/interfaces/auth.interfaces'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { CreateTrialLessonBookingDto } from './dto/create-trial-lesson-booking.dto'
+import { GetMyTrialLessonBookingsDto } from './dto/get-my-trial-lesson-bookings.dto'
+import { TrialLessonBookingService } from './trial-lesson-booking.service'
+import type { TutorTrialLessonBookingRequestDto } from './dto/tutor-trial-lesson-booking-request.dto'
+
+@Controller('trial-lesson-bookings')
+@ApiTags('Trial Lesson Booking')
+export class TrialLessonBookingController {
+  constructor(private readonly trialLessonBookingService: TrialLessonBookingService) {}
+
+  @Get('occupied')
+  async getOccupiedByTutorAndDate(@Query('tutorId') tutorId: string, @Query('date') date: string) {
+    return this.trialLessonBookingService.getAcceptedByTutorAndDate(tutorId, date)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('already-booked')
+  async getAlreadyBookedStatus(@Req() req: Request, @Query('tutorId') tutorId: string) {
+    const user = req.user as AuthUserPayload
+    return this.trialLessonBookingService.hasStudentBookedTutor(user.sub, tutorId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('current-booking')
+  async getCurrentBooking(@Req() req: Request, @Query('tutorId') tutorId: string) {
+    const user = req.user as AuthUserPayload
+    return this.trialLessonBookingService.getCurrentStudentTutorBooking(user.sub, tutorId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async create(@Req() req: Request, @Body() body: CreateTrialLessonBookingDto) {
+    const user = req.user as AuthUserPayload
+    return this.trialLessonBookingService.createTrialLessonBooking(user.sub, body)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('my-requests')
+  async getMyRequests(
+    @Req() req: Request,
+    @Query() query: GetMyTrialLessonBookingsDto
+  ): Promise<PaginatedResponse<TutorTrialLessonBookingRequestDto>> {
+    const user = req.user as AuthUserPayload
+
+    const status =
+      query.status && query.status !== ETrialLessonStatus.CANCELLED ? query.status : undefined
+
+    return this.trialLessonBookingService.getTutorBookingRequests(user.sub, {
+      status,
+      page: query.page,
+      limit: query.limit,
+    })
+  }
+}

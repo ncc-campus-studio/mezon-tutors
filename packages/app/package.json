@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mezon-tutors/shared": "0.0.1",
+    "@payos/payos-checkout": "^1.0.8",
     "@react-navigation/native": "^6.1.17",
     "@tamagui/animations-react-native": "^1.144.2",
     "@tamagui/colors": "^1.144.2",

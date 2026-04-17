@@ -21,11 +21,6 @@ export const AVAILABILITY_EDITOR_CONFIG = {
   timePickerMinWidth: 120,
 } as const;
 
-export function timeToMinutes(time: string): number {
-  const [hour = 0, minute = 0] = time.split(':').map(Number);
-  return hour * 60 + minute;
-}
-
 export function getStatusLabelKey(status: SessionStatus): string {
   switch (status) {
     case 'upcoming':

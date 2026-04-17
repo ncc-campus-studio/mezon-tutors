@@ -7,8 +7,11 @@ import { HealthController } from './health.controller';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { TutorProfileModule } from './modules/tutor-profile/tutor-profile.module';
+import { TutorAvailabilityModule } from './modules/tutor-availability/tutor-availability.module';
 import { MyLessonsModule } from './modules/my-lessons/my-lessons.module';
 import { TutorApplicationModule } from './modules/tutor-application/tutor-application.module';
+import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-lesson-booking.module';
+import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module';
 import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
 
 @Module({
@@ -20,8 +23,11 @@ import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
     PrismaModule,
     AuthModule,
     TutorProfileModule,
+    TutorAvailabilityModule,
     TutorApplicationModule,
     MyLessonsModule,
+    TrialLessonBookingModule,
+    PayosWebhookModule,
     MyScheduleModule,
   ],
   controllers: [HealthController],
