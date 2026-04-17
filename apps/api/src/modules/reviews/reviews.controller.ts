@@ -3,10 +3,8 @@ import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type { AuthUserPayload } from '../auth/interfaces/auth.interfaces';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AdminGuard } from '../../common/guards/admin.guard';
 import { ReviewsService } from './reviews.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
+import { CreateReviewDto, UpdateReviewDto } from './dto/review.dto';
 
 @Controller('reviews')
 @ApiTags('Reviews')
@@ -28,17 +26,5 @@ export class ReviewsController {
   ) {
     const user = req.user as AuthUserPayload;
     return this.reviewsService.updateReview(reviewId, user.sub, dto);
-  }
-
-  @Post('recalculate/:tutorId')
-  @UseGuards(AdminGuard)
-  async recalculateTutorRating(@Param('tutorId') tutorId: string) {
-    return this.reviewsService.recalculateTutorRating(tutorId);
-  }
-
-  @Post('recalculate-all')
-  @UseGuards(AdminGuard)
-  async recalculateAllTutorsRating() {
-    return this.reviewsService.recalculateAllTutorsRating();
   }
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import { Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import { useTranslations } from 'next-intl';
 import { REVIEW_STAR_SIZE, REVIEW_STAR_GAP } from '@mezon-tutors/shared';

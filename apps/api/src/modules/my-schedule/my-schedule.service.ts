@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LessonStatus } from '@mezon-tutors/db';
-import { DEFAULT_TIMEZONE, PENDING_STUDENT_ID } from '@mezon-tutors/shared';
+import { ETrialLessonStatus } from '@mezon-tutors/db';
+import { DEFAULT_TIMEZONE } from '@mezon-tutors/shared';
 import dayjs = require('dayjs');
 import timezone = require('dayjs/plugin/timezone');
 import utc = require('dayjs/plugin/utc');
@@ -74,7 +74,7 @@ export class MyScheduleService {
     }
     const sunday = monday.add(6, 'day').endOf('day');
 
-    const [availability, lessons] = await Promise.all([
+    const [availability, bookings] = await Promise.all([
       this.prisma.tutorAvailability.findMany({
         where: {
           tutorId: tutorProfileId,
@@ -82,10 +82,10 @@ export class MyScheduleService {
         },
         orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
       }),
-      this.prisma.lesson.findMany({
+      this.prisma.trialLessonBooking.findMany({
         where: {
           tutorId: tutorProfileId,
-          startsAt: {
+          startAt: {
             gte: monday.toDate(),
             lte: sunday.toDate(),
           },
@@ -101,7 +101,7 @@ export class MyScheduleService {
           },
         },
         orderBy: {
-          startsAt: 'asc',
+          startAt: 'asc',
         },
       }),
     ]);
@@ -113,28 +113,28 @@ export class MyScheduleService {
       isActive: slot.isActive,
     }));
 
-    const lessonEvents: ScheduleEvent[] = lessons.map((lesson) => {
-      const startsAt = dayjs(lesson.startsAt).tz(DEFAULT_TIMEZONE);
-      const endsAt = dayjs(lesson.endsAt).tz(DEFAULT_TIMEZONE);
+    const lessonEvents: ScheduleEvent[] = bookings.map((booking) => {
+      const startsAt = dayjs(booking.startAt).tz(DEFAULT_TIMEZONE);
+      const endsAt = startsAt.add(booking.durationMinutes, 'minute');
       const dayIndex = startsAt.day() === 0 ? 6 : startsAt.day() - 1;
 
       let status: 'upcoming' | 'pending' | 'blocked';
-      if (lesson.status === LessonStatus.CANCELLED) {
+      if (booking.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
-      } else if (lesson.student.mezonUserId === PENDING_STUDENT_ID) {
+      } else if (booking.status === ETrialLessonStatus.PENDING) {
         status = 'pending';
       } else {
         status = 'upcoming';
       }
 
       return {
-        id: lesson.id,
+        id: booking.id,
         dayIndex,
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),
         status,
-        title: lesson.subject,
-        studentName: lesson.student.username,
+        title: 'Trial Lesson',
+        studentName: booking.student.username,
         timeLabel: `${startsAt.format('HH:mm')} - ${endsAt.format('HH:mm')}`,
       };
     });

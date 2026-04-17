@@ -1,39 +1,38 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ETrialLessonStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
+import { CreateReviewDto, UpdateReviewDto } from './dto/review.dto';
 
 @Injectable()
 export class ReviewsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createReview(studentId: string, dto: CreateReviewDto) {
+    const completedLesson = await this.prisma.trialLessonBooking.findFirst({
+      where: {
+        studentId,
+        tutorId: dto.tutorId,
+        status: ETrialLessonStatus.COMPLETED,
+      },
+    });
+
+    if (!completedLesson) {
+      throw new BadRequestException('You must complete a lesson with this tutor before reviewing');
+    }
+
+    const existingReview = await this.prisma.tutorReview.findFirst({
+      where: {
+        reviewerId: studentId,
+        tutorId: dto.tutorId,
+      },
+    });
+
+    if (existingReview) {
+      throw new BadRequestException('You have already reviewed this tutor');
+    }
+
     try {
       return await this.prisma.$transaction(async (tx) => {
-        const completedLesson = await tx.trialLessonBooking.findFirst({
-          where: {
-            studentId,
-            tutorId: dto.tutorId,
-            status: ETrialLessonStatus.COMPLETED,
-          },
-        });
-
-        if (!completedLesson) {
-          throw new BadRequestException('You must complete a lesson with this tutor before reviewing');
-        }
-
-        const existingReview = await tx.tutorReview.findFirst({
-          where: {
-            reviewerId: studentId,
-            tutorId: dto.tutorId,
-          },
-        });
-
-        if (existingReview) {
-          throw new BadRequestException('You have already reviewed this tutor');
-        }
-
         const tutor = await tx.tutorProfile.findUnique({
           where: { id: dto.tutorId },
           select: { ratingCount: true, ratingAverage: true },
@@ -117,41 +116,5 @@ export class ReviewsService {
 
       return updatedReview;
     });
-  }
-
-  async recalculateTutorRating(tutorId: string) {
-    return this.prisma.$transaction(async (tx) => {
-      const reviews = await tx.tutorReview.findMany({
-        where: { tutorId },
-        select: { rating: true },
-      });
-
-      const ratingCount = reviews.length;
-      const ratingAverage = ratingCount > 0
-        ? reviews.reduce((sum, review) => sum + review.rating, 0) / ratingCount
-        : 0;
-
-      await tx.tutorProfile.update({
-        where: { id: tutorId },
-        data: {
-          ratingCount,
-          ratingAverage,
-        },
-      });
-
-      return { tutorId, ratingCount, ratingAverage };
-    });
-  }
-
-  async recalculateAllTutorsRating() {
-    const tutors = await this.prisma.tutorProfile.findMany({
-      select: { id: true },
-    });
-
-    const results = await Promise.all(
-      tutors.map(tutor => this.recalculateTutorRating(tutor.id))
-    );
-
-    return results;
   }
 }
