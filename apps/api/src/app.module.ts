@@ -13,6 +13,7 @@ import { TutorApplicationModule } from './modules/tutor-application/tutor-applic
 import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-lesson-booking.module';
 import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module';
 import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
     TrialLessonBookingModule,
     PayosWebhookModule,
     MyScheduleModule,
+    CloudinaryModule,
   ],
   controllers: [HealthController],
   providers: [

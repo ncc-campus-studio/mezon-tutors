@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -69,8 +69,7 @@ export function TutorProfileVideoScreen() {
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [durationError, setDurationError] = useState<string | null>(null);
   const videoInputSectionRef = useRef<TamaguiElement | null>(null);
-  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
-  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+  const [lastSavedAt, setLastSavedAt] = useAtom(tutorProfileLastSavedAtAtom);
 
   const form = useForm<VideoFormValues>({
     defaultValues: {

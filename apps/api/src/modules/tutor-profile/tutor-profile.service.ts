@@ -12,7 +12,15 @@ import {
   TutorLanguageDto,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared';
-import { ETrialLessonStatus, Prisma, Role, VerificationStatus } from '@mezon-tutors/db';
+import {
+  ETrialLessonStatus,
+  IdentityVerificationStatus,
+  Prisma,
+  ProfessionalDocumentStatus,
+  ProfessionalDocumentType,
+  Role,
+  VerificationStatus,
+} from '@mezon-tutors/db';
 import dayjs = require('dayjs');
 import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
@@ -72,7 +80,6 @@ export class TutorProfileService {
         userId: userId,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        avatar: dto.avatar ?? '',
         videoUrl: dto.videoUrl ?? '',
         country: dto.country,
         phone: dto.phone,
@@ -95,6 +102,18 @@ export class TutorProfileService {
     if (dto.availability?.length && profile) {
       await this.upsertTutorAvailabilitySlotByUserId(profile.id, dto.availability);
     }
+
+    if (dto.identityPhotoUrl && profile) {
+      await this.createTutorIdentityVerificationByUserId(profile.id, dto.identityPhotoUrl);
+    }
+
+    if (dto.teachingCertificateFileUrl && profile) {
+      await this.createTutorCertificateByUserId(profile.id, dto.teachingCertificateName, dto.teachingCertificateFileUrl, ProfessionalDocumentType.CERTIFICATE);
+    }
+
+    if (dto.educationFileUrl && profile) {
+      await this.createTutorCertificateByUserId(profile.id, dto.specialization, dto.educationFileUrl, ProfessionalDocumentType.DEGREE);
+    }
   }
 
   async updateByUserId(userId: string, dto: SubmitTutorProfileDto): Promise<void> {
@@ -111,7 +130,6 @@ export class TutorProfileService {
       data: {
         firstName: dto.firstName,
         lastName: dto.lastName,
-        avatar: dto.avatar ?? '',
         videoUrl: dto.videoUrl ?? '',
         country: dto.country,
         phone: dto.phone,
@@ -230,6 +248,33 @@ export class TutorProfileService {
           },
         });
       }
+    });
+  }
+
+  async createTutorIdentityVerificationByUserId(userId: string, identityPhotoUrl: string): Promise<void> {
+    await this.prisma.identityVerification.create({
+      data: {
+        tutorId: userId,
+        fileKey: identityPhotoUrl,
+        status: IdentityVerificationStatus.PENDING,
+      },
+    });
+  }
+
+  async createTutorCertificateByUserId(
+    userId: string,
+    teachingCertificateName: string,
+    teachingCertificateFileUrl: string,
+    type: ProfessionalDocumentType
+  ): Promise<void> {
+    await this.prisma.professionalDocument.create({
+      data: {
+        tutorId: userId,
+        name: teachingCertificateName,
+        type,
+        status: ProfessionalDocumentStatus.PENDING,
+        fileKey: teachingCertificateFileUrl,
+      },
     });
   }
 

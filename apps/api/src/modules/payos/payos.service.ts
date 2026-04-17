@@ -16,9 +16,9 @@ export class PayosService {
   constructor(private readonly appConfig: AppConfigService) {}
 
   isConfigured(): boolean {
-    const id = this.appConfig.get('PAYOS_CLIENT_ID')
-    const key = this.appConfig.get('PAYOS_API_KEY')
-    const checksum = this.appConfig.get('PAYOS_CHECKSUM_KEY')
+    const id = this.appConfig.payosConfig.clientId
+    const key = this.appConfig.payosConfig.apiKey
+    const checksum = this.appConfig.payosConfig.checksumKey
     return Boolean(id && key && checksum)
   }
 
@@ -27,9 +27,9 @@ export class PayosService {
       return null
     }
     return {
-      clientId: this.appConfig.get('PAYOS_CLIENT_ID'),
-      apiKey: this.appConfig.get('PAYOS_API_KEY'),
-      checksumKey: this.appConfig.get('PAYOS_CHECKSUM_KEY'),
+      clientId: this.appConfig.payosConfig.clientId,
+      apiKey: this.appConfig.payosConfig.apiKey,
+      checksumKey: this.appConfig.payosConfig.checksumKey,
     }
   }
 

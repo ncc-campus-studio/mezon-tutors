@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LessonStatus } from '@mezon-tutors/db';
+import { ETrialLessonStatus } from '@mezon-tutors/db';
 import { DEFAULT_TIMEZONE, PENDING_STUDENT_ID } from '@mezon-tutors/shared';
 import dayjs = require('dayjs');
 import timezone = require('dayjs/plugin/timezone');
@@ -82,10 +82,10 @@ export class MyScheduleService {
         },
         orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
       }),
-      this.prisma.lesson.findMany({
+      this.prisma.trialLessonBooking.findMany({
         where: {
           tutorId: tutorProfileId,
-          startsAt: {
+          startAt: {
             gte: monday.toDate(),
             lte: sunday.toDate(),
           },
@@ -99,9 +99,14 @@ export class MyScheduleService {
               avatar: true,
             },
           },
+          tutor: {
+            select: {
+              subject: true,
+            },
+          },
         },
         orderBy: {
-          startsAt: 'asc',
+          startAt: 'asc',
         },
       }),
     ]);
@@ -114,12 +119,12 @@ export class MyScheduleService {
     }));
 
     const lessonEvents: ScheduleEvent[] = lessons.map((lesson) => {
-      const startsAt = dayjs(lesson.startsAt).tz(DEFAULT_TIMEZONE);
-      const endsAt = dayjs(lesson.endsAt).tz(DEFAULT_TIMEZONE);
+      const startsAt = dayjs(lesson.startAt).tz(DEFAULT_TIMEZONE);
+      const endsAt = dayjs(lesson.startAt).add(lesson.durationMinutes, 'minutes').tz(DEFAULT_TIMEZONE);
       const dayIndex = startsAt.day() === 0 ? 6 : startsAt.day() - 1;
 
       let status: 'upcoming' | 'pending' | 'blocked';
-      if (lesson.status === LessonStatus.CANCELLED) {
+      if (lesson.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
       } else if (lesson.student.mezonUserId === PENDING_STUDENT_ID) {
         status = 'pending';
@@ -133,7 +138,7 @@ export class MyScheduleService {
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),
         status,
-        title: lesson.subject,
+        title: lesson.tutor.subject,
         studentName: lesson.student.username,
         timeLabel: `${startsAt.format('HH:mm')} - ${endsAt.format('HH:mm')}`,
       };

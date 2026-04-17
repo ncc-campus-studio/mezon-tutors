@@ -34,6 +34,7 @@ export * from './constants/dashboard';
 export * from './constants/dashboard-booking-request';
 export * from './constants/payment';
 export * from './constants/my-schedule';
+export * from './constants/cloudinary';
 
 // Utils
 export * from './utils/utils';
