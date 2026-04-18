@@ -36,6 +36,8 @@ export * from './constants/payment';
 export * from './constants/my-schedule';
 export * from './constants/cloudinary';
 
+export * from './constants/review';
+
 // Utils
 export * from './utils/utils';
 export * from './utils/enum';

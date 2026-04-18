@@ -74,7 +74,7 @@ export class MyScheduleService {
     }
     const sunday = monday.add(6, 'day').endOf('day');
 
-    const [availability, lessons] = await Promise.all([
+    const [availability, bookings] = await Promise.all([
       this.prisma.tutorAvailability.findMany({
         where: {
           tutorId: tutorProfileId,
@@ -126,14 +126,14 @@ export class MyScheduleService {
       let status: 'upcoming' | 'pending' | 'blocked';
       if (lesson.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
-      } else if (lesson.student.mezonUserId === PENDING_STUDENT_ID) {
+      } else if (booking.status === ETrialLessonStatus.PENDING) {
         status = 'pending';
       } else {
         status = 'upcoming';
       }
 
       return {
-        id: lesson.id,
+        id: booking.id,
         dayIndex,
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),

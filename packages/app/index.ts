@@ -19,3 +19,5 @@ export * from './provider';
 
 export * from './features/calendar';
 export * from './features/dashboard/tutor/my-schedule/screen';
+
+export * from './features/reviews';

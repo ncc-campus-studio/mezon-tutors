@@ -14,6 +14,7 @@ import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-l
 import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module';
 import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     PayosWebhookModule,
     MyScheduleModule,
     CloudinaryModule,
+    ReviewsModule,
   ],
   controllers: [HealthController],
   providers: [

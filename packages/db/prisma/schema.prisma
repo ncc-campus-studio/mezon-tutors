@@ -155,6 +155,7 @@ model TutorReview {
   tutor    TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
   reviewer User         @relation("TutorReviewAuthor", fields: [reviewerId], references: [id], onDelete: Cascade)
 
+  @@unique([reviewerId, tutorId])
   @@index([tutorId, createdAt])
   @@index([reviewerId])
   @@map("tutor_reviews")

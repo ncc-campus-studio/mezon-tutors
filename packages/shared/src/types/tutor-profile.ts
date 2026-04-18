@@ -206,6 +206,7 @@ export interface TutorReviewDto {
   rating: number
   comment: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface TutorResourceDto {
