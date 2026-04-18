@@ -32,16 +32,19 @@ export interface SubmitTutorProfileDto {
   subject: string
   languages: TutorLanguageDto[]
 
-  avatar?: string
+  identityPhotoUrl: string
   headline: string
   motivate: string
   introduce: string
 
   teachingCertificateName: string
   teachingYear: string
+  teachingCertificateFileUrl: string
+
   university: string
   degree: string
   specialization: string
+  educationFileUrl: string
 
   videoUrl: string
 
@@ -246,4 +249,69 @@ export interface TutorReviewsDto {
 
 export interface TutorResourcesDto {
   resources: TutorResourceDto[]
+}
+
+export type TutorProfileAboutState = {
+  firstName: string
+  lastName: string
+  email: string
+  country: string
+  phone: string
+  subject: string
+  languages: string
+  proficiencies: string
+}
+
+export type TutorProfileFile = {
+  dataUrl: string | null
+  uploadedUrl: string | null
+  publicId: string | null
+  fileName: string
+}
+
+export type TutorProfilePhotoState = {
+  photo: TutorProfileFile
+  identity: TutorProfileFile
+  headline: string
+  motivate: string
+  introduce: string
+}
+
+export type TeachingCertificate = {
+  name: string
+  year: string
+  file: TutorProfileFile
+}
+
+export type HigherEducation = {
+  university: string
+  degree: string
+  specialization: string
+  file: TutorProfileFile
+}
+
+export type TutorProfileCertificationState = {
+  teachingCertificate: TeachingCertificate
+  higherEducation: HigherEducation
+}
+
+export type TutorProfileVideoId = {
+  type: 'youtube' | 'vimeo'
+  id: string
+}
+
+export type TutorProfileVideoState = {
+  videoLink: string
+  videoId: TutorProfileVideoId | null
+}
+
+export type TimeSlot = {
+  startTime: string
+  endTime: string
+}
+
+export type TutorProfileAvailabilityState = {
+  selectedDayIndex: number
+  hourlyRate: string
+  slotsByDay: Record<string, TimeSlot[]>
 }

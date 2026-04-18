@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect, useMemo } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -18,24 +18,22 @@ import {
 } from '@mezon-tutors/app/ui';
 import { WalletIcon } from '@mezon-tutors/app/ui/icons';
 import {
-  hourlyRateAtom,
-  slotsByDayAtom,
-  buildSubmitTutorProfilePayload,
+  tutorProfileAvailabilityAtom,
   resetTutorProfileAfterSubmitAtom,
   tutorProfileAboutAtom,
   tutorProfilePhotoAtom,
   tutorProfileCertificationAtom,
   tutorProfileVideoAtom,
-  tutorProfileIdentityAtom,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { formatLastSavedTime, HOURLY_RATE_REGEX } from '@mezon-tutors/shared';
+import { DAY_KEYS, formatLastSavedTime, HOURLY_RATE_REGEX } from '@mezon-tutors/shared';
 import { TutorProfileStickyActions } from '@mezon-tutors/app/features/tutor-profile/components/tutor-profile-sticky-actions';
 import { useSubmitTutorProfileMutation } from '@mezon-tutors/app/services';
 import { AvailabilityEditor } from '@mezon-tutors/app/features/availability';
 import type { AvailabilityData } from '@mezon-tutors/app/features/availability';
+import type { SubmitTutorProfileDto, TimeSlot } from '@mezon-tutors/shared';
 
 const ICON_COLOR = '#1253D5';
 const CURRENT_STEP = 5;
@@ -43,6 +41,7 @@ const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 
 type AvailabilityFormValues = {
   hourlyRate: string;
+  slotsByDay: Record<string, TimeSlot[]>;
 };
 
 export function TutorProfileAvailabilityScreen() {
@@ -50,13 +49,9 @@ export function TutorProfileAvailabilityScreen() {
   const router = useRouter();
   const about = useAtomValue(tutorProfileAboutAtom);
   const photo = useAtomValue(tutorProfilePhotoAtom);
-  const identity = useAtomValue(tutorProfileIdentityAtom);
   const certification = useAtomValue(tutorProfileCertificationAtom);
   const video = useAtomValue(tutorProfileVideoAtom);
-  const initialHourlyRate = useAtomValue(hourlyRateAtom);
-  const initialSlotsByDay = useAtomValue(slotsByDayAtom);
-  const setHourlyRate = useSetAtom(hourlyRateAtom);
-  const setSlotsByDay = useSetAtom(slotsByDayAtom);
+  const [tutorProfileAvailability, setTutorProfileAvailability] = useAtom(tutorProfileAvailabilityAtom);
   const submitMutation = useSubmitTutorProfileMutation();
   const resetAfterSubmit = useSetAtom(resetTutorProfileAfterSubmitAtom);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
@@ -64,7 +59,8 @@ export function TutorProfileAvailabilityScreen() {
 
   const form = useForm<AvailabilityFormValues>({
     defaultValues: {
-      hourlyRate: initialHourlyRate ?? '',
+      hourlyRate: tutorProfileAvailability.hourlyRate ?? '',
+      slotsByDay: tutorProfileAvailability.slotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
     },
     mode: 'onChange',
   });
@@ -79,14 +75,15 @@ export function TutorProfileAvailabilityScreen() {
 
   useEffect(() => {
     reset({
-      hourlyRate: initialHourlyRate ?? '',
+      hourlyRate: tutorProfileAvailability.hourlyRate ?? '',
+      slotsByDay: tutorProfileAvailability.slotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
     });
-  }, []);
+  }, [tutorProfileAvailability.hourlyRate, tutorProfileAvailability.slotsByDay, reset]);
 
   const onSaveExit = () => {
     if (submitMutation.isPending) return;
     form.handleSubmit((values) => {
-      setHourlyRate(values.hourlyRate);
+      setTutorProfileAvailability((prev) => ({ ...prev, hourlyRate: values.hourlyRate, slotsByDay: values.slotsByDay }));
       setLastSavedAt(new Date().toISOString());
       router.push('/');
     })();
@@ -94,13 +91,17 @@ export function TutorProfileAvailabilityScreen() {
 
   const handleHourlyRateChange = (value: string) => {
     setValue('hourlyRate', value);
-    setHourlyRate(value);
+    setTutorProfileAvailability((prev) => ({ ...prev, hourlyRate: value }));
     setLastSavedAt(new Date().toISOString());
   };
 
   const handleAvailabilitySave = (data: AvailabilityData) => {
-    setSlotsByDay(data.slotsByDay);
+    setTutorProfileAvailability((prev) => ({ ...prev, slotsByDay: data.slotsByDay }));
     setLastSavedAt(new Date().toISOString());
+  };
+
+  const handleAvailabilityChange = (data: AvailabilityData) => {
+    setTutorProfileAvailability((prev) => ({ ...prev, slotsByDay: data.slotsByDay }));
   };
 
   const draftSavedLabel =
@@ -108,22 +109,69 @@ export function TutorProfileAvailabilityScreen() {
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
       : '';
 
+  const availabilityInitialData = useMemo(
+    () => ({ slotsByDay: tutorProfileAvailability.slotsByDay }),
+    [tutorProfileAvailability.slotsByDay]
+  );
+
   const handleContinue = async () => {
     const hourlyRate = form.getValues('hourlyRate');
+    const slotsByDay = form.getValues('slotsByDay') ?? {};
     
     if (!hourlyRate || !HOURLY_RATE_REGEX.test(hourlyRate.trim()) || Number(hourlyRate) <= 0) {
       return;
     }
 
-    const payload = buildSubmitTutorProfilePayload({
-      ...about,
-      ...photo,
-      ...identity,
-      ...certification,
-      videoUrl: video.videoLink,
-      hourlyRate,
-      slotsByDay: initialSlotsByDay,
+    const proficiencies = (about.proficiencies || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const languages = (about.languages || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((languageCode, i) => ({
+        languageCode,
+        proficiency: proficiencies[i] ?? '',
+      }));
+
+    const availability: SubmitTutorProfileDto['availability'] = [];
+    Object.entries(slotsByDay).forEach(([dayKey, slots]) => {
+      const dayIndex = DAY_KEYS.indexOf(dayKey as (typeof DAY_KEYS)[number]);
+      if (dayIndex === -1) return;
+      for (const slot of slots) {
+        availability.push({
+          dayOfWeek: dayIndex,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        });
+      }
     });
+
+    const payload: SubmitTutorProfileDto = {
+      firstName: about.firstName,
+      lastName: about.lastName,
+      email: about.email,
+      country: about.country as SubmitTutorProfileDto['country'],
+      phone: about.phone,
+      subject: about.subject,
+      languages,
+      identityPhotoUrl: photo.identity.uploadedUrl ?? '',
+      headline: photo.headline,
+      motivate: photo.motivate,
+      introduce: photo.introduce,
+      teachingCertificateName: certification.teachingCertificate.name,
+      teachingYear: certification.teachingCertificate.year,
+      teachingCertificateFileUrl: certification.teachingCertificate.file.uploadedUrl ?? '',
+      university: certification.higherEducation.university,
+      degree: certification.higherEducation.degree,
+      specialization: certification.higherEducation.specialization,
+      educationFileUrl: certification.higherEducation.file.uploadedUrl ?? '',
+      videoUrl: video.videoLink,
+      pricePerHour: Number.parseFloat(hourlyRate) || 0,
+      availability,
+    };
 
     await submitMutation.mutateAsync(payload);
     resetAfterSubmit();
@@ -273,9 +321,9 @@ export function TutorProfileAvailabilityScreen() {
               </YStack>
 
               <AvailabilityEditor
-                mode="create"
-                initialData={{ slotsByDay: initialSlotsByDay }}
+                initialData={availabilityInitialData}
                 onSave={handleAvailabilitySave}
+                onChange={handleAvailabilityChange}
                 showActions={false}
               />
             </Container>

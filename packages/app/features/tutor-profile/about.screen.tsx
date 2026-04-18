@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -28,7 +28,6 @@ import {
   joinLanguagesArray,
   parseLanguagesString,
   formatLastSavedTime,
-  
   VIETNAM_PHONE_REGEX,
 } from '@mezon-tutors/shared';
 import {
@@ -66,8 +65,7 @@ export function TutorProfileAboutScreen() {
   const router = useRouter();
   const [about, setAbout] = useAtom(tutorProfileAboutAtom);
   const [, markStepCompleted] = useAtom(markStepCompletedAtom);
-  const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
-  const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
+  const [lastSavedAt, setLastSavedAt] = useAtom(tutorProfileLastSavedAtAtom);
 
   const aboutSchema = useMemo(
     () =>

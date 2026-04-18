@@ -124,6 +124,7 @@
       "photoRequired": "Profile photo is required",
       "photoInvalidType": "Photo must be JPG or PNG",
       "photoInvalidSize": "Photo must be smaller than {max}MB",
+      "photoUploadFailed": "Upload failed, please try again",
       "identityRequired": "Identity photo is required",
       "identityInvalidType": "Identity photo must be JPG or PNG",
       "identityInvalidSize": "Identity photo must be smaller than {max}MB"
@@ -173,9 +174,11 @@
       "certificateFileRequired": "Certificate file is required",
       "certificateFileInvalidType": "Certificate file must be PDF, JPG or PNG",
       "certificateFileTooLarge": "Certificate file must be smaller than {max}MB",
+      "certificateUploadFailed": "Certificate upload failed, please try again",
       "educationFileRequired": "Diploma file is required",
       "educationFileInvalidType": "Diploma file must be PDF, JPG or PNG",
-      "educationFileTooLarge": "Diploma file must be smaller than {max}MB"
+      "educationFileTooLarge": "Diploma file must be smaller than {max}MB",
+      "educationUploadFailed": "Diploma upload failed, please try again"
     }
   },
   "Video": {

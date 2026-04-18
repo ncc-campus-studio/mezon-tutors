@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ETrialLessonStatus } from '@mezon-tutors/db';
-import { DEFAULT_TIMEZONE } from '@mezon-tutors/shared';
+import { DEFAULT_TIMEZONE, PENDING_STUDENT_ID } from '@mezon-tutors/shared';
 import dayjs = require('dayjs');
 import timezone = require('dayjs/plugin/timezone');
 import utc = require('dayjs/plugin/utc');
@@ -99,6 +99,11 @@ export class MyScheduleService {
               avatar: true,
             },
           },
+          tutor: {
+            select: {
+              subject: true,
+            },
+          },
         },
         orderBy: {
           startAt: 'asc',
@@ -113,13 +118,13 @@ export class MyScheduleService {
       isActive: slot.isActive,
     }));
 
-    const lessonEvents: ScheduleEvent[] = bookings.map((booking) => {
-      const startsAt = dayjs(booking.startAt).tz(DEFAULT_TIMEZONE);
-      const endsAt = startsAt.add(booking.durationMinutes, 'minute');
+    const lessonEvents: ScheduleEvent[] = lessons.map((lesson) => {
+      const startsAt = dayjs(lesson.startAt).tz(DEFAULT_TIMEZONE);
+      const endsAt = dayjs(lesson.startAt).add(lesson.durationMinutes, 'minutes').tz(DEFAULT_TIMEZONE);
       const dayIndex = startsAt.day() === 0 ? 6 : startsAt.day() - 1;
 
       let status: 'upcoming' | 'pending' | 'blocked';
-      if (booking.status === ETrialLessonStatus.CANCELLED) {
+      if (lesson.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
       } else if (booking.status === ETrialLessonStatus.PENDING) {
         status = 'pending';
@@ -133,8 +138,8 @@ export class MyScheduleService {
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),
         status,
-        title: 'Trial Lesson',
-        studentName: booking.student.username,
+        title: lesson.tutor.subject,
+        studentName: lesson.student.username,
         timeLabel: `${startsAt.format('HH:mm')} - ${endsAt.format('HH:mm')}`,
       };
     });

@@ -36,13 +36,12 @@ import { TutorProfileStickyActions } from './components/tutor-profile-sticky-act
 import {
   tutorProfileLastSavedAtAtom,
   tutorProfilePhotoAtom,
-  tutorProfileIdentityAtom,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { formatLastSavedTime } from '@mezon-tutors/shared';
+import { CLOUDINARY_FOLDER, formatLastSavedTime, MAX_IMAGE_SIZE_MB } from '@mezon-tutors/shared';
+import { cloudinaryService } from '@mezon-tutors/app/services';
 
 const CURRENT_STEP = 2;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
-const MAX_SIZE_MB = 5;
 const ACCEPT_PROFILE_IMAGE = 'image/jpeg,image/png,image/jpg';
 
 export function TutorProfilePhotoScreen() {
@@ -52,9 +51,11 @@ export function TutorProfilePhotoScreen() {
   const photoCardRef = useRef<HTMLDivElement | null>(null);
   const identityCardRef = useRef<HTMLDivElement | null>(null);
   const formCardRef = useRef<HTMLDivElement | null>(null);
-  const [photo, setPhoto] = useAtom(tutorProfilePhotoAtom);
-  const [identity, setIdentity] = useAtom(tutorProfileIdentityAtom);
-  const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(photo.dataUrl);
+  const [tutorProfilePhoto, setTutorProfilePhoto] = useAtom(tutorProfilePhotoAtom);
+  const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(
+    tutorProfilePhoto.photo.dataUrl || tutorProfilePhoto.photo.uploadedUrl
+  );
+  const [isUploading, setIsUploading] = useState(false);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
@@ -70,7 +71,7 @@ export function TutorProfilePhotoScreen() {
           identityPhotoFile: z.instanceof(File).nullable(),
         })
         .superRefine((data, ctx) => {
-          const bytesLimit = MAX_SIZE_MB * 1024 * 1024;
+          const bytesLimit = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
           const checkImageFile = (
             file: File | null,
@@ -97,13 +98,13 @@ export function TutorProfilePhotoScreen() {
                 code: z.ZodIssueCode.custom,
                 message:
                   msgType === 'photo'
-                    ? t('validation.photoInvalidSize', { max: MAX_SIZE_MB })
-                    : t('validation.identityInvalidSize', { max: MAX_SIZE_MB }),
+                    ? t('validation.photoInvalidSize', { max: MAX_IMAGE_SIZE_MB })
+                    : t('validation.identityInvalidSize', { max: MAX_IMAGE_SIZE_MB }),
               });
             }
           };
 
-          if (!photo.dataUrl && !data.profilePhotoFile) {
+          if (!tutorProfilePhoto.photo.dataUrl && !tutorProfilePhoto.photo.uploadedUrl && !data.profilePhotoFile) {
             ctx.addIssue({
               path: ['profilePhotoFile'],
               code: z.ZodIssueCode.custom,
@@ -114,7 +115,7 @@ export function TutorProfilePhotoScreen() {
             checkImageFile(data.profilePhotoFile, 'profilePhotoFile', 'photo');
           }
 
-          if (!identity.dataUrl && !data.identityPhotoFile) {
+          if (!tutorProfilePhoto.identity.dataUrl && !tutorProfilePhoto.identity.uploadedUrl && !data.identityPhotoFile) {
             ctx.addIssue({
               path: ['identityPhotoFile'],
               code: z.ZodIssueCode.custom,
@@ -125,16 +126,16 @@ export function TutorProfilePhotoScreen() {
             checkImageFile(data.identityPhotoFile, 'identityPhotoFile', 'identity');
           }
         }),
-    [t, locale, photo.dataUrl, identity.dataUrl, allowedImageExt]
+    [t, locale, tutorProfilePhoto.photo.dataUrl, tutorProfilePhoto.photo.uploadedUrl, tutorProfilePhoto.identity.dataUrl, tutorProfilePhoto.identity.uploadedUrl, allowedImageExt]
   );
 
   type PhotoFormValues = z.infer<typeof photoFormSchema>;
 
   const form = useForm<PhotoFormValues>({
     defaultValues: {
-      introduce: photo.introduce,
-      headline: photo.headline,
-      motivate: photo.motivate,
+      introduce: tutorProfilePhoto.introduce,
+      headline: tutorProfilePhoto.headline,
+      motivate: tutorProfilePhoto.motivate,
       profilePhotoFile: null,
       identityPhotoFile: null,
     },
@@ -164,47 +165,123 @@ export function TutorProfilePhotoScreen() {
   const identityPhotoFile = useWatch({ control, name: 'identityPhotoFile' });
 
   useEffect(() => {
-    setPreviewPhotoUrl(photo.dataUrl);
-  }, [photo.dataUrl]);
+    setPreviewPhotoUrl(tutorProfilePhoto.photo.dataUrl || tutorProfilePhoto.photo.uploadedUrl);
+  }, [tutorProfilePhoto.photo.dataUrl, tutorProfilePhoto.photo.uploadedUrl]);
 
   useEffect(() => {
     const currentProfile = getValues('profilePhotoFile');
     const currentIdentity = getValues('identityPhotoFile');
     form.reset({
-      introduce: photo.introduce,
-      headline: photo.headline,
-      motivate: photo.motivate,
+      introduce: tutorProfilePhoto.introduce,
+      headline: tutorProfilePhoto.headline,
+      motivate: tutorProfilePhoto.motivate,
       profilePhotoFile: currentProfile,
       identityPhotoFile: currentIdentity,
     });
-  }, [photo.introduce, photo.headline, photo.motivate, getValues, form]);
+  }, [tutorProfilePhoto.introduce, tutorProfilePhoto.headline, tutorProfilePhoto.motivate, getValues, form]);
 
   useEffect(() => {
     if (!profilePhotoFile) return;
+    const bytesLimit = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+    if (profilePhotoFile.size > bytesLimit) {
+      form.setError('profilePhotoFile', {
+        type: 'manual',
+        message: t('validation.photoInvalidSize', { max: MAX_IMAGE_SIZE_MB }),
+      });
+      return;
+    }
+    const previousPublicId = tutorProfilePhoto.photo.publicId;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const dataUrl = reader.result as string;
-      setPhoto((prev) => ({ ...prev, dataUrl }));
+      setTutorProfilePhoto((prev) => ({ ...prev, photo: { ...prev.photo, dataUrl } }));
       setPreviewPhotoUrl(dataUrl);
       setLastSavedAt(new Date().toISOString());
+
+      try {
+        setIsUploading(true);
+        const uploadedFile = await cloudinaryService.uploadFileWithSignature(
+          profilePhotoFile,
+          CLOUDINARY_FOLDER.TUTOR_AVATAR,
+          'image'
+        );
+        setTutorProfilePhoto((prev) => ({
+          ...prev,
+          photo: { ...prev.photo, uploadedUrl: uploadedFile.secureUrl, publicId: uploadedFile.publicId },
+        }));
+        if (previousPublicId && previousPublicId !== uploadedFile.publicId) {
+          void cloudinaryService.deleteFile(previousPublicId).catch(() => null);
+        }
+        await form.trigger('profilePhotoFile');
+      } catch {
+        form.setError('profilePhotoFile', {
+          type: 'manual',
+          message: t('validation.photoUploadFailed'),
+        });
+      } finally {
+        setIsUploading(false);
+      }
     };
     reader.readAsDataURL(profilePhotoFile);
-  }, [profilePhotoFile, setPhoto, setLastSavedAt]);
+  }, [profilePhotoFile, t]);
 
   useEffect(() => {
     if (!identityPhotoFile) return;
+    const bytesLimit = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+    if (identityPhotoFile.size > bytesLimit) {
+      form.setError('identityPhotoFile', {
+        type: 'manual',
+        message: t('validation.identityInvalidSize', { max: MAX_IMAGE_SIZE_MB }),
+      });
+      return;
+    }
+    const previousPublicId = tutorProfilePhoto.identity.publicId;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       const dataUrl = reader.result as string;
-      setIdentity({ dataUrl });
+      setTutorProfilePhoto((prev) => ({ ...prev, identity: { ...prev.identity, dataUrl } }));
       setLastSavedAt(new Date().toISOString());
+
+      try {
+        setIsUploading(true);
+        const uploadedFile = await cloudinaryService.uploadFileWithSignature(
+          identityPhotoFile,
+          CLOUDINARY_FOLDER.TUTOR_IDENTITY,
+          'image'
+        );
+        setTutorProfilePhoto((prev) => ({
+          ...prev,
+          identity: { ...prev.identity, uploadedUrl: uploadedFile.secureUrl, publicId: uploadedFile.publicId },
+        }));
+        if (previousPublicId && previousPublicId !== uploadedFile.publicId) {
+          void cloudinaryService.deleteFile(previousPublicId).catch(() => null);
+        }
+        await form.trigger('identityPhotoFile');
+      } catch {
+        form.setError('identityPhotoFile', {
+          type: 'manual',
+          message: t('validation.photoUploadFailed'),
+        });
+      } finally {
+        setIsUploading(false);
+      }
     };
     reader.readAsDataURL(identityPhotoFile);
-  }, [identityPhotoFile, setIdentity, setLastSavedAt]);
+  }, [identityPhotoFile, t]);
 
-  const onSaveContinue = (values: PhotoFormValues) => {
-    const { profilePhotoFile: _pp, identityPhotoFile: _ip, ...textValues } = values;
-    setPhoto((prev) => ({ ...prev, ...textValues }));
+  const onSaveContinue = async (values: PhotoFormValues) => {
+    const { profilePhotoFile: _profilePhotoFile, identityPhotoFile: _identityPhotoFile, ...textValues } =
+      values;
+
+    if ((profilePhotoFile && !tutorProfilePhoto.photo.uploadedUrl) || (identityPhotoFile && !tutorProfilePhoto.identity.uploadedUrl)) {
+      form.setError(profilePhotoFile ? 'profilePhotoFile' : 'identityPhotoFile', {
+        type: 'manual',
+        message: t('validation.photoUploadFailed'),
+      });
+      return;
+    }
+
+    setTutorProfilePhoto((prev) => ({ ...prev, ...textValues }));
     setLastSavedAt(new Date().toISOString());
     router.push('/become-tutor/certification');
   };
@@ -557,7 +634,7 @@ export function TutorProfilePhotoScreen() {
                   gap: '$4',
                 }}
               >
-                {!identity.dataUrl ? (
+                {!tutorProfilePhoto.identity.dataUrl && !tutorProfilePhoto.identity.uploadedUrl ? (
                   <YStack
                     width="55%"
                     height={250}
@@ -591,7 +668,7 @@ export function TutorProfilePhotoScreen() {
                     }}
                   >
                     <img
-                      src={identity.dataUrl}
+                      src={tutorProfilePhoto.identity.dataUrl || tutorProfilePhoto.identity.uploadedUrl || ''}
                       alt=""
                       style={{
                         width: '100%',
@@ -755,6 +832,7 @@ export function TutorProfilePhotoScreen() {
           </Button>
           <Button
             variant="primary"
+            disabled={isUploading}
             onPress={handleSubmit(onSaveContinue, onValidationError)}
           >
             {t('saveContinue')}
