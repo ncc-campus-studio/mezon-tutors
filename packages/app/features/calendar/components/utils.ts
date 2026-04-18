@@ -7,7 +7,11 @@ export function buildRowModels(
   enableGapCollapse: boolean,
   minGapHours: number
 ): CalendarRowModel[] {
-  if (!weekHours.length || !enableGapCollapse) {
+  if (!weekHours.length) {
+    return [];
+  }
+
+  if (!enableGapCollapse) {
     return weekHours.map((hour) => ({ type: 'hour', hour }));
   }
 
@@ -56,10 +60,6 @@ export function buildRowModels(
         endHour: Math.min(24, lastEmptyHour + 1),
         hourCount: emptyCount,
       });
-    } else {
-      for (let i = startIndex; i < index; i++) {
-        rows.push({ type: 'hour', hour: sortedHours[i] });
-      }
     }
   }
 

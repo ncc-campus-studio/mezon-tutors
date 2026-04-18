@@ -332,9 +332,36 @@
     "reviewRecentLabel": "2 days ago",
     "showAllReviews": "Show all {count} reviews",
     "showLessReviews": "Show less reviews",
+    "postReview": "Post review",
+    "editReview": "Edit review",
+    "whatStudentsSay": "What my students say",
+    "basedOnReviews": "Based on {count} student reviews",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "allReviewsTitle": "All Reviews",
+    "loadingReviews": "Loading reviews...",
+    "reviewModal": {
+      "editTitle": "Edit Review",
+      "postTitle": "Post Review",
+      "forTutor": "for {tutorName}",
+      "ratingLabel": "Rating",
+      "commentLabel": "Comment",
+      "placeholderComment": "Share your experience with this tutor ({min}-{max} characters)",
+      "cancel": "Cancel",
+      "submit": "Submit Review",
+      "update": "Update Review",
+      "submitting": "Submitting...",
+      "errors": {
+        "commentTooShort": "Comment must be at least {min} characters",
+        "commentTooLong": "Comment must not exceed {max} characters",
+        "submitFailed": "Failed to submit review. Please try again."
+      }
+    },
     "pagination": {
       "previous": "Previous",
       "next": "Next"
-    }
+    },
+    "loadMoreReviews": "Load more reviews",
+    "close": "Close"
   }
 }

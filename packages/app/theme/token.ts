@@ -131,6 +131,11 @@ export const tokens = createTokens({
     myLessonsEventBorder: 'rgba(255, 255, 255, 0.08)',
     myLessonsEventTutor: '#DDE6FD',
     myLessonsEventTime: '#9FB2DC',
+
+    // ===== Reviews =====
+    reviewPostButtonBackground: '#1253D5',
+    reviewPostButtonBackgroundHover: '#104BC4',
+    reviewPostButtonText: '#FFFFFF',
   },
 
   radius: {

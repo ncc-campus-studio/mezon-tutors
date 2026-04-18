@@ -63,6 +63,7 @@ export * from './PlayIcon'
 export * from './SeamlessInstantMessagingIcon'
 export * from './SeamlessVirtualClassroomIcon'
 export * from './StarIcon'
+export * from './StarFilledIcon'
 export * from './WatchDemoIcon'
 export * from './TutorVideoCardIcon'
 export * from './VercelIcon'
@@ -72,6 +73,7 @@ export * from './MoonIcon'
 export * from './PersonalIcon';
 export * from './VideoIcon';
 export * from './EditListIcon';
+export * from './EditIcon';
 export * from './BadgeIcon';
 export * from './ExternalLinkIcon';
 export * from './LinkIcon';
