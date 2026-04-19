@@ -118,7 +118,7 @@ export class MyScheduleService {
       isActive: slot.isActive,
     }));
 
-    const lessonEvents: ScheduleEvent[] = lessons.map((lesson) => {
+    const lessonEvents: ScheduleEvent[] = bookings.map((lesson) => {
       const startsAt = dayjs(lesson.startAt).tz(DEFAULT_TIMEZONE);
       const endsAt = dayjs(lesson.startAt).add(lesson.durationMinutes, 'minutes').tz(DEFAULT_TIMEZONE);
       const dayIndex = startsAt.day() === 0 ? 6 : startsAt.day() - 1;
@@ -126,14 +126,14 @@ export class MyScheduleService {
       let status: 'upcoming' | 'pending' | 'blocked';
       if (lesson.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
-      } else if (booking.status === ETrialLessonStatus.PENDING) {
+      } else if (lesson.status === ETrialLessonStatus.PENDING) {
         status = 'pending';
       } else {
         status = 'upcoming';
       }
 
       return {
-        id: booking.id,
+        id: lesson.id,
         dayIndex,
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),

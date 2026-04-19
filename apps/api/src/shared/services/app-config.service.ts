@@ -38,15 +38,32 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
 
-  // Payos
-  PAYOS_CLIENT_ID: z.string().min(1, 'PAYOS_CLIENT_ID is required'),
-  PAYOS_API_KEY: z.string().min(1, 'PAYOS_API_KEY is required'),
-  PAYOS_CHECKSUM_KEY: z.string().min(1, 'PAYOS_CHECKSUM_KEY is required'),
+  PAYOS_CLIENT_ID: z.string().default(''),
+  PAYOS_API_KEY: z.string().default(''),
+  PAYOS_CHECKSUM_KEY: z.string().default(''),
 
-  // Cloudinary
-  CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
-  CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
-  CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),
+  CLOUDINARY_CLOUD_NAME: z.string().default(''),
+  CLOUDINARY_API_KEY: z.string().default(''),
+  CLOUDINARY_API_SECRET: z.string().default(''),
+}).superRefine((data, ctx) => {
+  if (data.NODE_ENV !== 'production') return;
+  const requiredInProd: [string, string][] = [
+    ['PAYOS_CLIENT_ID', data.PAYOS_CLIENT_ID],
+    ['PAYOS_API_KEY', data.PAYOS_API_KEY],
+    ['PAYOS_CHECKSUM_KEY', data.PAYOS_CHECKSUM_KEY],
+    ['CLOUDINARY_CLOUD_NAME', data.CLOUDINARY_CLOUD_NAME],
+    ['CLOUDINARY_API_KEY', data.CLOUDINARY_API_KEY],
+    ['CLOUDINARY_API_SECRET', data.CLOUDINARY_API_SECRET],
+  ];
+  for (const [key, val] of requiredInProd) {
+    if (!val?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${key} is required in production`,
+        path: [key],
+      });
+    }
+  }
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
