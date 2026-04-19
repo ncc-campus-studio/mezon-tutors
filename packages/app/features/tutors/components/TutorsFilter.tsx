@@ -22,6 +22,8 @@ export function TutorsFilter({
 }: TutorsFilterProps) {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const t = useTranslations('Tutors.Filter')
+  const tSubject = useTranslations('Tutors.Filter.Subject')
+  const tCountry = useTranslations('Tutors.Filter.Country')
 
   const parsedPriceRange = useMemo(() => {
     if (!pricePerLesson) return null
@@ -68,7 +70,7 @@ export function TutorsFilter({
           value={subject}
           onValueChange={(value) => onSubjectChange(value as ESubject)}
           options={(Object.values(ESubject) as ESubject[]).map((value) => ({
-            label: t(value),
+            label: tSubject(value),
             value: value as string,
           }))}
         />
@@ -92,7 +94,7 @@ export function TutorsFilter({
           value={country}
           onValueChange={(value) => onCountryChange(value as ECountry)}
           options={(Object.values(ECountry) as ECountry[]).map((value) => ({
-            label: t(value),
+            label: tCountry(value),
             value: value as string,
           }))}
         />

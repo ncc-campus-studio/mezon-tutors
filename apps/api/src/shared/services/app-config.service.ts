@@ -37,6 +37,16 @@ const envSchema = z.object({
   // Email (Resend)
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
+
+  // Payos
+  PAYOS_CLIENT_ID: z.string().min(1, 'PAYOS_CLIENT_ID is required'),
+  PAYOS_API_KEY: z.string().min(1, 'PAYOS_API_KEY is required'),
+  PAYOS_CHECKSUM_KEY: z.string().min(1, 'PAYOS_CHECKSUM_KEY is required'),
+
+  // Cloudinary
+  CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
+  CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
+  CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
@@ -61,6 +71,12 @@ export class AppConfigService {
       REDIRECT_URI: this.configService.get('REDIRECT_URI'),
       RESEND_API_KEY: this.configService.get('RESEND_API_KEY'),
       RESEND_FROM_EMAIL: this.configService.get('RESEND_FROM_EMAIL'),
+      PAYOS_CLIENT_ID: this.configService.get('PAYOS_CLIENT_ID'),
+      PAYOS_API_KEY: this.configService.get('PAYOS_API_KEY'),
+      PAYOS_CHECKSUM_KEY: this.configService.get('PAYOS_CHECKSUM_KEY'),
+      CLOUDINARY_CLOUD_NAME: this.configService.get('CLOUDINARY_CLOUD_NAME'),
+      CLOUDINARY_API_KEY: this.configService.get('CLOUDINARY_API_KEY'),
+      CLOUDINARY_API_SECRET: this.configService.get('CLOUDINARY_API_SECRET'),
     };
 
     try {
@@ -132,6 +148,22 @@ export class AppConfigService {
 
   get resendFromEmail(): string {
     return this.env.RESEND_FROM_EMAIL;
+  }
+
+  get payosConfig() {
+    return {
+      clientId: this.env.PAYOS_CLIENT_ID,
+      apiKey: this.env.PAYOS_API_KEY,
+      checksumKey: this.env.PAYOS_CHECKSUM_KEY,
+    };
+  }
+
+  get cloudinaryConfig() {
+    return {
+      cloudName: this.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: this.env.CLOUDINARY_API_KEY,
+      apiSecret: this.env.CLOUDINARY_API_SECRET,
+    };
   }
 
   // Helper generic method if needed for other keys

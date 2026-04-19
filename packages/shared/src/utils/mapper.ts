@@ -31,7 +31,6 @@ export const LanguageLabel: Record<ELanguage, string> = {
   [ELanguage.DUTCH]: 'Dutch',
   [ELanguage.POLISH]: 'Polish',
   [ELanguage.TURKISH]: 'Turkish',
-  [ELanguage.OTHER]: 'Other',
 }
 
 export const SubjectLabel: Record<ESubject, string> = {

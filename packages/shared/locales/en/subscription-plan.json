@@ -1,0 +1,34 @@
+{
+  "SubscriptionPlan": {
+    "Screen": {
+      "brand": "Subscription",
+      "headline": "Time to make real progress!",
+      "subtitle": "Subscribe to a monthly plan. Prices are for our standard lesson time of 50 mins.",
+      "selectPlan": "Select your plan"
+    },
+    "PlanSelectionList": {
+      "lessonsPerWeek": "{count} lessons per week",
+      "popular": "POPULAR",
+      "priceLine": "{monthlyPrice} ₫/mo ({perLessonPrice} ₫ per lesson)"
+    },
+    "PlanSummaryCard": {
+      "summary": "Summary",
+      "title": "Your learning plan",
+      "planCard": {
+        "title": "Standard 50m Lessons",
+        "subtitle": "Monthly Curriculum"
+      },
+      "frequency": "Frequency",
+      "lessonsPerWeek": "{count} lessons per week",
+      "benefits": {
+        "schedule": "Schedule your lessons for any time",
+        "changeTutor": "Change your tutor for free",
+        "cancelAnytime": "Cancel your plan at any time"
+      },
+      "total": "Total",
+      "perMonth": "/mo",
+      "continue": "Continue to checkout",
+      "securityNotice": "Secure 256-bit SSL encrypted payment"
+    }
+  }
+}

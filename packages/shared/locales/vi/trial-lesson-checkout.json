@@ -1,0 +1,67 @@
+{
+  "TrialLessonCheckout": {
+    "Screen": {
+      "title": "Thanh toán",
+      "subtitle": "Hoàn tất đặt buổi học thử với {tutorName}",
+      "loadingBooking": "Đang tải thông tin đặt lịch...",
+      "trialLessonDetails": "Chi tiết buổi học thử",
+      "durationLabel": "{durationMinutes} phút",
+      "loadingPaymentSummary": "Đang tải tóm tắt thanh toán...",
+      "pendingPaymentNotice": "Bạn đã có đơn chờ thanh toán với gia sư này. Vui lòng hoàn tất thanh toán bên dưới.",
+      "bookedLockedNotice": "Bạn đã đặt gia sư này rồi, không thể tạo thêm booking.",
+      "missingInfo": {
+        "title": "Thiếu thông tin đặt lịch",
+        "description": "Vui lòng mở trang này từ luồng đặt buổi học thử trên thẻ gia sư.",
+        "expectedQuery": "Query cần có: tutorId, startAt, durationMinutes, dayOfWeek"
+      },
+      "errors": {
+        "loadTutor": "Không thể tải hồ sơ gia sư. Vui lòng thử lại sau.",
+        "missingRate": "Gia sư này chưa có mức giá theo giờ; không thể tiếp tục thanh toán."
+      },
+      "toast": {
+        "alreadyBookedTitle": "Bạn đã có lịch đặt",
+        "alreadyBookedDescription": "Bạn đã có booking với gia sư này và không thể tạo thêm.",
+        "bookingFailedTitle": "Đặt lịch thất bại",
+        "bookingFailedFallback": "Không thể tạo booking",
+        "popupBlockedTitle": "Không mở được cửa sổ thanh toán",
+        "popupBlockedDescription": "Vui lòng cho phép popup và thử lại."
+      },
+      "tutor": {
+        "professionalPrefix": "Chuyên nghiệp ",
+        "subjectSuffix": "Tutor",
+        "emptySubtitle": "—",
+        "fallbackName": "Gia sư của bạn",
+        "loadingName": "..."
+      },
+      "paymentMethods": {
+        "payos": {
+          "title": "payOS",
+          "subtitle": "VietQR, Napas 24/7"
+        }
+      }
+    },
+    "PaymentMethodPanel": {
+      "title": "Chọn phương thức thanh toán",
+      "processing": "Đang xử lý...",
+      "bookAndPay": "Đặt buổi học và thanh toán {amount}",
+      "bookLesson": "Đặt buổi học",
+      "securityNotice": "Thanh toán được mã hóa SSL an toàn"
+    },
+    "PaymentSummaryCard": {
+      "title": "Tóm tắt thanh toán",
+      "trialLesson": "Buổi học thử ({durationMinutes} phút)",
+      "total": "Tổng cộng",
+      "promoCode": "Mã giảm giá",
+      "promoPlaceholder": "Nhập mã",
+      "apply": "Áp dụng"
+    },
+    "TrialLessonDetailsCard": {
+      "trialLesson": "Buổi học thử",
+      "date": "Ngày",
+      "time": "Giờ",
+      "duration": "Thời lượng",
+      "policy": "Chính sách",
+      "freeCancellation": "Hủy miễn phí"
+    }
+  }
+}

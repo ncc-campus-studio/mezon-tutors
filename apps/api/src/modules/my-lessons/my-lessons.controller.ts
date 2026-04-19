@@ -8,7 +8,10 @@ export class MyLessonsController {
   constructor(private readonly myLessonsService: MyLessonsService) {}
 
   @Get()
-  async getOverview(@Query('student_mezon_user_id') studentMezonUserId?: string) {
-    return this.myLessonsService.getOverview(studentMezonUserId);
+  async getOverview(
+    @Query('student_mezon_user_id') studentMezonUserId?: string,
+    @Query('week_start_date') weekStartDate?: string,
+  ) {
+    return this.myLessonsService.getOverview(studentMezonUserId, weekStartDate);
   }
 }

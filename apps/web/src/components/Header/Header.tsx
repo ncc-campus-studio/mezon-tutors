@@ -1,54 +1,19 @@
 'use client'
 import Link from 'next/link'
-import styles from './Header.module.css'
 import { useAtomValue } from 'jotai'
 import { isAuthenticatedAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton'
-import { LogoutButton } from '@mezon-tutors/app/components/auth/LogoutButton'
-import { ROUTES } from '@mezon-tutors/shared'
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { HEADER_NAV, ROUTES } from '@mezon-tutors/shared'
+import { useCallback } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-
-function ThemeIcon({ isDark }: { isDark: boolean }) {
-  if (isDark) {
-    return (
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    )
-  }
-
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M12 2.5V5.2M12 18.8V21.5M21.5 12H18.8M5.2 12H2.5M18.7 5.3L16.8 7.2M7.2 16.8L5.3 18.7M18.7 18.7L16.8 16.8M7.2 7.2L5.3 5.3"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
+import { XStack, Text, Button } from '@mezon-tutors/app/ui'
+import { LogoIcon } from '@mezon-tutors/app/ui/icons'
+import { themes } from '@mezon-tutors/app/theme/theme'
+import { useThemeName } from 'tamagui'
+import { HeaderLocaleToggle } from './HeaderLocaleToggle'
+import { HeaderThemeToggle } from './HeaderThemeToggle'
+import { HeaderNavLink } from './HeaderNavLink'
 
 export default function Header() {
   const locale = useLocale()
@@ -56,63 +21,14 @@ export default function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const themeName = useThemeName()
   const isAuthenticated = useAtomValue(isAuthenticatedAtom)
   const user = useAtomValue(userAtom)
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light')
-  const [showUserMenu, setShowUserMenu] = useState(false)
-
-  const headerThemeVarsByMode = {
-    light: {
-      '--header-bg-start': '#0b1628',
-      '--header-bg-end': '#101f3f',
-      '--header-border': 'rgba(255, 255, 255, 0.10)',
-      '--header-logo-text': '#ffffff',
-      '--header-nav-text': '#cbd5e1',
-      '--header-nav-hover': '#ffffff',
-      '--header-toggle-border': 'rgba(255, 255, 255, 0.22)',
-      '--header-toggle-bg': 'rgba(255, 255, 255, 0.04)',
-      '--header-toggle-text': '#e7eeff',
-      '--header-toggle-hover': 'rgba(255, 255, 255, 0.12)',
-      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.75)',
-      '--header-locale-active-text': '#ffffff',
-    } as CSSProperties,
-    dark: {
-      '--header-bg-start': '#050d19',
-      '--header-bg-end': '#0b1628',
-      '--header-border': 'rgba(148, 163, 184, 0.20)',
-      '--header-logo-text': '#f8fafc',
-      '--header-nav-text': '#cbd5e1',
-      '--header-nav-hover': '#ffffff',
-      '--header-toggle-border': 'rgba(148, 163, 184, 0.35)',
-      '--header-toggle-bg': 'rgba(15, 23, 42, 0.45)',
-      '--header-toggle-text': '#e2e8f0',
-      '--header-toggle-hover': 'rgba(148, 163, 184, 0.18)',
-      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.82)',
-      '--header-locale-active-text': '#ffffff',
-    } as CSSProperties,
-  }
-
-  useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute('data-theme')
-    if (currentTheme === 'dark' || currentTheme === 'light') {
-      setThemeMode(currentTheme)
-      return
-    }
-
-    const savedTheme = window.localStorage.getItem('app-theme')
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      setThemeMode(savedTheme)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Prevent accidental dropdown open right after auth state changes/navigation.
-    setShowUserMenu(false)
-  }, [isAuthenticated, pathname])
+  const themeMode: 'light' | 'dark' = themeName === 'dark' ? 'dark' : 'light'
+  const headerTheme = themeMode === 'dark' ? themes.dark : themes.light
 
   const toggleTheme = useCallback(() => {
     const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
-    setThemeMode(nextTheme)
     window.dispatchEvent(new CustomEvent('app-theme-change', { detail: nextTheme }))
   }, [themeMode])
 
@@ -120,8 +36,8 @@ export default function Header() {
     (nextLocale: 'en' | 'vi') => {
       if (nextLocale === locale) return
 
-      // Persist selected locale for next-intl middleware/request config.
-      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax; secure`
+      const isHttps = window.location.protocol === 'https:'
+      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax${isHttps ? '; secure' : ''}`
 
       const query = searchParams.toString()
       const nextPath = query ? `${pathname}?${query}` : pathname
@@ -131,103 +47,98 @@ export default function Header() {
     [locale, pathname, router, searchParams]
   )
 
-  const headerCssVars = useMemo(() => headerThemeVarsByMode[themeMode], [themeMode])
+  const toggleLocale = useCallback(() => {
+    const nextLocale = locale === 'en' ? 'vi' : 'en'
+    void switchLocale(nextLocale)
+  }, [locale, switchLocale])
+
+  const goToDashboard = useCallback(() => {
+    router.push(ROUTES.DASHBOARD.INDEX)
+  }, [router])
 
   return (
-    <header className={styles.header} style={headerCssVars}>
-      <div className={styles.logo}>
-        <Link href={ROUTES.HOME.index} className={styles.logoLink}>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-            className={styles.icons}
+    <XStack
+      top={0}
+      zIndex={200}
+      height={80}
+      paddingHorizontal={60}
+      alignItems="center"
+      justifyContent="space-between"
+      backgroundColor="$myLessonsTopNavBackground"
+      borderBottomWidth={1}
+      borderBottomColor="$myLessonsTopNavBorder"
+      style={{
+        position: 'sticky',
+        backdropFilter: 'blur(14px) saturate(140%)',
+        backgroundImage: `linear-gradient(90deg, ${headerTheme.webHeaderBgStart}, ${headerTheme.webHeaderBgEnd})`,
+        boxShadow: `${headerTheme.webHeaderContainerShadow}`,
+        transition: 'background-image 420ms cubic-bezier(0.22,1,0.36,1), box-shadow 420ms cubic-bezier(0.22,1,0.36,1), border-color 320ms ease',
+      }}
+    >
+      <XStack alignItems="center" gap={10}>
+        <Link href={ROUTES.HOME.index} style={{ color: 'inherit', textDecoration: 'none' }}>
+          <XStack
+            alignItems="center"
+            gap={10}
+            borderRadius={999}
+            paddingVertical={6}
+            paddingHorizontal={10}
+            backgroundColor="$webHeaderLogoChipBg"
+            borderWidth={1}
+            borderColor="$webHeaderLogoChipBorder"
+            style={{ transition: 'all 320ms cubic-bezier(0.22,1,0.36,1)' }}
           >
-            <img src="/icons/Background.svg" alt="background" />
-            <span style={{ margin: 0 }}>TutorMatch</span>
-          </div>
+            <LogoIcon />
+            <Text color="$myLessonsBrandText" fontSize={18} fontWeight="700" lineHeight={24}>
+              TutorMatch
+            </Text>
+          </XStack>
         </Link>
-      </div>
+      </XStack>
 
-      <nav className={styles.nav}>
-        <Link href={ROUTES.TUTOR.INDEX}>{t('findTutors')}</Link>
-        <Link href={ROUTES.MY_LESSONS.INDEX}>{t('myLessons')}</Link>
-        <Link href={ROUTES.BECOME_TUTOR.INDEX}>{t('becomeTutor')}</Link>
-      </nav>
+      <XStack gap={30} alignItems="center">
+        {HEADER_NAV.map((item) => (
+          <HeaderNavLink
+            key={item.href}
+            href={item.href}
+            label={t(item.labelKey)}
+            active={pathname === item.href}
+          />
+        ))}
+      </XStack>
 
-      <div className={styles.actions}>
-        <button type="button" className={styles.themeToggle} onClick={toggleTheme}>
-          <ThemeIcon isDark={themeMode === 'dark'} />
-        </button>
+      <XStack alignItems="center" gap={10}>
+        {!isAuthenticated ? <LoginButton /> : null}
 
-        <div className={styles.localeToggle}>
-          <button
-            type="button"
-            className={locale === 'en' ? styles.localeActive : ''}
-            onClick={() => switchLocale('en')}
+        <HeaderLocaleToggle locale={locale} onToggle={toggleLocale} iconColor={headerTheme.webHeaderToggleText} />
+
+        <HeaderThemeToggle isDark={themeMode === 'dark'} onToggleAction={toggleTheme} />
+
+        {isAuthenticated && user?.avatar ? (
+          <XStack
+            borderWidth={1}
+            borderColor="$myLessonsTopNavBorder"
+            borderRadius={999}
+            backgroundColor="transparent"
+            padding={4}
+            cursor="pointer"
+            onPress={goToDashboard}
           >
-            EN
-          </button>
-          <button
-            type="button"
-            className={locale === 'vi' ? styles.localeActive : ''}
-            onClick={() => switchLocale('vi')}
-          >
-            VI
-          </button>
-        </div>
-
-        {isAuthenticated ? (
-          <div className={styles.userMenuWrapper}>
-            <button 
-              type="button"
-              className={styles.userInfo}
-              onClick={() => setShowUserMenu(!showUserMenu)}
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.username ?? 'User avatar'} className={styles.avatar} />
-              ) : (
-                <div className={styles.avatar}>
-                  {user?.username?.substring(0, 2).toUpperCase() || 'U'}
-                </div>
-              )}
-              <span className={styles.username}>{user?.username}</span>
-              <svg 
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12" 
-                fill="none"
-                style={{ 
-                  transition: 'transform 200ms',
-                  transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)'
-                }}
-              >
-                <path 
-                  d="M3 4.5L6 7.5L9 4.5" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            
-            {showUserMenu && (
-              <>
-                <div 
-                  className={styles.menuOverlay} 
-                  onClick={() => setShowUserMenu(false)}
-                />
-                <div className={styles.userMenu}>
-                  <div className={styles.menuItem}>
-                    <LogoutButton />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
-          <LoginButton />
-        )}
-      </div>
-    </header>
+            <img
+              src={user.avatar}
+              alt={user.username ?? 'User avatar'}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '999px',
+                objectFit: 'cover',
+                border: `2px solid ${headerTheme.webHeaderAvatarBorder}`,
+                cursor: 'pointer',
+              }}
+            />
+          </XStack>
+        ) : null}
+      </XStack>
+    </XStack>
   )
 }

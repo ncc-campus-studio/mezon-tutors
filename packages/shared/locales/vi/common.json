@@ -10,5 +10,35 @@
     "getStarted": "Bắt đầu ngay",
     "myMessages": "Tin nhắn của tôi",
     "searchPlaceholder": "Tìm kiếm bằng môn học"
+  },
+  "Footer": {
+    "description": "Nền tảng kết nối gia sư ngôn ngữ hàng đầu dành cho người đi làm tại Việt Nam.",
+    "product": {
+      "title": "Sản phẩm",
+      "findTutor": "Tìm gia sư",
+      "pricing": "Bảng giá",
+      "enterprise": "Doanh nghiệp"
+    },
+    "community": {
+      "title": "Cộng đồng",
+      "becomeTutor": "Trở thành gia sư",
+      "blog": "Blog giáo dục",
+      "events": "Sự kiện"
+    },
+    "support": {
+      "title": "Hỗ trợ",
+      "helpCenter": "Trung tâm trợ giúp",
+      "privacyPolicy": "Chính sách bảo mật",
+      "contact": "Liên hệ"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn"
+    },
+    "copyright": "© 2026 TutorMatch. Bảo lưu mọi quyền.",
+    "bottom": {
+      "terms": "Điều khoản",
+      "privacy": "Bảo mật"
+    }
   }
 }

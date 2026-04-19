@@ -1,0 +1,34 @@
+{
+  "SubscriptionPlan": {
+    "Screen": {
+      "brand": "Gói đăng ký",
+      "headline": "Đã đến lúc tiến bộ thật sự!",
+      "subtitle": "Đăng ký gói tháng. Giá áp dụng cho buổi học tiêu chuẩn 50 phút.",
+      "selectPlan": "Chọn gói của bạn"
+    },
+    "PlanSelectionList": {
+      "lessonsPerWeek": "{count} buổi mỗi tuần",
+      "popular": "PHỔ BIẾN",
+      "priceLine": "{monthlyPrice} ₫/tháng ({perLessonPrice} ₫ mỗi buổi)"
+    },
+    "PlanSummaryCard": {
+      "summary": "Tóm tắt",
+      "title": "Kế hoạch học của bạn",
+      "planCard": {
+        "title": "Buổi học chuẩn 50 phút",
+        "subtitle": "Lộ trình hàng tháng"
+      },
+      "frequency": "Tần suất",
+      "lessonsPerWeek": "{count} buổi mỗi tuần",
+      "benefits": {
+        "schedule": "Linh hoạt chọn thời gian học",
+        "changeTutor": "Đổi gia sư miễn phí",
+        "cancelAnytime": "Hủy gói bất cứ lúc nào"
+      },
+      "total": "Tổng cộng",
+      "perMonth": "/tháng",
+      "continue": "Tiếp tục thanh toán",
+      "securityNotice": "Thanh toán mã hóa SSL 256-bit an toàn"
+    }
+  }
+}
