@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM node:22-bookworm-slim AS builder
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare yarn@4.11.0 --activate
@@ -8,8 +6,10 @@ COPY package.json yarn.lock .yarnrc.yml turbo.json tsconfig.base.json ./
 COPY apps ./apps
 COPY packages ./packages
 COPY scripts ./scripts
-RUN yarn config set enableScripts false
-RUN yarn install
+RUN yarn config set enableScripts false \
+  && yarn install --mode=skip-build \
+  && yarn cache clean --all \
+  && rm -rf /root/.yarn
 RUN printf '%s\n' 'DATABASE_URL=postgresql://postgres:postgres@localhost:5432/dummy?schema=public' > packages/db/.env
 RUN yarn turbo run build --filter=@mezon-tutors/api
 
