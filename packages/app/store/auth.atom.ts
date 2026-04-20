@@ -1,8 +1,7 @@
 'use client';
 
-import authService from '@mezon-tutors/app/services/auth/auth.service';
+import { authService, tokenStorage } from '@mezon-tutors/app/services';
 import { atom } from 'jotai';
-import { atomWithStorage } from 'jotai/utils';
 
 export type AuthUser = {
   id: string;
@@ -13,7 +12,7 @@ export type AuthUser = {
   role?: string | null;
 };
 
-type AuthUserSource = {
+export type AuthUserSource = {
   sub?: string;
   id?: string;
   mezonUserId?: string;
@@ -23,7 +22,7 @@ type AuthUserSource = {
   role?: string | null;
 };
 
-function toAuthUser(source: AuthUserSource): AuthUser {
+export function toAuthUser(source: AuthUserSource): AuthUser {
   return {
     id: source.sub ?? source.id ?? '',
     mezonUserId: source.mezonUserId ?? '',
@@ -37,15 +36,12 @@ function toAuthUser(source: AuthUserSource): AuthUser {
 export const userAtom = atom<AuthUser | null>(null);
 export const isLoadingAtom = atom<boolean>(true);
 
-export const accessTokenAtom = atomWithStorage<string | null>('accessToken', null);
-
 export const isAuthenticatedAtom = atom((get) => {
-  return Boolean(get(accessTokenAtom) && get(userAtom));
+  return Boolean(get(userAtom));
 });
 
-export const initAuthAtom = atom(null, async (get, set) => {
-  const token = get(accessTokenAtom);
-
+export const initAuthAtom = atom(null, async (_, set) => {
+  const token = await tokenStorage.getAccessToken();
   if (!token) {
     set(isLoadingAtom, false);
     return;
@@ -55,48 +51,9 @@ export const initAuthAtom = atom(null, async (get, set) => {
     const data = await authService.getMe();
     set(userAtom, toAuthUser(data));
   } catch {
-    set(accessTokenAtom, null);
+    await tokenStorage.clearTokens();
     set(userAtom, null);
   } finally {
     set(isLoadingAtom, false);
   }
-});
-
-export const loginAtom = atom(
-  null,
-  async (_, set, { accessToken, user }: { accessToken: string; user?: AuthUserSource }) => {
-    set(accessTokenAtom, accessToken);
-
-    if (user?.mezonUserId) {
-      set(userAtom, toAuthUser(user));
-      return;
-    }
-
-    try {
-      const data = await authService.getMe();
-      set(userAtom, toAuthUser(data));
-    } catch {
-      set(accessTokenAtom, null);
-      set(userAtom, null);
-    }
-  }
-);
-
-export const logoutAtom = atom(null, async (get, set) => {
-  const token = get(accessTokenAtom);
-
-  window.localStorage.removeItem('refreshToken');
-
-  set(accessTokenAtom, null);
-  set(userAtom, null);
-
-  if (token) {
-    try {
-      await authService.logout();
-    } catch {}
-  }
-});
-
-export const getAuthUrlAtom = atom(null, async () => {
-  return await authService.getAuthUrl();
 });
