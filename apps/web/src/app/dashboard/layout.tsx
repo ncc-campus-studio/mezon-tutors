@@ -11,7 +11,7 @@ import { type DashboardMenuIconKey, type DashboardMenuItem, DASHBOARD_MENU_ITEMS
 import { ROUTES } from '@mezon-tutors/shared/src/constants/routes'
 import { isLoadingAtom, logoutAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { BookingRequestIcon, CalendarIcon, DocumentIcon, LogoutIcon } from '@mezon-tutors/app/ui/icons'
-import { useThemeName } from 'tamagui'
+import { useThemeName, useMedia } from 'tamagui'
 import { themes } from '@mezon-tutors/app/theme/theme'
 
 type AppTheme = (typeof themes)[keyof typeof themes]
@@ -54,6 +54,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const themeName = useThemeName()
+  const media = useMedia()
+  const isMobile = media.sm || media.xs
   const t = useTranslations('Dashboard')
   const user = useAtomValue(userAtom)
   const isAuthLoading = useAtomValue(isLoadingAtom)
@@ -85,67 +87,84 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     router.push(ROUTES.HOME.index)
   }
 
+  const sidebarContent = (
+    <YStack
+      width={240}
+      minWidth={240}
+      backgroundColor="$dashboardTutorSidebarBackground"
+      borderRightWidth={1}
+      borderRightColor="$dashboardTutorSidebarBorder"
+      padding="$4"
+      gap="$3"
+      height="100%"
+      $xs={{ display: 'none' }}
+      $sm={{ display: 'none' }}
+    >
+      {visibleMenuItems.map((item: DashboardMenuItem) => {
+        const { active, Icon: ItemIcon, iconColor, labelColor } = getDashboardMenuDisplay(
+          item,
+          pathname,
+          dashboardTheme
+        )
+
+        const content = (
+          <Button
+            onPress={() => {
+              if (item.type === 'action') {
+                handleLogout()
+              }
+            }}
+            borderWidth={active ? 1 : 0}
+            borderColor="$dashboardTutorSidebarItemActiveBorder"
+            backgroundColor={active ? '$dashboardTutorSidebarItemActiveBg' : 'transparent'}
+            color={labelColor}
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            borderRadius={12}
+            flexDirection="row"
+            alignItems="center"
+            gap="$2"
+            justifyContent="flex-start"
+            width="100%"
+            hoverStyle={{
+              backgroundColor: '$dashboardTutorSidebarItemHover',
+              borderColor: '$dashboardTutorSidebarItemActiveBorder',
+            }}
+          >
+            <ItemIcon size={item.iconKey === 'bookingRequests' ? 19 : 16} color={iconColor} />
+            <Text color={labelColor} fontWeight={active ? '700' : '500'}>
+              {t(`sidebar.${item.labelKey}`)}
+            </Text>
+          </Button>
+        )
+
+        if (item.type === 'link' && item.href) {
+          return (
+            <Link key={item.key} href={item.href} style={{ textDecoration: 'none', width: '100%' }}>
+              {content}
+            </Link>
+          )
+        }
+
+        return <YStack key={item.key} width="100%">{content}</YStack>
+      })}
+
+      <YStack marginTop="auto" width="100%" />
+    </YStack>
+  )
+
   return (
     <Screen>
-      <XStack minHeight="100vh" flexDirection="row" flexWrap="nowrap">
-        <YStack
-          width={240}
-          minWidth={240}
-          backgroundColor="$dashboardTutorSidebarBackground"
-          borderRightWidth={1}
-          borderRightColor="$dashboardTutorSidebarBorder"
-          padding="$4"
-          gap="$3"
+      <XStack minHeight="100vh" flexDirection="row" flexWrap="nowrap" position="relative">
+        {!isMobile && sidebarContent}
+
+        <YStack 
+          flex={1} 
+          minWidth={0} 
+          backgroundColor="$dashboardTutorPageBackground" 
+          padding={isMobile ? 12 : "$4"}
+          paddingTop={isMobile ? 12 : "$4"}
         >
-          {visibleMenuItems.map((item: DashboardMenuItem) => {
-            const { active, Icon: ItemIcon, iconColor, labelColor } = getDashboardMenuDisplay(
-              item,
-              pathname,
-              dashboardTheme
-            )
-
-            const content = (
-              <Button
-                onPress={item.type === 'action' ? handleLogout : undefined}
-                borderWidth={active ? 1 : 0}
-                borderColor="$dashboardTutorSidebarItemActiveBorder"
-                backgroundColor={active ? '$dashboardTutorSidebarItemActiveBg' : 'transparent'}
-                color={labelColor}
-                paddingVertical="$2"
-                paddingHorizontal="$3"
-                borderRadius={12}
-                flexDirection="row"
-                alignItems="center"
-                gap="$2"
-                justifyContent="flex-start"
-                style={{ cursor: 'pointer' }}
-                hoverStyle={{
-                  backgroundColor: '$dashboardTutorSidebarItemHover',
-                  borderColor: '$dashboardTutorSidebarItemActiveBorder',
-                }}
-              >
-                <ItemIcon size={item.iconKey === 'bookingRequests' ? 19 : 16} color={iconColor} />
-                <Text color={labelColor} fontWeight={active ? '700' : '500'}>
-                  {t(`sidebar.${item.labelKey}`)}
-                </Text>
-              </Button>
-            )
-
-            if (item.type === 'link' && item.href) {
-              return (
-                <Link key={item.key} href={item.href} style={{ textDecoration: 'none' }}>
-                  {content}
-                </Link>
-              )
-            }
-
-            return <YStack key={item.key}>{content}</YStack>
-          })}
-
-          <YStack marginTop="auto" width="100%" />
-        </YStack>
-
-        <YStack flex={1} minWidth={0} backgroundColor="$dashboardTutorPageBackground" padding="$4">
           {children}
         </YStack>
       </XStack>
