@@ -3205,6 +3205,7 @@ __metadata:
     "@types/passport-jwt": "npm:^4.0.1"
     class-transformer: "npm:^0.5.1"
     class-validator: "npm:^0.14.1"
+    cloudinary: "npm:^2.9.0"
     dayjs: "npm:^1.11.13"
     helmet: "npm:^8.1.0"
     jsonwebtoken: "npm:^9.0.3"
@@ -9908,6 +9909,15 @@ __metadata:
   version: 1.0.4
   resolution: "clone@npm:1.0.4"
   checksum: 10c0/2176952b3649293473999a95d7bebfc9dc96410f6cbd3d2595cf12fd401f63a4bf41a7adbfd3ab2ff09ed60cb9870c58c6acdd18b87767366fabfc163700f13b
+  languageName: node
+  linkType: hard
+
+"cloudinary@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "cloudinary@npm:2.9.0"
+  dependencies:
+    lodash: "npm:^4.17.21"
+  checksum: 10c0/263e843b3ca6446ece4312dc2b84892aaeab35847b0fdbd0e80086ce2485a755f647e02ef60e4ebcf4e700f223d91efb8afcc1f7ee5bc41f8973f3bb34fe573f
   languageName: node
   linkType: hard
 

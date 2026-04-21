@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, useFormState, useWatch } from 'react-hook-form';
@@ -28,13 +28,13 @@ import {
   defaultCertificationState,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { formatLastSavedTime } from '@mezon-tutors/shared';
+import { CLOUDINARY_FOLDER, formatLastSavedTime, MAX_FILE_SIZE_MB } from '@mezon-tutors/shared';
+import { cloudinaryService } from '@mezon-tutors/app/services';
 import { z } from 'zod';
 
 const CURRENT_STEP = 3;
 const PROGRESS_PERCENT = (CURRENT_STEP - 1) * 20;
 
-const MAX_FILE_SIZE_MB = 5;
 const ACCEPT_CERT = '.pdf,.jpg,.jpeg,.png';
 
 export function TutorProfileCertificationScreen() {
@@ -43,10 +43,13 @@ export function TutorProfileCertificationScreen() {
   const router = useRouter();
   const [certification, setCertification] = useAtom(tutorProfileCertificationAtom);
   const [, markStepCompleted] = useAtom(markStepCompletedAtom);
+  const [isUploading, setIsUploading] = useState(false);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
   const teachingCardRef = useRef<HTMLDivElement>(null);
   const educationCardRef = useRef<HTMLDivElement | null>(null);
+  const teachingUploadSeqRef = useRef(0);
+  const educationUploadSeqRef = useRef(0);
 
   const certificationMerged = useMemo(
     () => ({ ...defaultCertificationState, ...certification }),
@@ -97,7 +100,8 @@ export function TutorProfileCertificationScreen() {
 
           const hasTeaching =
             data.teachingCertificateFile !== null ||
-            !!certificationMerged.teachingCertificateFileDataUrl;
+            !!certificationMerged.teachingCertificate.file.dataUrl ||
+            !!certificationMerged.teachingCertificate.file.uploadedUrl;
           if (!hasTeaching) {
             ctx.addIssue({
               path: ['teachingCertificateFile'],
@@ -114,7 +118,9 @@ export function TutorProfileCertificationScreen() {
           }
 
           const hasEducation =
-            data.educationFile !== null || !!certificationMerged.educationFileDataUrl;
+            data.educationFile !== null ||
+            !!certificationMerged.higherEducation.file.dataUrl ||
+            !!certificationMerged.higherEducation.file.uploadedUrl;
           if (!hasEducation) {
             ctx.addIssue({
               path: ['educationFile'],
@@ -133,8 +139,10 @@ export function TutorProfileCertificationScreen() {
     [
       t,
       locale,
-      certificationMerged.teachingCertificateFileDataUrl,
-      certificationMerged.educationFileDataUrl,
+      certificationMerged.teachingCertificate.file.dataUrl,
+      certificationMerged.teachingCertificate.file.uploadedUrl,
+      certificationMerged.higherEducation.file.dataUrl,
+      certificationMerged.higherEducation.file.uploadedUrl,
     ]
   );
 
@@ -147,11 +155,11 @@ export function TutorProfileCertificationScreen() {
 
   const form = useForm<CertificationFormValues>({
     defaultValues: {
-      teachingCertificateName: certificationMerged.teachingCertificateName,
-      teachingYear: certificationMerged.teachingYear,
-      university: certificationMerged.university,
-      degree: certificationMerged.degree,
-      specialization: certificationMerged.specialization,
+      teachingCertificateName: certificationMerged.teachingCertificate.name,
+      teachingYear: certificationMerged.teachingCertificate.year,
+      university: certificationMerged.higherEducation.university,
+      degree: certificationMerged.higherEducation.degree,
+      specialization: certificationMerged.higherEducation.specialization,
       teachingCertificateFile: null,
       educationFile: null,
     },
@@ -182,58 +190,196 @@ export function TutorProfileCertificationScreen() {
 
   useEffect(() => {
     if (!teachingCertificateFile) return;
+    const bytesLimit = MAX_FILE_SIZE_MB * 1024 * 1024;
+    if (teachingCertificateFile.size > bytesLimit) {
+      form.setError('teachingCertificateFile', {
+        type: 'manual',
+        message: t('validation.certificateFileTooLarge', { max: MAX_FILE_SIZE_MB }),
+      });
+      return;
+    }
+    teachingUploadSeqRef.current += 1;
+    const seq = teachingUploadSeqRef.current;
+    const previousPublicId = certificationMerged.teachingCertificate.file.publicId;
+
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
       setCertification((prev) => ({
         ...prev,
-        teachingCertificateFileDataUrl: reader.result as string,
-        teachingCertificateFileName: teachingCertificateFile.name,
+        teachingCertificate: {
+          ...prev.teachingCertificate,
+          file: {
+            ...prev.teachingCertificate.file,
+            dataUrl,
+            uploadedUrl: null,
+            fileName: teachingCertificateFile.name,
+          },
+        },
       }));
       setLastSavedAt(new Date().toISOString());
+
+      try {
+        setIsUploading(true);
+        const uploadedFile = await cloudinaryService.uploadFileWithSignature(
+          teachingCertificateFile,
+          CLOUDINARY_FOLDER.TUTOR_CERTIFICATE,
+          'auto'
+        );
+
+        if (teachingUploadSeqRef.current !== seq) return;
+
+        setCertification((prev) => ({
+          ...prev,
+          teachingCertificate: {
+            ...prev.teachingCertificate,
+            file: {
+              ...prev.teachingCertificate.file,
+              uploadedUrl: uploadedFile.secureUrl,
+              publicId: uploadedFile.publicId,
+            },
+          },
+        }));
+        if (previousPublicId && previousPublicId !== uploadedFile.publicId) {
+          void cloudinaryService.deleteFile(previousPublicId).catch(() => null);
+        }
+        await form.trigger('teachingCertificateFile');
+      } catch {
+        if (teachingUploadSeqRef.current !== seq) return;
+        form.setError('teachingCertificateFile', {
+          type: 'manual',
+          message: t('validation.certificateUploadFailed'),
+        });
+      } finally {
+        if (teachingUploadSeqRef.current === seq) setIsUploading(false);
+      }
     };
     reader.readAsDataURL(teachingCertificateFile);
-  }, [teachingCertificateFile, setCertification, setLastSavedAt]);
+  }, [teachingCertificateFile, t]);
 
   useEffect(() => {
     if (!educationFile) return;
+    const bytesLimit = MAX_FILE_SIZE_MB * 1024 * 1024;
+    if (educationFile.size > bytesLimit) {
+      form.setError('educationFile', {
+        type: 'manual',
+        message: t('validation.educationFileTooLarge', { max: MAX_FILE_SIZE_MB }),
+      });
+      return;
+    }
+    educationUploadSeqRef.current += 1;
+    const seq = educationUploadSeqRef.current;
+    const previousPublicId = certificationMerged.higherEducation.file.publicId;
+
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
       setCertification((prev) => ({
         ...prev,
-        educationFileDataUrl: reader.result as string,
-        educationFileName: educationFile.name,
+        higherEducation: {
+          ...prev.higherEducation,
+          file: {
+            ...prev.higherEducation.file,
+            dataUrl,
+            uploadedUrl: null,
+            fileName: educationFile.name,
+          },
+        },
       }));
       setLastSavedAt(new Date().toISOString());
+
+      try {
+        setIsUploading(true);
+        const uploadedFile = await cloudinaryService.uploadFileWithSignature(
+          educationFile,
+          CLOUDINARY_FOLDER.TUTOR_DIPLOMA,
+          'auto'
+        );
+
+        if (educationUploadSeqRef.current !== seq) return;
+
+        setCertification((prev) => ({
+          ...prev,
+          higherEducation: {
+            ...prev.higherEducation,
+            file: {
+              ...prev.higherEducation.file,
+              uploadedUrl: uploadedFile.secureUrl,
+              publicId: uploadedFile.publicId,
+            },
+          },
+        }));
+        if (previousPublicId && previousPublicId !== uploadedFile.publicId) {
+          void cloudinaryService.deleteFile(previousPublicId).catch(() => null);
+        }
+        await form.trigger('educationFile');
+      } catch {
+        if (educationUploadSeqRef.current !== seq) return;
+        form.setError('educationFile', {
+          type: 'manual',
+          message: t('validation.educationUploadFailed'),
+        });
+      } finally {
+        if (educationUploadSeqRef.current === seq) setIsUploading(false);
+      }
     };
     reader.readAsDataURL(educationFile);
-  }, [educationFile, setCertification, setLastSavedAt]);
+  }, [educationFile, t]);
 
   useEffect(() => {
     const currentTeachingFile = getValues('teachingCertificateFile');
     const currentEducationFile = getValues('educationFile');
     form.reset({
-      teachingCertificateName: certificationMerged.teachingCertificateName,
-      teachingYear: certificationMerged.teachingYear,
-      university: certificationMerged.university,
-      degree: certificationMerged.degree,
-      specialization: certificationMerged.specialization,
+      teachingCertificateName: certificationMerged.teachingCertificate.name,
+      teachingYear: certificationMerged.teachingCertificate.year,
+      university: certificationMerged.higherEducation.university,
+      degree: certificationMerged.higherEducation.degree,
+      specialization: certificationMerged.higherEducation.specialization,
       teachingCertificateFile: currentTeachingFile,
       educationFile: currentEducationFile,
     });
   }, [
-    certificationMerged.teachingCertificateName,
-    certificationMerged.teachingYear,
-    certificationMerged.university,
-    certificationMerged.degree,
-    certificationMerged.specialization,
+    certificationMerged.teachingCertificate.name,
+    certificationMerged.teachingCertificate.year,
+    certificationMerged.higherEducation.university,
+    certificationMerged.higherEducation.degree,
+    certificationMerged.higherEducation.specialization,
     getValues,
   ]);
 
-  const onSubmit = (values: CertificationFormValues) => {
+  const onSubmit = async (values: CertificationFormValues) => {
     const { teachingCertificateFile: _tcf, educationFile: _ef, ...textFields } = values;
+    if (isUploading) return;
+
+    if (!certificationMerged.teachingCertificate.file.uploadedUrl) {
+      form.setError('teachingCertificateFile', {
+        type: 'manual',
+        message: t('validation.certificateUploadFailed'),
+      });
+      return;
+    }
+
+    if (!certificationMerged.higherEducation.file.uploadedUrl) {
+      form.setError('educationFile', {
+        type: 'manual',
+        message: t('validation.educationUploadFailed'),
+      });
+      return;
+    }
+
     setCertification((prev) => ({
       ...prev,
-      ...textFields,
+      teachingCertificate: {
+        ...prev.teachingCertificate,
+        name: textFields.teachingCertificateName,
+        year: textFields.teachingYear,
+      },
+      higherEducation: {
+        ...prev.higherEducation,
+        university: textFields.university,
+        degree: textFields.degree,
+        specialization: textFields.specialization,
+      },
     }));
     setLastSavedAt(new Date().toISOString());
     markStepCompleted(CURRENT_STEP);
@@ -367,8 +513,9 @@ export function TutorProfileCertificationScreen() {
                       prompt={t('teaching.uploadPrompt')}
                       hint={t('teaching.uploadHint')}
                       persistedFileName={
-                        certificationMerged.teachingCertificateFileDataUrl
-                          ? certificationMerged.teachingCertificateFileName || undefined
+                        certificationMerged.teachingCertificate.file.dataUrl ||
+                        certificationMerged.teachingCertificate.file.uploadedUrl
+                          ? certificationMerged.teachingCertificate.file.fileName || undefined
                           : undefined
                       }
                     />
@@ -480,8 +627,9 @@ export function TutorProfileCertificationScreen() {
                       prompt={t('education.uploadPrompt')}
                       hint={t('education.uploadHint')}
                       persistedFileName={
-                        certificationMerged.educationFileDataUrl
-                          ? certificationMerged.educationFileName || undefined
+                        certificationMerged.higherEducation.file.dataUrl ||
+                        certificationMerged.higherEducation.file.uploadedUrl
+                          ? certificationMerged.higherEducation.file.fileName || undefined
                           : undefined
                       }
                     />
@@ -502,6 +650,7 @@ export function TutorProfileCertificationScreen() {
           </Button>
           <Button
             variant="primary"
+            disabled={isUploading}
             onPress={handleSubmit(onSubmit, onValidationError)}
           >
             {t('continue')}

@@ -319,6 +319,15 @@ export const themes = {
     tutorsDetailReviewCardBackground: '#F8FBFF',
     tutorsDetailReviewCardBorder: '#DCE7F7',
     tutorsDetailStarGold: '#F5C542',
+    tutorsDetailStarOutline: '#D1D5DB',
+    tutorsDetailReviewPostButtonBg: '#1D66F2',
+    tutorsDetailReviewPostButtonText: '#FFFFFF',
+    tutorsDetailReviewPostButtonHover: '#1557D6',
+    tutorsDetailReviewModalBackground: '#FFFFFF',
+    tutorsDetailReviewModalBorder: '#D1DFEF',
+    tutorsDetailReviewModalTitle: '#1D2433',
+    tutorsDetailReviewModalLabel: '#4A5A78',
+    tutorsDetailReviewModalOverlay: 'rgba(0, 0, 0, 0.5)',
 
     // ===== Home =====
     homePageBackground: '#F6FAFF',
@@ -742,6 +751,15 @@ export const themes = {
     tutorsDetailReviewCardBackground: '#0C1A33',
     tutorsDetailReviewCardBorder: 'rgba(42, 72, 126, 0.65)',
     tutorsDetailStarGold: '#F5C542',
+    tutorsDetailStarOutline: '#6B7280',
+    tutorsDetailReviewPostButtonBg: '#2F7CFF',
+    tutorsDetailReviewPostButtonText: '#FFFFFF',
+    tutorsDetailReviewPostButtonHover: '#1D66F2',
+    tutorsDetailReviewModalBackground: '#1A2942',
+    tutorsDetailReviewModalBorder: '#2B4A82',
+    tutorsDetailReviewModalTitle: '#F0F5FF',
+    tutorsDetailReviewModalLabel: '#B8CAEB',
+    tutorsDetailReviewModalOverlay: 'rgba(0, 0, 0, 0.7)',
 
     // ===== Home =====
     homePageBackground: '#071225',

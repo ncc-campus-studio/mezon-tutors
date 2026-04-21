@@ -332,9 +332,36 @@
     "reviewRecentLabel": "2 ngày trước",
     "showAllReviews": "Xem tất cả {count} đánh giá",
     "showLessReviews": "Thu gọn đánh giá",
+    "postReview": "Đăng đánh giá",
+    "editReview": "Chỉnh sửa đánh giá",
+    "whatStudentsSay": "Học viên của tôi nói gì",
+    "basedOnReviews": "Dựa trên {count} đánh giá của học viên",
+    "showMore": "Xem thêm",
+    "showLess": "Thu gọn",
+    "allReviewsTitle": "Tất cả đánh giá",
+    "loadingReviews": "Đang tải đánh giá...",
+    "reviewModal": {
+      "editTitle": "Chỉnh sửa đánh giá",
+      "postTitle": "Đăng đánh giá",
+      "forTutor": "cho {tutorName}",
+      "ratingLabel": "Đánh giá",
+      "commentLabel": "Nhận xét",
+      "placeholderComment": "Chia sẻ trải nghiệm của bạn với gia sư này ({min}-{max} ký tự)",
+      "cancel": "Hủy",
+      "submit": "Gửi đánh giá",
+      "update": "Cập nhật đánh giá",
+      "submitting": "Đang gửi...",
+      "errors": {
+        "commentTooShort": "Đánh giá phải có ít nhất {min} ký tự",
+        "commentTooLong": "Đánh giá không được vượt quá {max} ký tự",
+        "submitFailed": "Không thể gửi đánh giá. Vui lòng thử lại."
+      }
+    },
     "pagination": {
       "previous": "Trước",
       "next": "Sau"
-    }
+    },
+    "loadMoreReviews": "Tải thêm đánh giá",
+    "close": "Đóng"
   }
 }

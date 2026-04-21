@@ -25,6 +25,7 @@ import { useTheme } from 'tamagui';
 type AvailabilityEditorProps = {
   initialData?: AvailabilityData;
   onSave: (data: AvailabilityData) => Promise<void> | void;
+  onChange?: (data: AvailabilityData) => void;
   onCancel?: () => void;
   showActions?: boolean;
   isSaving?: boolean;
@@ -34,6 +35,7 @@ type AvailabilityEditorProps = {
 export function AvailabilityEditor({
   initialData,
   onSave,
+  onChange,
   onCancel,
   showActions = false,
   isSaving = false,
@@ -54,6 +56,7 @@ export function AvailabilityEditor({
   const {
     handleSubmit,
     watch,
+    reset,
     setValue,
     setError,
     clearErrors,
@@ -111,6 +114,14 @@ export function AvailabilityEditor({
     }
   }, []);
 
+  useEffect(() => {
+    reset(
+      initialData ?? {
+        slotsByDay: Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
+      }
+    );
+  }, [initialData, reset]);
+
   const dayKey = getDayKey(selectedDayIndex);
   const slotsByDayForm = watch('slotsByDay');
   const unsortedSlots = slotsByDayForm?.[dayKey] ?? [];
@@ -129,24 +140,30 @@ export function AvailabilityEditor({
   const addSlot = () => {
     const current = form.getValues('slotsByDay') ?? {};
     const daySlots = current[dayKey] ?? [];
-    setValue('slotsByDay', {
+    const nextSlotsByDay = {
       ...current,
       [dayKey]: [...daySlots, { ...DEFAULT_AVAILABILITY_SLOT }],
-    });
+    };
+    setValue('slotsByDay', nextSlotsByDay);
+    onChange?.({ slotsByDay: nextSlotsByDay });
     clearErrors('slotsByDay');
   };
 
   const removeSlot = (index: number) => {
     const current = form.getValues('slotsByDay') ?? {};
     const daySlots = (current[dayKey] ?? []).filter((_, i) => i !== index);
-    setValue('slotsByDay', { ...current, [dayKey]: daySlots });
+    const nextSlotsByDay = { ...current, [dayKey]: daySlots };
+    setValue('slotsByDay', nextSlotsByDay);
+    onChange?.({ slotsByDay: nextSlotsByDay });
   };
 
   const updateSlot = (index: number, patch: Partial<TimeSlot>) => {
     const current = form.getValues('slotsByDay') ?? {};
     const list = [...(current[dayKey] ?? [])];
     list[index] = { ...list[index], ...patch };
-    setValue('slotsByDay', { ...current, [dayKey]: list });
+    const nextSlotsByDay = { ...current, [dayKey]: list };
+    setValue('slotsByDay', nextSlotsByDay);
+    onChange?.({ slotsByDay: nextSlotsByDay });
   };
 
   const dayTabs = t.raw('availability.tabs') as string[];

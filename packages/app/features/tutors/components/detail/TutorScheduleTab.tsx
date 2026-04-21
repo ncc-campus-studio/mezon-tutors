@@ -54,10 +54,7 @@ function getWeekHoursFromSlots(slots: TutorDetailAvailabilitySlotDto[]): number[
   const hours = new Set<number>();
   slots.forEach((slot) => {
     const startHour = Math.floor(parseTimeToHour(slot.startTime));
-    const endHour = Math.floor(parseTimeToHour(slot.endTime));
-    for (let h = startHour; h < endHour; h++) {
-      hours.add(h);
-    }
+    hours.add(startHour);
   });
 
   return Array.from(hours).sort((a, b) => a - b);
