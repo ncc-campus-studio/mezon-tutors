@@ -6,14 +6,15 @@ export const MY_LESSONS_MOBILE_CONFIG = {
     maxWidth: 44,
     width: 44,
     padding: {
-      vertical: 14,
+      vertical: 26,
       horizontal: 4,
     },
+    contentGap: 0,
     borderRadius: 12,
     dayFontSize: 9,
-    dayLineHeight: 10,
+    dayLineHeight:9,
     dateFontSize: 15,
-    dateLineHeight: 18,
+    dateLineHeight: 9,
   },
   card: {
     borderRadius: 10,

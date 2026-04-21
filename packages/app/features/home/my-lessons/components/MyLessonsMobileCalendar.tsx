@@ -63,7 +63,7 @@ function WeekDayButton({ day, date, isActive, isToday, onPress }: WeekDayButtonP
       width={config.width}
       flexDirection="column"
       alignItems="center"
-      gap={2}
+      gap={config.contentGap}
       position="relative"
       flexShrink={0}
       className="week-day-button"
