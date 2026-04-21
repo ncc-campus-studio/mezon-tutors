@@ -7,6 +7,8 @@ export * from './CameraIcon';
 export * from './CardIcon';
 export * from './BookingRequestIcon';
 export * from './CheckIcon';
+export * from './ChevronLeftIcon';
+export * from './ChevronRightIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';
@@ -52,6 +54,7 @@ export * from './LanguageIcon'
 export * from './StarOutlineIcon'
 export * from './LogoutIcon'
 export * from './LogoIcon'
+export * from './MenuIcon'
 export * from './FeatureEveningClassesIcon'
 export * from './FeatureFlexibleWeekendsIcon'
 export * from './FeatureLearnViaMezonIcon'

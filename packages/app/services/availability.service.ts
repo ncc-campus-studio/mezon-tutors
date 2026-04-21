@@ -37,7 +37,7 @@ export const availabilityService = {
     const availability: AvailabilitySlot[] = [];
     
     Object.entries(data.slotsByDay).forEach(([dayKey, slots]) => {
-      const dayIndex = DAY_KEYS.indexOf(dayKey);
+      const dayIndex = DAY_KEYS.indexOf(dayKey as typeof DAY_KEYS[number]);
       const dayOfWeek = dayIndex === 6 ? 0 : dayIndex + 1;
       
       slots.forEach(slot => {
