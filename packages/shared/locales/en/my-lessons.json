@@ -67,5 +67,10 @@
   "screen": {
     "loading": "Loading lessons data..."
   },
+  "mobile": {
+    "allLessons": "All",
+    "lessons": "Lessons",
+    "noLessonsForDay": "No lessons scheduled for this day"
+  },
   "previewFooter": "TutorMatch interface preview."
 }

@@ -1,17 +1,10 @@
 import { ROUTES } from './routes';
 
-export type DashboardMenuIconKey =
-  | 'document'
-  | 'bookingRequests'
-  | 'calendar'
-  | 'logout';
-export type DashboardMenuLabelKey =
-  | 'myLessons'
-  | 'bookingRequests'
-  | 'mySchedule'
-  | 'logout';
+export type DashboardMenuIconKey = 'document' | 'bookingRequests' | 'calendar' | 'logout';
+export type DashboardMenuLabelKey = 'myLessons' | 'bookingRequests' | 'mySchedule' | 'logout';
 
-export type DashboardRole = 'STUDENT' | 'TUTOR';
+export const DASHBOARD_ROLES = ['STUDENT', 'TUTOR'] as const;
+export type DashboardRole = (typeof DASHBOARD_ROLES)[number];
 
 export type DashboardMenuItem = {
   key: string;
@@ -55,3 +48,42 @@ export const DASHBOARD_MENU_ITEMS: DashboardMenuItem[] = [
     roles: ['STUDENT', 'TUTOR'],
   },
 ];
+
+export function isDashboardRole(role: string | null | undefined): role is DashboardRole {
+  if (!role) {
+    return false;
+  }
+
+  return DASHBOARD_ROLES.includes(role as DashboardRole);
+}
+
+export function getDashboardMenuItemsByRole(role: string | null | undefined): DashboardMenuItem[] {
+  if (!isDashboardRole(role)) {
+    return [];
+  }
+
+  return DASHBOARD_MENU_ITEMS.filter((item) => item.roles.includes(role));
+}
+
+export const DASHBOARD_SIDEBAR_CONFIG = {
+  width: 240,
+  padding: {
+    container: 16,
+    item: {
+      vertical: 8,
+      horizontal: 12,
+    },
+  },
+  borderRadius: 12,
+  iconSizes: {
+    default: 16,
+    bookingRequests: 19,
+  },
+} as const;
+
+export const DASHBOARD_ICON_MAP = {
+  document: 'DocumentIcon',
+  bookingRequests: 'BookingRequestIcon',
+  calendar: 'CalendarIcon',
+  logout: 'LogoutIcon',
+} as const;

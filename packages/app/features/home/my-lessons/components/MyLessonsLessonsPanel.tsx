@@ -2,22 +2,12 @@ import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Image } from 'tamagui';
+import { StarOutlineIcon } from '@mezon-tutors/app/ui/icons';
+import { DEFAULT_AVATAR_URL } from '@mezon-tutors/shared/src/constants/my-lesson';
 import type { LessonItem } from '../types';
 
-function getInitials(name: string): string {
-  const tokens = name.trim().split(/\s+/).filter(Boolean);
-  if (!tokens.length) {
-    return 'NA';
-  }
-
-  return tokens
-    .slice(0, 2)
-    .map((token) => token[0]?.toUpperCase() ?? '')
-    .join('');
-}
-
 function LessonPersonBadge({ name, avatar }: { name: string; avatar?: string }) {
-  const avatarUri = avatar?.trim() || '';
+  const avatarUri = avatar?.trim() || DEFAULT_AVATAR_URL;
 
   return (
     <YStack
@@ -31,13 +21,13 @@ function LessonPersonBadge({ name, avatar }: { name: string; avatar?: string }) 
       borderColor="$myLessonsAvatarBorder"
       overflow="hidden"
     >
-      {avatarUri ? (
-        <Image source={{ uri: avatarUri }} width={40} height={40} borderRadius={999} accessibilityLabel={name} />
-      ) : (
-        <Text color="$myLessonsAvatarText" fontSize={11} fontWeight="700">
-          {getInitials(name)}
-        </Text>
-      )}
+      <Image 
+        source={{ uri: avatarUri }} 
+        width={40} 
+        height={40} 
+        borderRadius={999} 
+        accessibilityLabel={name} 
+      />
     </YStack>
   );
 }
@@ -65,7 +55,6 @@ function PastLessonListItem({
       justifyContent="space-between"
       alignItems="center"
       gap="$3"
-      flexWrap="wrap"
     >
       <XStack alignItems="center" gap="$2.5" flex={1} minWidth={220}>
         <LessonPersonBadge name={lesson.tutor} avatar={lesson.tutorAvatar} />
@@ -79,7 +68,7 @@ function PastLessonListItem({
         </YStack>
       </XStack>
 
-      <XStack alignItems="center" gap="$2">
+      <XStack alignItems="center" gap="$2.5" marginLeft="auto">
         {rated ? (
           <YStack
             borderWidth={1}
@@ -90,9 +79,12 @@ function PastLessonListItem({
             backgroundColor="$myLessonsLessonsRatingBackground"
             alignItems="center"
           >
-            <Text color="$myLessonsLessonsRatingText" fontSize={11} fontWeight="700">
-              {'☆ 4.8'}
-            </Text>
+            <XStack alignItems="center" gap={2}>
+              <StarOutlineIcon size={11} color="$myLessonsLessonsRatingText" />
+              <Text color="$myLessonsLessonsRatingText" fontSize={11} fontWeight="700">
+                {lesson.rating?.toFixed(1) ?? '5.0'}
+              </Text>
+            </XStack>
             <Text color="$myLessonsLessonsRatingText" fontSize={10} fontWeight="600">
               {ratedLabel}
             </Text>
@@ -110,7 +102,12 @@ function PastLessonListItem({
             fontSize={11}
             fontWeight="600"
           >
-            {`☆ ${rateLabel}`}
+            <XStack alignItems="center" gap={2}>
+              <StarOutlineIcon size={11} color="$myLessonsLessonsActionSecondaryText" />
+              <Text color="$myLessonsLessonsActionSecondaryText" fontSize={11} fontWeight="600">
+                {rateLabel}
+              </Text>
+            </XStack>
           </Button>
         )}
 
