@@ -9,7 +9,8 @@ import Link from 'next/link'
 import { Screen, XStack, YStack, Text, Button } from '@mezon-tutors/app/ui'
 import { type DashboardMenuIconKey, type DashboardMenuItem, DASHBOARD_MENU_ITEMS } from '@mezon-tutors/shared/src/constants/dashboard'
 import { ROUTES } from '@mezon-tutors/shared/src/constants/routes'
-import { isLoadingAtom, logoutAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
+import { authService, tokenStorage } from '@mezon-tutors/app/services'
+import { isLoadingAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { BookingRequestIcon, CalendarIcon, DocumentIcon, LogoutIcon } from '@mezon-tutors/app/ui/icons'
 import { useThemeName } from 'tamagui'
 import { themes } from '@mezon-tutors/app/theme/theme'
@@ -57,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const t = useTranslations('Dashboard')
   const user = useAtomValue(userAtom)
   const isAuthLoading = useAtomValue(isLoadingAtom)
-  const logout = useSetAtom(logoutAtom)
+  const setUser = useSetAtom(userAtom)
   const dashboardTheme = themeName === 'dark' ? themes.dark : themes.light
   const role = user?.role === 'STUDENT' ? 'STUDENT' : 'TUTOR'
   const visibleMenuItems = DASHBOARD_MENU_ITEMS.filter((item) => item.roles.includes(role))
@@ -81,8 +82,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }
 
   const handleLogout = async () => {
-    await logout()
-    router.push(ROUTES.HOME.index)
+    try {
+      await authService.logout()
+    } finally {
+      await tokenStorage.clearTokens()
+      setUser(null)
+      router.push(ROUTES.HOME.index)
+    }
   }
 
   return (

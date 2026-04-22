@@ -11,6 +11,9 @@ import type {
 } from './interfaces/auth.interfaces';
 import { UserService } from '../user/user.service';
 
+const ACCESS_TOKEN_EXPIRES_IN = '60m';
+const REFRESH_TOKEN_EXPIRES_IN = '30d';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -110,7 +113,7 @@ export class AuthService {
 
   async createRefreshToken(userId: string): Promise<string> {
     const jwtConfig = this.appConfig.jwtConfig;
-    const expiresIn = '30d';
+    const expiresIn = REFRESH_TOKEN_EXPIRES_IN;
 
     const token = await this.jwtService.signAsync(
       { sub: userId, type: 'refresh' },
@@ -199,7 +202,7 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
 
     return {
@@ -220,7 +223,7 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
 
     const refreshToken = await this.createRefreshToken(user.id);

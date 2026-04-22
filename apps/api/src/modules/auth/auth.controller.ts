@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards, Headers } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 import { AppConfigService } from '../../shared/services/app-config.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { MezonCallbackQueryDto } from './dto/mezon-callback-query.dto';
 import { MezonExchangeDto } from './dto/mezon-exchange.dto';
+
+const REFRESH_TOKEN_MAX_AGE = 1000 * 60 * 60 * 24 * 30;
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -14,6 +16,17 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly appConfig: AppConfigService
   ) {}
+
+  private getRefreshCookieOptions(): CookieOptions {
+    const isProduction = this.appConfig.nodeEnv === 'production';
+
+    return {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: REFRESH_TOKEN_MAX_AGE,
+    };
+  }
 
   @Get('url')
   getMezonOAuthUrl() {
@@ -28,12 +41,15 @@ export class AuthController {
   }
 
   @Post('mezon/exchange')
-  async mezonExchange(@Body() body: MezonExchangeDto) {
+  async mezonExchange(@Body() body: MezonExchangeDto, @Res({ passthrough: true }) res: Response) {
     const { code, state } = body;
     const result = await this.authService.handleMezonCallback(code, state);
+
+    res.cookie('refresh_token', result.tokens.refreshToken, this.getRefreshCookieOptions());
+
     return {
       user: result.user,
-      tokens: result.tokens,
+      accessToken: result.tokens.accessToken,
     };
   }
 
@@ -49,9 +65,14 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
-    const tokens = await this.authService.refreshAccessToken(body.refreshToken);
-    return { tokens };
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies.refresh_token;
+    
+    const tokens = await this.authService.refreshAccessToken(refreshToken);
+
+    res.cookie('refresh_token', tokens.refreshToken, this.getRefreshCookieOptions());
+
+    return { accessToken: tokens.accessToken };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -62,8 +83,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Body() body: { refreshToken?: string }, @Req() req: Request) {
-    await this.authService.revokeRefreshToken(body.refreshToken!);
+  async logout(@Req() req: Request) {
+    const refreshToken = req.cookies.refresh_token;
+    
+    await this.authService.revokeRefreshToken(refreshToken);
 
     return {
       success: true,
