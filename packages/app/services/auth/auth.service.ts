@@ -1,5 +1,5 @@
 import { apiClient } from '@mezon-tutors/app/services/api-client';
-import { tokenStorage } from '@mezon-tutors/app/services/token-storage';
+import { tokenStorage } from '../storage/token-storage';
 
 export type AuthTokens = {
   accessToken: string;
@@ -40,8 +40,8 @@ class AuthService {
     return res.url;
   }
 
-  async exchangeCode(code: string, state?: string): Promise<ExchangeResponse> {
-    const data = await apiClient.post<ExchangeResponse>('/auth/mezon/exchange', { code, state });
+  async exchangeCode(code: string, state?: string): Promise<{ accessToken: string }> {
+    const data = await apiClient.post<{ accessToken: string }>('/auth/mezon/exchange', { code, state });
     return data;
   }
 
@@ -50,10 +50,14 @@ class AuthService {
     return res;
   }
 
+  async refreshToken(): Promise<{ accessToken: string }> {
+    const data = await apiClient.post<{ accessToken: string }>('/auth/refresh');
+    return data;
+  }
+
   async logout(): Promise<void> {
-    const refreshToken = await tokenStorage.getRefreshToken();
     try {
-      await apiClient.post('/auth/logout', { refreshToken });
+      await apiClient.post('/auth/logout');
     } finally {
       await tokenStorage.clearTokens();
     }

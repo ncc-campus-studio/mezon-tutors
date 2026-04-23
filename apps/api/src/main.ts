@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppConfigService } from './shared/services/app-config.service';
 import { ValidationPipe } from '@nestjs/common';
@@ -11,6 +12,9 @@ async function bootstrap() {
 
   // Security headers
   app.use(helmet());
+
+  // Parse cookies
+  app.use(cookieParser());
 
   // Enable CORS
   app.enableCors({

@@ -1,12 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { tokenStorage } from './token-storage';
+import { tokenStorage } from './storage/token-storage';
 import { env } from '../config/env';
+import authService from './auth/auth.service';
 
 export const BASE_URL = env.apiEndpoint;
 
-/**
- * Custom API error for consistent error handling across the app.
- */
 export class ApiError extends Error {
   status: number;
   body: unknown;
@@ -23,30 +21,32 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Shared promise for concurrent token refresh operations.
- * This ensures that multiple simultaneous 401s only trigger ONE refresh call.
- */
-let refreshPromise: Promise<string> | null = null;
 
-/**
- * Basic API Client using Axios
- */
+let refreshPromise: Promise<string> | null = null;
+const MAX_RETRY_COUNT = 3;
+const RETRY_BASE_DELAY_MS = 500;
+const RETRY_MAX_DELAY_MS = 3000;
+const SAFE_RETRY_METHODS = new Set(['get', 'head', 'options']);
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 export const apiClient = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request Interceptor: Attach the access token to every outgoing request
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const accessToken = await tokenStorage.getAccessToken();
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
-    // FormData: let the browser set Content-Type with boundary; do not force application/json
     if (config.data instanceof FormData && config.headers) {
       delete config.headers['Content-Type'];
     }
@@ -55,11 +55,9 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle data unwrapping and automatic token refresh
 apiClient.interceptors.response.use(
   (response) => {
     const body = response.data;
-    // Auto-unwrap the standard API envelope: { data: T, error: string }
     if (body && typeof body === 'object' && 'data' in body && 'error' in body) {
       if (body.error) {
         throw new ApiError(response.status, 'API Error', body.error);
@@ -69,59 +67,72 @@ apiClient.interceptors.response.use(
     return body;
   },
   async (error: AxiosError) => {
-    const config = error.config;
+    const originalRequest = error.config as (
+      InternalAxiosRequestConfig & {
+        _retry?: boolean;
+        _retryCount?: number;
+      }
+    ) | undefined;
 
-    // Logic for handling 401 Unauthorized (Expired Token)
-    // We avoid retrying if the request itself was an auth call
-    if (error.response?.status === 401 && config && !config.url?.includes('/auth/')) {
+    const status = error.response?.status;
+    const method = originalRequest?.method?.toLowerCase();
+    const isSafeMethod = !method || SAFE_RETRY_METHODS.has(method);
+    const shouldRetry =
+      !!originalRequest &&
+      isSafeMethod &&
+      status !== 401 &&
+      (!status || status >= 500 || status === 408 || status === 429) &&
+      (originalRequest._retryCount ?? 0) < MAX_RETRY_COUNT;
+
+    if (shouldRetry) {
+      originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
+      const retryDelay = Math.min(
+        RETRY_BASE_DELAY_MS * 2 ** (originalRequest._retryCount - 1),
+        RETRY_MAX_DELAY_MS
+      );
+      await sleep(retryDelay);
+      return apiClient.request(originalRequest);
+    }
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       try {
         if (!refreshPromise) {
-          refreshPromise = (async () => {
-            const refreshToken = await tokenStorage.getRefreshToken();
-            if (!refreshToken) {
-              throw new Error('No refresh token available');
-            }
-
-            interface RefreshResponse {
-              tokens: { accessToken: string };
-            }
-            const res = await axios.post<RefreshResponse, { data: RefreshResponse }>(
-              `${BASE_URL}/auth/refresh`,
-              { refreshToken }
-            );
-            const { accessToken } = res.data.tokens;
-
-            await tokenStorage.setAccessToken(accessToken);
-            return accessToken;
-          })();
+          refreshPromise = authService
+            .refreshToken()
+            .then(async (newToken) => {
+              await tokenStorage.setAccessToken(newToken.accessToken);
+              return newToken.accessToken;
+            })
+            .finally(() => {
+              refreshPromise = null;
+            });
         }
 
-        const token = await refreshPromise;
-
-        // Reset promise for future refreshes
-        refreshPromise = null;
-
-        // Clone/Retry the original request with the fresh token
-        if (config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return apiClient.request(config);
+        const newAccessToken = await refreshPromise;
+        originalRequest.headers = originalRequest.headers ?? {};
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return apiClient.request(originalRequest);
       } catch (refreshError) {
-        refreshPromise = null;
         await tokenStorage.clearTokens();
+
+        if (refreshError instanceof AxiosError) {
+          const refreshStatus = refreshError.response?.status || 500;
+          const refreshBody = refreshError.response?.data || null;
+          return Promise.reject(new ApiError(refreshStatus, refreshError.message, refreshBody));
+        }
+
         return Promise.reject(refreshError);
       }
     }
 
-    // Standardize all other errors into ApiError
-    const status = error.response?.status || 500;
+    const finalStatus = error.response?.status || 500;
     const body = error.response?.data || null;
-    return Promise.reject(new ApiError(status, error.message, body));
+    return Promise.reject(new ApiError(finalStatus, error.message, body));
   }
 );
 
-// Module augmentation to simplify usage and improve React Query compatibility
-// This allows calling: await apiClient.get<User>('/me') and getting User directly.
 declare module 'axios' {
   export interface AxiosInstance {
     request<T = unknown, R = T>(config: AxiosRequestConfig): Promise<R>;

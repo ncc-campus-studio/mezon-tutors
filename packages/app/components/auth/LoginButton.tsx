@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 import {
   isAuthenticatedAtom,
-  loginAtom,
-  getAuthUrlAtom,
+  toAuthUser,
+  userAtom,
 } from '@mezon-tutors/app/store/auth.atom';
+import { authService, tokenStorage } from '@mezon-tutors/app/services';
 import type { MezonAuthMessage } from '@mezon-tutors/shared/src/types/auth';
 import { useTranslations } from 'next-intl';
 import { Button } from '@mezon-tutors/app/ui';
@@ -21,14 +22,13 @@ type LoginButtonProps = {
 export function LoginButton({ label, redirectTo }: LoginButtonProps) {
   const t = useTranslations('Common.Header');
   const isAuthenticated = useAtomValue(isAuthenticatedAtom);
-  const login = useSetAtom(loginAtom);
-  const getAuthUrl = useSetAtom(getAuthUrlAtom);
+  const setUser = useSetAtom(userAtom);
 
   const popupRef = useRef<Window | null>(null);
   const intervalRef = useRef<number | null>(null);
   const channelRef = useRef<BroadcastChannel | null>(null);
 
-  const cleanup = useCallback((reason?: string) => {
+  const cleanup = useCallback(() => {
     if (intervalRef.current !== null) {
       window.clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -49,20 +49,29 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
       if (!payload) return;
 
       if (payload.type === 'MEZON_AUTH_SUCCESS') {
-        const tokens = payload.data?.tokens;
+        const accessToken = payload.data?.accessToken;
         const loginUser = payload.data?.user;
 
-        if (!tokens?.accessToken) {
+        if (!accessToken) {
           console.warn('[OAUTH] SUCCESS but missing accessToken');
           return;
         }
 
-        if (tokens.refreshToken) {
-          window.localStorage.setItem('refreshToken', tokens.refreshToken);
+        void tokenStorage.setAccessToken(accessToken);
+        if (loginUser?.mezonUserId) {
+          setUser(toAuthUser(loginUser));
+        } else {
+          void authService
+            .getMe()
+            .then((data) => {
+              setUser(toAuthUser(data));
+            })
+            .catch(() => {
+              void tokenStorage.clearTokens();
+              setUser(null);
+            });
         }
-
-        login({ accessToken: tokens.accessToken, user: loginUser });
-        cleanup('success');
+        cleanup();
 
         if (redirectTo && window.location.pathname !== redirectTo) {
           window.location.assign(redirectTo);
@@ -72,10 +81,10 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
 
       if (payload.type === 'MEZON_AUTH_ERROR') {
         console.error('[OAUTH] ERROR:', payload.error);
-        cleanup('error');
+        cleanup();
       }
     },
-    [login, cleanup, redirectTo]
+    [cleanup, redirectTo, setUser]
   );
 
   useEffect(() => {
@@ -84,9 +93,7 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
 
       const payload = event.data as MezonAuthMessage;
 
-      if (payload?.type === 'MEZON_AUTH_SUCCESS' || payload?.type === 'MEZON_AUTH_ERROR') {
-        processOAuthPayload(payload);
-      }
+      processOAuthPayload(payload);
     };
 
     window.addEventListener('message', handleMessage);
@@ -103,7 +110,7 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
 
     return () => {
       window.removeEventListener('message', handleMessage);
-      cleanup('unmount');
+      cleanup();
     };
   }, [processOAuthPayload, cleanup]);
 
@@ -124,25 +131,25 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
 
       if (!popup) {
         console.error('[OAUTH] popup blocked');
-        cleanup('popup_blocked');
+        cleanup();
         return;
       }
 
       popupRef.current = popup;
 
-      const url = await getAuthUrl();
+      const url = await authService.getAuthUrl();
       popup.location.href = url;
 
       intervalRef.current = window.setInterval(() => {
         if (!popup || popup.closed) {
-          cleanup('popup_closed');
+          cleanup();
         }
       }, 5000);
     } catch (error) {
       console.error('[OAUTH] start login error:', error);
-      cleanup('catch');
+      cleanup();
     }
-  }, [getAuthUrl, cleanup]);
+  }, [cleanup]);
 
   if (isAuthenticated) return null;
 
