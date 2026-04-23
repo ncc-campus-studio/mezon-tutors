@@ -13,11 +13,13 @@ export type AuthUser = {
   email?: string | null;
   avatar?: string | null;
   role?: string;
+  idToken?: string | null;
 };
 
 export type ExchangeResponse = {
   user: AuthUser & Record<string, unknown>;
-  tokens: AuthTokens;
+  accessToken: string;
+  idToken?: string | null;
 };
 
 export type MeResponse = {
@@ -40,8 +42,8 @@ class AuthService {
     return res.url;
   }
 
-  async exchangeCode(code: string, state?: string): Promise<{ accessToken: string }> {
-    const data = await apiClient.post<{ accessToken: string }>('/auth/mezon/exchange', { code, state });
+  async exchangeCode(code: string, state?: string): Promise<ExchangeResponse> {
+    const data = await apiClient.post<ExchangeResponse>('/auth/mezon/exchange', { code, state });
     return data;
   }
 

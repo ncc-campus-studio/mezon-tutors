@@ -35,7 +35,7 @@ export * from './constants/dashboard-booking-request';
 export * from './constants/payment';
 export * from './constants/my-schedule';
 export * from './constants/cloudinary';
-
+export * from './constants/mezon-light';
 export * from './constants/review';
 
 // Utils

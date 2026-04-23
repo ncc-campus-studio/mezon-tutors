@@ -250,6 +250,7 @@ export class AuthService {
         email: mezonUser.email ?? null,
       },
       tokens,
+      idToken: tokenData.id_token ?? null,
     };
 
     return {

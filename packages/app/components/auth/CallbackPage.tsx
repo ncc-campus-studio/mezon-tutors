@@ -32,10 +32,12 @@ export default function MezonAuthCallbackPage() {
 
     async function exchangeCode() {
       try {
-        const { accessToken } = await authService.exchangeCode(code, state);
+        const exchangeData = await authService.exchangeCode(code, state);
+
+        const { accessToken, user, idToken } = exchangeData;
         const payload = {
           type: 'MEZON_AUTH_SUCCESS' as const,
-          data: { accessToken },
+          data: { accessToken, user, idToken },
         };
         sendResult(payload);
         window.close();

@@ -50,6 +50,7 @@ export class AuthController {
     return {
       user: result.user,
       accessToken: result.tokens.accessToken,
+      idToken: result.idToken,
     };
   }
 

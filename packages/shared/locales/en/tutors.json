@@ -27,6 +27,22 @@
     "perLesson": "/ lesson",
     "bookTrial": "Book trial lesson",
     "sendMessage": "Send message",
+    "messageModal": {
+      "title": "Send message to {tutorName}",
+      "placeholder": "Enter the message content...",
+      "cancel": "Cancel",
+      "send": "Send",
+      "sending": "Sending...",
+      "errors": {
+        "missingStudentId": "Cannot send message: student ID is required.",
+        "missingStudentMezonUserId": "Cannot send message: student Mezon user ID is required.",
+        "missingTutorMezonUserId": "Cannot send message: tutor Mezon user ID is required.",
+        "missingTutorId": "Cannot send message: tutor ID is required.",
+        "emptyContent": "Please enter the message content.",
+        "missingChannelId": "Cannot send message: channel ID is required.",
+        "sendFailed": "Cannot send message."
+      }
+    },
     "proficiency": {
       "Native": "Native",
       "Near-Native": "Near-Native",
