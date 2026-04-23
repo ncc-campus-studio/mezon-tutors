@@ -8,10 +8,32 @@ import { ReviewStarRating } from './ReviewStarRating';
 interface ReviewsSummaryProps {
   ratingAverage: number;
   ratingCount: number;
+  isMobile?: boolean;
 }
 
-export function ReviewsSummary({ ratingAverage, ratingCount }: ReviewsSummaryProps) {
+export function ReviewsSummary({ ratingAverage, ratingCount, isMobile = false }: ReviewsSummaryProps) {
   const t = useTranslations('Tutors.Detail');
+
+  if (isMobile) {
+    return (
+      <XStack gap="$3" alignItems="center">
+        <Text color="$tutorsDetailPrimaryText" fontSize={48} fontWeight="900" lineHeight={48}>
+          {ratingAverage.toFixed(1)}
+        </Text>
+        <YStack gap="$1">
+          <ReviewStarRating 
+            rating={ratingAverage} 
+            readonly 
+            size={24}
+            gap={4}
+          />
+          <Text color="$tutorsDetailMutedText" fontSize={13}>
+            {t('basedOnReviews', { count: ratingCount })}
+          </Text>
+        </YStack>
+      </XStack>
+    );
+  }
 
   return (
     <YStack gap="$2">
@@ -19,7 +41,7 @@ export function ReviewsSummary({ ratingAverage, ratingCount }: ReviewsSummaryPro
         {ratingAverage.toFixed(2)}
       </Text>
       <ReviewStarRating 
-        rating={Math.round(ratingAverage)} 
+        rating={ratingAverage} 
         readonly 
         size={REVIEW_STAR_SIZE.SMALL}
         gap={REVIEW_STAR_GAP.SMALL}

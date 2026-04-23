@@ -1,7 +1,6 @@
 import { YStack } from '@mezon-tutors/app/ui';
 import type { LessonItem, MyLessonsCalendarMeta } from '../types';
 import { MyLessonsCalendarCard } from './MyLessonsCalendarCard';
-import { MyLessonsPromoCard } from './MyLessonsPromoCard';
 
 type MyLessonsCalendarSectionProps = {
   calendar: MyLessonsCalendarMeta;
@@ -13,7 +12,6 @@ type MyLessonsCalendarSectionProps = {
 export function MyLessonsCalendarSection({ calendar, lessons, onPrevWeek, onNextWeek }: MyLessonsCalendarSectionProps) {
   return (
     <YStack gap="$5" width="100%" maxWidth={1032} minWidth={0} alignSelf="center">
-      <MyLessonsPromoCard />
       <MyLessonsCalendarCard lessons={lessons} calendar={calendar} onPrevWeek={onPrevWeek} onNextWeek={onNextWeek} />
     </YStack>
   );

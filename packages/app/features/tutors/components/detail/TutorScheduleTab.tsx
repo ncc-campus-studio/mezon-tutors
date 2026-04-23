@@ -1,17 +1,19 @@
 import { CalendarCard } from '@mezon-tutors/app';
 import type { CalendarEvent, CalendarWeekDay } from '@mezon-tutors/app';
+import { Button, Text, YStack } from '@mezon-tutors/app/ui';
 import type { TutorDetailAvailabilitySlotDto } from '@mezon-tutors/shared';
 import { getFallbackWeekHours } from '@mezon-tutors/shared';
 import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/vi';
 import 'dayjs/locale/en';
 import { useLocale, useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { useMedia } from 'tamagui';
 import { TutorScheduleEventCard } from './TutorScheduleEventCard';
+import { TutorScheduleModal } from './TutorScheduleModal';
+import { parseTimeToHour } from './utils/schedule-time';
+import { mergeConsecutiveSlotsInSameHour, getWeekHoursFromSlots } from './utils/schedule-slots';
 import type { TutorScheduleTabProps } from './types';
-
-dayjs.extend(customParseFormat);
 
 function buildTutorScheduleWeekDays(locale: string): CalendarWeekDay[] {
   const now = dayjs();
@@ -29,35 +31,24 @@ function buildTutorScheduleWeekDays(locale: string): CalendarWeekDay[] {
   });
 }
 
-function parseTimeToHour(time: string): number {
-  const parsed = dayjs(time, 'HH:mm');
-  return parsed.hour() + parsed.minute() / 60;
-}
-
 function convertSlotsToEvents(
   slots: TutorDetailAvailabilitySlotDto[]
 ): CalendarEvent<TutorDetailAvailabilitySlotDto>[] {
-  return slots
-    .filter((slot) => slot.isActive)
-    .map((slot) => ({
+  const activeSlots = slots.filter((slot) => slot.isActive);
+  const mergedSlots = mergeConsecutiveSlotsInSameHour(activeSlots);
+  
+  return mergedSlots.map((slot) => {
+    const startHour = parseTimeToHour(slot.startTime);
+    const flooredStartHour = Math.floor(startHour);
+    
+    return {
       id: `${slot.dayOfWeek}-${slot.startTime}-${slot.endTime}`,
       dayIndex: slot.dayOfWeek,
-      startHour: parseTimeToHour(slot.startTime),
-      endHour: parseTimeToHour(slot.endTime),
+      startHour: flooredStartHour,
+      endHour: flooredStartHour + 1,
       data: slot,
-    }));
-}
-
-function getWeekHoursFromSlots(slots: TutorDetailAvailabilitySlotDto[]): number[] {
-  if (!slots.length) return getFallbackWeekHours();
-
-  const hours = new Set<number>();
-  slots.forEach((slot) => {
-    const startHour = Math.floor(parseTimeToHour(slot.startTime));
-    hours.add(startHour);
+    };
   });
-
-  return Array.from(hours).sort((a, b) => a - b);
 }
 
 export function TutorScheduleTab({ tutor }: TutorScheduleTabProps) {
@@ -65,10 +56,46 @@ export function TutorScheduleTab({ tutor }: TutorScheduleTabProps) {
   const locale = useLocale();
   const media = useMedia();
   const isCompact = media.md || media.sm || media.xs;
+  const isMobile = media.sm || media.xs;
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const weekDays = buildTutorScheduleWeekDays(locale);
-  const weekHours = getWeekHoursFromSlots(tutor.availability);
-  const events = convertSlotsToEvents(tutor.availability);
+  const weekDays = useMemo(() => buildTutorScheduleWeekDays(locale), [locale]);
+  const weekHours = useMemo(() => {
+    const hours = getWeekHoursFromSlots(tutor.availability);
+    return hours.length > 0 ? hours : getFallbackWeekHours();
+  }, [tutor.availability]);
+  const events = useMemo(() => convertSlotsToEvents(tutor.availability), [tutor.availability]);
+
+  if (isMobile) {
+    return (
+      <>
+        <YStack gap="$3">
+          <Text 
+            color="$tutorsDetailSecondaryText" 
+            fontSize={14}
+            textAlign="center"
+          >
+            {t('scheduleDescription')}
+          </Text>
+          <Button
+            variant="outline"
+            onPress={() => setIsModalOpen(true)}
+            size="large"
+          >
+            <Text fontWeight="600">{t('mobileSchedule.seeMySchedule')}</Text>
+          </Button>
+        </YStack>
+
+        <TutorScheduleModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          weekDays={weekDays}
+          availability={tutor.availability}
+          timezone={tutor.timezone}
+        />
+      </>
+    );
+  }
 
   return (
     <CalendarCard
@@ -78,7 +105,12 @@ export function TutorScheduleTab({ tutor }: TutorScheduleTabProps) {
       events={events}
       enableGapCollapse
       readonly
-      renderEvent={(event, isCompact) => <TutorScheduleEventCard slot={event.data} isCompact={isCompact} />}
+      renderEvent={(event, compact) => (
+        <TutorScheduleEventCard
+          slot={event.data}
+          isCompact={compact}
+        />
+      )}
       isCompact={isCompact}
       presetData={{
         title: t('scheduleTitle'),
