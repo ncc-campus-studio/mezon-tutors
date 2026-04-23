@@ -1,0 +1,70 @@
+{
+  "title": "Tin nhắn",
+  "chatButton": "Chat",
+  "openMezon": "Mở Mezon",
+  "listTitle": "Danh sách DM",
+  "emptyList": "Bạn chưa có cuộc trò chuyện nào.",
+  "emptyConversation": "Chọn một cuộc trò chuyện để bắt đầu.",
+  "inputPlaceholder": "Nhập tin nhắn...",
+  "send": "Gửi",
+  "sending": "Đang gửi...",
+  "restoreError": "Không thể khôi phục phiên chat. Vui lòng đăng nhập lại.",
+  "noticeTitle": "HƯỚNG DẪN CHAT",
+  "noticePrefix": "Để xem lịch sử chat và lịch sử giao dịch lâu dài, vui lòng truy cập ",
+  "noticeLink": "Mezon.",
+  "noticeOpenChatPrefix": "Nhấn ",
+  "noticeOpenChatLink": "vào đây",
+  "noticeOpenChatSuffix": " để mở cuộc trò chuyện này trên Mezon.",
+  "fakeSets": {
+    "set1": [
+      "Chào {peerName}, mình muốn đặt một buổi học thử trong tuần này.",
+      "Được nhé, mình còn lịch tối Thứ Năm và tối Thứ Bảy. Bạn muốn giờ nào?",
+      "Tối Thứ Năm lúc 8h hợp với mình, mình sẽ đặt lịch ngay."
+    ],
+    "set2": [
+      "Bạn có dạy lớp giao tiếp cơ bản không {peerName}?",
+      "Có nhé, mình có lộ trình 6 buổi cho người mới bắt đầu.",
+      "Tuyệt quá, mình muốn học ngay tuần này."
+    ],
+    "set3": [
+      "Tôi cần luyện phát âm nhanh, bạn hỗ trợ được không?",
+      "Được, mình sửa phát âm trực tiếp theo từng câu.",
+      "Ok, mình gửi mục tiêu học trước buổi đầu tiên."
+    ],
+    "set4": [
+      "Bạn thường dạy theo tài liệu nào?",
+      "Mình kết hợp slide riêng và bài tập thực hành mỗi buổi.",
+      "Nghe rất hợp nhu cầu của mình."
+    ],
+    "set5": [
+      "Mình có thể đặt lịch học cuối tuần không?",
+      "Được, mình còn khung giờ sáng Thứ Bảy.",
+      "Mình đặt Thứ Bảy lúc 9h nhé."
+    ],
+    "set6": [
+      "Mình muốn luyện phỏng vấn công việc, bạn có kinh nghiệm không?",
+      "Có nhé, mình đã luyện phỏng vấn cho nhiều bạn đi làm.",
+      "Quá tốt, mình muốn bắt đầu ngay tuần này."
+    ],
+    "set7": [
+      "Học phí tính theo giờ hay theo gói vậy?",
+      "Mình tính theo giờ, có ưu đãi nếu học dài hạn.",
+      "Vậy mình muốn đăng ký gói 10 giờ đầu tiên."
+    ],
+    "set8": [
+      "Sau mỗi buổi học bạn có giao bài tập về nhà không?",
+      "Có, mình luôn giao bài tập ngắn để ôn tập.",
+      "Hay quá, mình rất cần phần này."
+    ],
+    "set9": [
+      "Mục tiêu của mình là IELTS 6.5 trong 4 tháng.",
+      "Mục tiêu này khá khả thi nếu học đều 3 buổi mỗi tuần.",
+      "Ok, mình sắp xếp lịch theo kế hoạch này."
+    ],
+    "set10": [
+      "Bạn có thể dạy xen kẽ tiếng Anh và tiếng Việt không?",
+      "Được, mình có thể giải thích song ngữ để dễ theo.",
+      "Cảm ơn {peerName}, cách này rất hợp với mình."
+    ]
+  }
+}

@@ -17,6 +17,18 @@ export type DmChannelRecord = {
   updatedAt: string
 }
 
+export type MyDmChannelItem = {
+  id: string
+  channelId: string
+  studentId: string
+  tutorId: string
+  peerId: string
+  peerName: string
+  peerAvatar: string
+  peerMezonUserId: string
+  updatedAt: string
+}
+
 const dmChannelApi = {
   getByStudentAndTutor(studentId: string, tutorId: string): Promise<DmChannelRecord | null> {
     return apiClient.get(`/dm-channels`, {
@@ -29,6 +41,10 @@ const dmChannelApi = {
 
   upsert(payload: UpsertDmChannelPayload): Promise<DmChannelRecord> {
     return apiClient.post('/dm-channels', payload)
+  },
+
+  getMyChannels(): Promise<MyDmChannelItem[]> {
+    return apiClient.get('/dm-channels/my')
   },
 }
 
@@ -45,5 +61,13 @@ export function useGetDmChannel(studentId: string, tutorId: string, enabled = tr
 export function useUpsertDmChannelMutation() {
   return useMutation({
     mutationFn: (payload: UpsertDmChannelPayload) => dmChannelApi.upsert(payload),
+  })
+}
+
+export function useGetMyDmChannels(enabled = true) {
+  return useQuery({
+    queryKey: ['my-dm-channels'],
+    queryFn: () => dmChannelApi.getMyChannels(),
+    enabled,
   })
 }
