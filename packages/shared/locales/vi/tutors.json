@@ -295,6 +295,7 @@
     "motivationTitle": "Động lực dạy học",
     "emptySection": "Chưa có thông tin.",
     "scheduleTitle": "Lịch dạy",
+    "scheduleDescription": "Xem lịch trống của gia sư",
     "scheduleEmpty": "Chưa có lịch trống.",
     "reviewsEmpty": "Chưa có đánh giá.",
     "resourcesTitle": "Tài nguyên",
@@ -309,6 +310,15 @@
     "videoIntroTitle": "Bạn có muốn nói như người bản xứ?",
     "languagesTitle": "Ngôn ngữ tôi nói",
     "scheduleHint": "Khung giờ hiển thị theo múi giờ của bạn: {timezone}",
+    "mobileSchedule": {
+      "seeMySchedule": "Xem lịch dạy",
+      "backToSchedule": "Quay lại",
+      "periods": {
+        "morning": "Buổi sáng",
+        "afternoon": "Buổi chiều",
+        "evening": "Buổi tối"
+      }
+    },
     "scheduleUnavailable": "Không có",
     "weekdays": {
       "sun": "CN",
@@ -338,8 +348,12 @@
     "basedOnReviews": "Dựa trên {count} đánh giá của học viên",
     "showMore": "Xem thêm",
     "showLess": "Thu gọn",
-    "allReviewsTitle": "Tất cả đánh giá",
+    "allReviewsTitle": "Đánh giá",
+    "reviews": "đánh giá",
     "loadingReviews": "Đang tải đánh giá...",
+    "loadMoreReviews": "Xem thêm đánh giá",
+    "reviewsEmpty": "Chưa có đánh giá nào",
+    "reviewsCount": "({count} đánh giá)",
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",
       "postTitle": "Đăng đánh giá",

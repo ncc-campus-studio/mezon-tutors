@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   YStack,
   Text,
@@ -81,6 +81,9 @@ function SelectField({
   children,
   tamaguiSelectRest,
 }: SelectFieldProps) {
+  const suppressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [isSuppressingTap, setIsSuppressingTap] = useState(false)
+
   const selectedLabel = useMemo(() => {
     if (!options || !selectedValue) return null
     return options.find((o) => o.value === selectedValue)?.label ?? null
@@ -100,9 +103,41 @@ function SelectField({
   )
 
   const borderColor = errorMessage ? '$red9' : '$borderSubtle'
+  const handleValueChange = (value: string) => {
+    onSelectedValueChange(value)
+
+    setIsSuppressingTap(true)
+    if (suppressTimerRef.current) {
+      clearTimeout(suppressTimerRef.current)
+    }
+    suppressTimerRef.current = setTimeout(() => {
+      setIsSuppressingTap(false)
+      suppressTimerRef.current = null
+    }, 350)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (suppressTimerRef.current) {
+        clearTimeout(suppressTimerRef.current)
+      }
+    }
+  }, [])
 
   return (
     <YStack flex={flex} width={width} gap={gap}>
+      {isSuppressingTap ? (
+        <YStack
+          style={{ position: 'fixed' }}
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          zIndex={9999}
+          backgroundColor="transparent"
+          onPress={() => {}}
+        />
+      ) : null}
       {label ? (
         <Text fontSize="$3" fontWeight="500" color="$colorMuted">
           {label}
@@ -111,7 +146,7 @@ function SelectField({
 
       <TamaguiSelect
         value={selectedValue}
-        onValueChange={onSelectedValueChange}
+        onValueChange={handleValueChange}
         {...tamaguiSelectRest}
       >
         <TamaguiSelect.Trigger

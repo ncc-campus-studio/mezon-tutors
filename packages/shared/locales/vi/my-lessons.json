@@ -9,7 +9,7 @@
     "avatarAlt": "Ảnh đại diện người dùng đã đăng nhập"
   },
   "header": {
-    "title": "Lớp học của tôi",
+    "title": "Lịch học của tôi",
     "scheduleLesson": "+ Đặt lịch học",
     "tabs": {
       "lessons": "Buổi học",
@@ -66,6 +66,11 @@
   },
   "screen": {
     "loading": "Đang tải dữ liệu buổi học..."
+  },
+  "mobile": {
+    "allLessons": "Tất cả",
+    "lessons": "Buổi học",
+    "noLessonsForDay": "Không có buổi học nào trong ngày này"
   },
   "previewFooter": "Xem trước giao diện TutorMatch."
 }

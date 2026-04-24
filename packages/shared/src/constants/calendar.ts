@@ -27,12 +27,84 @@ export const CALENDAR_CONFIG = {
   DAYS_PER_WEEK: 7,
 } as const;
 
+export const MOBILE_CALENDAR_CONFIG = {
+  base: {
+    containerGap: 14,
+    weekDaysGap: 6,
+    weekDaysWrap: 'nowrap',
+  },
+  navigation: {
+    iconSize: 18,
+    buttonPadding: 8,
+    buttonBorderRadius: 999,
+    titleFontSize: 28,
+  },
+  weekDay: {
+    width: '14.285%',
+    minWidth: 48,
+    maxWidth: 56,
+    borderRadius: 12,
+    contentGap: 4,
+    dayFontSize: 10,
+    dayLineHeight: 12,
+    dateFontSize: 20,
+    dateLineHeight: 24,
+    padding: {
+      vertical: 12,
+      horizontal: 4,
+    },
+  },
+  variants: {
+    myLessons: {
+      navigationTitleFontSize: 28,
+      weekDay: {
+        dayFontSize: 10,
+        dateFontSize: 20,
+      },
+    },
+    tutorSchedule: {
+      navigationTitleFontSize: 24,
+      weekDay: {
+        dayFontSize: 10,
+        dateFontSize: 20,
+      },
+      style: {
+        selectedBorderWidth: 2,
+        selectedBorderColorToken: '$tutorsDetailPrimaryText',
+        selectedBackgroundToken: '$myLessonsPrimaryButton',
+        selectedDayTextToken: '$myLessonsPrimaryButtonText',
+        selectedDateTextToken: '$myLessonsPrimaryButtonText',
+        inactiveDayTextToken: '$myLessonsLessonsSecondaryText',
+        inactiveDateTextToken: '$tutorsDetailPrimaryText',
+      },
+    },
+    mySchedule: {
+      navigationTitleFontSize: 28,
+      weekDay: {
+        dayFontSize: 10,
+        dateFontSize: 20,
+      },
+    },
+  },
+} as const;
+
+export const TUTOR_SCHEDULE_SLOT_CONTAINER_PROPS = {
+  paddingVertical: 10,
+  paddingHorizontal: 12,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: '$tutorsDetailScheduleColumnBorder',
+  backgroundColor: '$tutorsDetailScheduleSlotEmptyBackground',
+  minWidth: 120,
+  width: '100%',
+} as const;
+
 export type CalendarThemeConfig = {
   showTimeline: boolean;
   showGridLines: boolean;
   showTimelineGrid?: boolean;
   showDayColumnGridLines?: boolean;
-  showGridOuterBorder?: boolean; 
+  showGridOuterBorder?: boolean;
   showNowLine: boolean;
   cardBorder?: boolean;
   cardBorderRadius?: number;
@@ -186,7 +258,7 @@ export function calculateDynamicTimelineHours(
   events.forEach((event) => {
     const startHour = dayjs(event.startsAt).tz('Asia/Ho_Chi_Minh').hour();
     const endHour = dayjs(event.endsAt).tz('Asia/Ho_Chi_Minh').hour();
-    
+
     for (let h = startHour; h <= endHour; h++) {
       hours.add(h);
     }
@@ -196,7 +268,7 @@ export function calculateDynamicTimelineHours(
     availabilitySlots.forEach((slot) => {
       const [startHour] = slot.startTime.split(':').map(Number);
       const [endHour] = slot.endTime.split(':').map(Number);
-      
+
       for (let h = startHour; h <= endHour; h++) {
         hours.add(h);
       }
@@ -213,3 +285,204 @@ export function calculateDynamicTimelineHours(
 
   return Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
 }
+
+export type MobileCalendarCardConfig = {
+  borderRadius: number;
+  padding: number;
+  gap: number;
+  avatar: { size: number; borderRadius: number };
+  title: { fontSize: number; lineHeight: number };
+  subtitle: { fontSize: number; lineHeight: number };
+  time: { fontSize: number; lineHeight: number; iconSize: number };
+  button: {
+    fontSize: number;
+    borderRadius: number;
+    padding: { vertical: number; horizontal: number };
+  };
+};
+
+export type MobileCalendarCategoryConfig = {
+  dotSize: number;
+  fontSize: number;
+  padding: { horizontal: number; vertical: number };
+  borderRadius: number;
+};
+
+export type MobileCalendarEmptyConfig = {
+  minHeight: number;
+  borderRadius: number;
+  padding: number;
+  fontSize: number;
+};
+
+export type ReusableMobileCalendarConfig = {
+  type: 'myLessons' | 'tutorSchedule' | 'mySchedule';
+  weekDay: {
+    minWidth: number;
+    maxWidth: number;
+    width: number;
+    padding: { vertical: number; horizontal: number };
+    contentGap: number;
+    borderRadius: number;
+    dayFontSize: number;
+    dayLineHeight: number;
+    dateFontSize: number;
+    dateLineHeight: number;
+  };
+  navigation: {
+    iconSize: number;
+    buttonPadding: number;
+    buttonBorderRadius: number;
+    titleFontSize: number;
+  };
+  card: MobileCalendarCardConfig;
+  category: MobileCalendarCategoryConfig;
+  empty: MobileCalendarEmptyConfig;
+};
+
+export const MOBILE_CALENDAR_CONFIGS: Record<
+  'myLessons' | 'tutorSchedule' | 'mySchedule',
+  ReusableMobileCalendarConfig
+> = {
+  myLessons: {
+    type: 'myLessons',
+    weekDay: {
+      minWidth: 44,
+      maxWidth: 44,
+      width: 44,
+      padding: { vertical: 26, horizontal: 4 },
+      contentGap: 0,
+      borderRadius: 12,
+      dayFontSize: 9,
+      dayLineHeight: 9,
+      dateFontSize: 15,
+      dateLineHeight: 9,
+    },
+    navigation: {
+      iconSize: 16,
+      buttonPadding: 4,
+      buttonBorderRadius: 6,
+      titleFontSize: 13,
+    },
+    card: {
+      borderRadius: 10,
+      padding: 10,
+      gap: 8,
+      avatar: { size: 40, borderRadius: 999 },
+      title: { fontSize: 13, lineHeight: 16 },
+      subtitle: { fontSize: 11, lineHeight: 14 },
+      time: { fontSize: 10, lineHeight: 14, iconSize: 11 },
+      button: {
+        fontSize: 11,
+        borderRadius: 7,
+        padding: { vertical: 7, horizontal: 12 },
+      },
+    },
+    category: {
+      dotSize: 6,
+      fontSize: 11,
+      padding: { horizontal: 10, vertical: 4 },
+      borderRadius: 16,
+    },
+    empty: {
+      minHeight: 120,
+      borderRadius: 10,
+      padding: 12,
+      fontSize: 11,
+    },
+  },
+  tutorSchedule: {
+    type: 'tutorSchedule',
+    weekDay: {
+      minWidth: 44,
+      maxWidth: 44,
+      width: 44,
+      padding: { vertical: 26, horizontal: 4 },
+      contentGap: 0,
+      borderRadius: 12,
+      dayFontSize: 9,
+      dayLineHeight: 9,
+      dateFontSize: 15,
+      dateLineHeight: 9,
+    },
+    navigation: {
+      iconSize: 16,
+      buttonPadding: 4,
+      buttonBorderRadius: 6,
+      titleFontSize: 13,
+    },
+    card: {
+      borderRadius: 12,
+      padding: 12,
+      gap: 10,
+      avatar: { size: 44, borderRadius: 999 },
+      title: { fontSize: 14, lineHeight: 18 },
+      subtitle: { fontSize: 12, lineHeight: 16 },
+      time: { fontSize: 11, lineHeight: 14, iconSize: 12 },
+      button: {
+        fontSize: 12,
+        borderRadius: 8,
+        padding: { vertical: 8, horizontal: 14 },
+      },
+    },
+    category: {
+      dotSize: 7,
+      fontSize: 12,
+      padding: { horizontal: 12, vertical: 6 },
+      borderRadius: 18,
+    },
+    empty: {
+      minHeight: 140,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 12,
+    },
+  },
+  mySchedule: {
+    type: 'mySchedule',
+    weekDay: {
+      minWidth: 48,
+      maxWidth: 56,
+      width: 48,
+      padding: { vertical: 12, horizontal: 4 },
+      contentGap: 4,
+      borderRadius: 12,
+      dayFontSize: 10,
+      dayLineHeight: 12,
+      dateFontSize: 20,
+      dateLineHeight: 24,
+    },
+    navigation: {
+      iconSize: 18,
+      buttonPadding: 8,
+      buttonBorderRadius: 999,
+      titleFontSize: 28,
+    },
+    card: {
+      borderRadius: 12,
+      padding: 12,
+      gap: 10,
+      avatar: { size: 44, borderRadius: 999 },
+      title: { fontSize: 14, lineHeight: 18 },
+      subtitle: { fontSize: 12, lineHeight: 16 },
+      time: { fontSize: 11, lineHeight: 14, iconSize: 12 },
+      button: {
+        fontSize: 12,
+        borderRadius: 8,
+        padding: { vertical: 8, horizontal: 14 },
+      },
+    },
+    category: {
+      dotSize: 7,
+      fontSize: 12,
+      padding: { horizontal: 12, vertical: 6 },
+      borderRadius: 18,
+    },
+    empty: {
+      minHeight: 140,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 12,
+    },
+  },
+};

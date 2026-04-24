@@ -10,6 +10,7 @@ import { AllReviewsModal } from './AllReviewsModal';
 import { ReviewModal } from '@mezon-tutors/app';
 import { useCurrentUser } from '../../../services/auth/useCurrentUser';
 import { useGetAlreadyBookedTrialLesson } from '../../../services/trial-lesson-booking/trial-lesson-booking.api';
+import { useMedia } from 'tamagui';
 
 interface ReviewsSectionProps {
   tutorId: string;
@@ -36,6 +37,8 @@ export function ReviewsSection({
   reviews,
 }: ReviewsSectionProps) {
   const t = useTranslations('Tutors.Detail');
+  const media = useMedia();
+  const isMobile = media.sm || media.xs;
   const [isAllReviewsOpen, setIsAllReviewsOpen] = useState(false);
   const [isPostReviewOpen, setIsPostReviewOpen] = useState(false);
 
@@ -77,8 +80,8 @@ export function ReviewsSection({
   }, [reviews, currentUserId]);
 
   const visibleReviews = useMemo(
-    () => sortedReviews.slice(0, REVIEW_DISPLAY_CONFIG.INITIAL_VISIBLE_COUNT),
-    [sortedReviews],
+    () => sortedReviews.slice(0, isMobile ? 1 : REVIEW_DISPLAY_CONFIG.INITIAL_VISIBLE_COUNT),
+    [sortedReviews, isMobile],
   );
 
   const leftColumnReviews = useMemo(
@@ -94,7 +97,7 @@ export function ReviewsSection({
   return (
     <YStack gap="$4">
       <XStack justifyContent="space-between" alignItems="center" gap="$3" flexWrap="wrap">
-        <Text color="$tutorsDetailPrimaryText" fontSize={24} fontWeight="700">
+        <Text color="$tutorsDetailPrimaryText" fontSize={isMobile ? 20 : 24} fontWeight="700">
           {t('whatStudentsSay')}
         </Text>
         {showPostReviewButton && (
@@ -119,7 +122,11 @@ export function ReviewsSection({
         )}
       </XStack>
 
-      <ReviewsSummary ratingAverage={ratingAverage} ratingCount={ratingCount} />
+      <ReviewsSummary 
+        ratingAverage={ratingAverage} 
+        ratingCount={ratingCount}
+        isMobile={isMobile}
+      />
 
       {reviews.length === 0 ? (
         <Text color="$tutorsDetailMutedText">{t('reviewsEmpty')}</Text>
@@ -129,9 +136,9 @@ export function ReviewsSection({
             {t('basedOnReviews', { count: ratingCount })}
           </Text>
 
-          <XStack gap="$3" alignItems="flex-start" width="100%">
-            <YStack flex={1} gap="$3">
-              {leftColumnReviews.map((review) => (
+          {isMobile ? (
+            <YStack gap="$3" width="100%">
+              {visibleReviews.map((review) => (
                 <ReviewCard
                   key={review.id}
                   review={review}
@@ -140,24 +147,40 @@ export function ReviewsSection({
                 />
               ))}
             </YStack>
-            <YStack flex={1} gap="$3">
-              {rightColumnReviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  isOwnReview={currentUserId === review.reviewerId}
-                  onEdit={() => setIsPostReviewOpen(true)}
-                />
-              ))}
-            </YStack>
-          </XStack>
+          ) : (
+            <XStack gap="$3" alignItems="flex-start" width="100%">
+              <YStack flex={1} gap="$3">
+                {leftColumnReviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    isOwnReview={currentUserId === review.reviewerId}
+                    onEdit={() => setIsPostReviewOpen(true)}
+                  />
+                ))}
+              </YStack>
+              <YStack flex={1} gap="$3">
+                {rightColumnReviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    isOwnReview={currentUserId === review.reviewerId}
+                    onEdit={() => setIsPostReviewOpen(true)}
+                  />
+                ))}
+              </YStack>
+            </XStack>
+          )}
 
-          {reviews.length > REVIEW_DISPLAY_CONFIG.INITIAL_VISIBLE_COUNT && (
+          {reviews.length > (isMobile ? 1 : REVIEW_DISPLAY_CONFIG.INITIAL_VISIBLE_COUNT) && (
             <Button
               variant="outline"
               onPress={() => setIsAllReviewsOpen(true)}
               alignSelf="center"
               marginTop="$2"
+              width={isMobile ? '100%' : 'auto'}
+              borderRadius={isMobile ? 12 : 8}
+              paddingVertical={isMobile ? '$3' : '$2'}
             >
               {t('showAllReviews', { count: reviews.length })}
             </Button>
@@ -174,6 +197,8 @@ export function ReviewsSection({
           setIsAllReviewsOpen(false);
           setIsPostReviewOpen(true);
         }}
+        ratingAverage={ratingAverage}
+        ratingCount={ratingCount}
       />
 
       <ReviewModal

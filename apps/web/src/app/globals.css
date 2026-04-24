@@ -504,3 +504,87 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@media (max-width: 660px) {
+  .mobile-avatar {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (min-width: 661px) and (max-width: 900px) {
+  .mobile-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .mobile-calendar-container {
+    gap: 8px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+  
+  .week-days-container {
+    gap: 1px !important;
+    justify-content: space-between !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+  
+  .week-day-button {
+    min-width: 40px !important;
+    max-width: 40px !important;
+    width: 40px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    border-radius: 7px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .week-day-label {
+    font-size: 6.5px !important;
+    letter-spacing: -0.5px !important;
+    line-height: 8px !important;
+  }
+  
+  .week-day-date {
+    font-size: 12px !important;
+    line-height: 15px !important;
+    font-weight: 700 !important;
+  }
+  
+  .month-title {
+    font-size: 11px !important;
+  }
+  
+  .mobile-header-logo {
+    padding: 6px !important;
+    gap: 0 !important;
+  }
+  
+  .my-lessons-title-mobile {
+    font-size: 24px !important;
+    line-height: 30px !important;
+  }
+  
+  .my-lessons-button-mobile {
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+  }
+  
+  .my-lessons-screen-container {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+}
+
+.mobile-header-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.mobile-header-logo:active {
+  transform: scale(0.95);
+}

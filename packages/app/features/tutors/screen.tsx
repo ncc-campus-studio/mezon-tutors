@@ -35,6 +35,7 @@ export function TutorsScreen() {
   const media = useMedia()
   const theme = useTheme()
   const showHoverPreview = !media.md
+  const isCompact = media.md || media.sm || media.xs
 
   const [page, setPage] = useState(() => {
     const initialPage = Number(searchParams.get('page') ?? '1')
@@ -59,7 +60,12 @@ export function TutorsScreen() {
   })
   const [hoverTutor, setHoverTutor] = useState<VerifiedTutorProfileDto | null>(null)
   const [previewOffsetY, setPreviewOffsetY] = useState(0)
+  const [disableCardNavigationUntil, setDisableCardNavigationUntil] = useState(0)
   const listColumnRef = useRef<HTMLElement | null>(null)
+
+  const suppressCardNavigation = () => {
+    setDisableCardNavigationUntil(Date.now() + 450)
+  }
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage)
@@ -75,6 +81,7 @@ export function TutorsScreen() {
   }
 
   const handleSortChange = (value: string) => {
+    suppressCardNavigation()
     setSortByFilter(value as ETutorSortBy)
     setPage(1)
     setHoverTutor(null)
@@ -82,6 +89,7 @@ export function TutorsScreen() {
   }
 
   const handleSubjectChange = (value: ESubject) => {
+    suppressCardNavigation()
     setSubjectFilter(value)
     setPage(1)
     setHoverTutor(null)
@@ -89,6 +97,7 @@ export function TutorsScreen() {
   }
 
   const handleCountryChange = (value: ECountry) => {
+    suppressCardNavigation()
     setCountryFilter(value)
     setPage(1)
     setHoverTutor(null)
@@ -96,6 +105,7 @@ export function TutorsScreen() {
   }
 
   const handlePriceChange = (value: string) => {
+    suppressCardNavigation()
     setPriceFilter(value)
     setPage(1)
     setHoverTutor(null)
@@ -117,11 +127,16 @@ export function TutorsScreen() {
 
   return (
     <Screen
-      paddingHorizontal="$8"
+      paddingHorizontal={isCompact ? '$1' : '$8'}
       backgroundColor={theme.tutorsPageBackground?.get() ?? '$background'}
     >
       <YStack flex={1}>
-        <Container padded paddingTop="$4" paddingBottom="$6" gap="$4">
+        <Container
+          padded
+          paddingTop={isCompact ? '$3' : '$4'}
+          paddingBottom={isCompact ? '$4' : '$6'}
+          gap={isCompact ? '$3' : '$4'}
+        >
           <TutorsFilter
             subject={subjectFilter}
             country={countryFilter}
@@ -130,9 +145,25 @@ export function TutorsScreen() {
             onCountryChange={handleCountryChange}
             onPricePerLessonChange={handlePriceChange}
           />
-          <XStack gap="$8" flexDirection="row" alignItems="flex-start" width="100%">
-            <YStack width="100%" minHeight="60vh" height="auto" gap="$3" position="relative">
-              <XStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap="$2">
+          <XStack
+            gap="$8"
+            flexDirection="row"
+            alignItems="flex-start"
+            width="100%"
+          >
+            <YStack
+              width="100%"
+              minHeight="60vh"
+              height="auto"
+              gap="$3"
+              position="relative"
+            >
+              <XStack
+                justifyContent="space-between"
+                alignItems="center"
+                flexWrap="wrap"
+                gap="$2"
+              >
                 <Text variant="muted">
                   {subjectFilter === ESubject.ANY_SUBJECT
                     ? t('totalLabelNoSubject', { count: totalTutors })
@@ -141,10 +172,16 @@ export function TutorsScreen() {
                         subject: tSubject(subjectFilter),
                       })}
                 </Text>
-                <XStack gap="$2" alignItems="center">
-                  <Text variant="muted">{t('sortBy')}</Text>
+                <XStack
+                  gap="$2"
+                  alignItems="center"
+                  width={isCompact ? '100%' : undefined}
+                >
+                  <Text variant="muted" flexShrink={0}>{t('sortBy')}</Text>
                   <Select
                     value={sortByFilter}
+                    width={isCompact ? '100%' : 140}
+                    flex={isCompact ? 1 : undefined}
                     onValueChange={handleSortChange}
                     options={(Object.values(ETutorSortBy) as ETutorSortBy[]).map((value) => ({
                       label: t(value),
@@ -154,7 +191,12 @@ export function TutorsScreen() {
                 </XStack>
               </XStack>
 
-              <XStack position="relative" width="100%" gap="$5" alignItems="flex-start">
+              <XStack
+                position="relative"
+                width="100%"
+                gap="$5"
+                alignItems="flex-start"
+              >
                 <YStack
                   ref={(node) => {
                     listColumnRef.current = node as unknown as HTMLElement | null
@@ -186,6 +228,7 @@ export function TutorsScreen() {
                           tutor={tutor}
                           onHover={showHoverPreview ? handleTutorCardHover : undefined}
                           isActive={hoverTutor?.id === tutor.id}
+                          disableNavigationUntil={disableCardNavigationUntil}
                         />
                       </YStack>
                     ))
@@ -193,7 +236,10 @@ export function TutorsScreen() {
                 </YStack>
 
                 {showHoverPreview && !showInitialLoading && items.length > 0 && (
-                  <YStack width={PREVIEW_WIDTH} flexShrink={0}>
+                  <YStack
+                    width={PREVIEW_WIDTH}
+                    flexShrink={0}
+                  >
                     {hoverTutor ? (
                       <YStack
                         style={{
@@ -202,7 +248,10 @@ export function TutorsScreen() {
                           willChange: 'transform',
                         }}
                       >
-                        <PreviewCard tutor={hoverTutor} isPopularWeek={false} />
+                        <PreviewCard
+                          tutor={hoverTutor}
+                          isPopularWeek={false}
+                        />
                       </YStack>
                     ) : null}
                   </YStack>
@@ -211,8 +260,16 @@ export function TutorsScreen() {
 
               <OverlayLoading isOpen={isFetching && items.length === 0 && !showInitialLoading} />
 
-              <XStack justifyContent="center" alignItems="center" paddingTop="$4">
-                <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+              <XStack
+                justifyContent="center"
+                alignItems="center"
+                paddingTop="$4"
+              >
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </XStack>
             </YStack>
           </XStack>
