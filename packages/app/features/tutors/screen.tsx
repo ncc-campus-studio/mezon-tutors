@@ -143,14 +143,26 @@ export function TutorsScreen() {
   }, [allItems, currency, convert])
 
   const items = useMemo(() => {
-    if (!priceFilter) return allItems
+    let filtered = allItems
     
-    return allItems.filter((tutor) => {
-      const convertedPrice = convertedPrices[tutor.id]
-      if (convertedPrice === undefined) return true
-      return convertedPrice >= priceFilter[0] && convertedPrice <= priceFilter[1]
-    })
-  }, [allItems, priceFilter, convertedPrices])
+    if (priceFilter) {
+      filtered = allItems.filter((tutor) => {
+        const convertedPrice = convertedPrices[tutor.id]
+        if (convertedPrice === undefined) return true
+        return convertedPrice >= priceFilter[0] && convertedPrice <= priceFilter[1]
+      })
+    }
+
+    if (sortByFilter === ETutorSortBy.HIGHEST_PRICE || sortByFilter === ETutorSortBy.LOWEST_PRICE) {
+      filtered = [...filtered].sort((a, b) => {
+        const priceA = convertedPrices[a.id] ?? 0
+        const priceB = convertedPrices[b.id] ?? 0
+        return sortByFilter === ETutorSortBy.HIGHEST_PRICE ? priceB - priceA : priceA - priceB
+      })
+    }
+
+    return filtered
+  }, [allItems, priceFilter, convertedPrices, sortByFilter])
 
   return (
     <Screen
