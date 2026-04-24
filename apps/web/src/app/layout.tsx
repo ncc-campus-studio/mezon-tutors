@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import './globals.css';
@@ -27,6 +27,15 @@ export const metadata: Metadata = {
   title: 'Mezon Learning | Find Your Best Language Tutor',
   description:
     'Learn faster with your best language tutor. Book experienced tutors for 120+ subjects.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
 };
 
 export default async function RootLayout({

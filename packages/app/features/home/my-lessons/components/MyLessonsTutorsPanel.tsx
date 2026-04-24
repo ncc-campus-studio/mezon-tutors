@@ -1,22 +1,11 @@
 ﻿import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui';
 import { CompassIcon, StarOutlineIcon } from '@mezon-tutors/app/ui/icons';
 import { ROUTES } from '@mezon-tutors/shared';
+import { DEFAULT_AVATAR_URL } from '@mezon-tutors/shared/src/constants/my-lesson';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { Image, useMedia, useTheme } from 'tamagui';
 import type { TutorItem } from '../types';
-
-function getInitials(name: string): string {
-  const tokens = name.trim().split(/\s+/).filter(Boolean);
-  if (!tokens.length) {
-    return 'NA';
-  }
-
-  return tokens
-    .slice(0, 2)
-    .map((token) => token[0]?.toUpperCase() ?? '')
-    .join('');
-}
 
 function TutorCard({
   tutor,
@@ -26,8 +15,10 @@ function TutorCard({
   onOpenTutor: (tutorId: string) => void;
 }) {
   const t = useTranslations('MyLessons');
+  const media = useMedia();
+  const isMobile = media.sm || media.xs;
   const displayNextLesson = tutor.nextLessonLabel || t('panels.tutors.unscheduled');
-  const avatarUri = tutor.avatar?.trim() || '';
+  const avatarUri = tutor.avatar?.trim() || DEFAULT_AVATAR_URL;
 
   return (
     <XStack
@@ -50,30 +41,13 @@ function TutorCard({
         cursor="pointer"
         onPress={() => onOpenTutor(tutor.id)}
       >
-        {avatarUri ? (
-          <Image
-            source={{ uri: avatarUri }}
-            width={64}
-            height={64}
-            borderRadius={12}
-            accessibilityLabel={tutor.name}
-          />
-        ) : (
-          <YStack
-            width={64}
-            height={64}
-            borderRadius={12}
-            alignItems="center"
-            justifyContent="center"
-            backgroundColor="$myLessonsAvatarBackground"
-            borderWidth={1}
-            borderColor="$myLessonsAvatarBorder"
-          >
-            <Text color="$myLessonsAvatarText" fontSize={20} fontWeight="700">
-              {getInitials(tutor.name)}
-            </Text>
-          </YStack>
-        )}
+        <Image
+          source={{ uri: avatarUri }}
+          width={64}
+          height={64}
+          borderRadius={12}
+          accessibilityLabel={tutor.name}
+        />
 
         <YStack gap={2} flex={1} minWidth={180}>
           <Text color="$myLessonsLessonsPrimaryText" fontSize={22} lineHeight={26} fontWeight="800">
@@ -116,34 +90,70 @@ function TutorCard({
           </Text>
         </XStack>
 
-        <Button
-          variant="primary"
-          backgroundColor="$myLessonsPrimaryButton"
-          borderColor="$myLessonsPrimaryButtonBorder"
-          color="$myLessonsPrimaryButtonText"
-          borderRadius={999}
-          paddingHorizontal="$4"
-          height={34}
-          fontSize={12}
-          fontWeight="700"
-        >
-          {t('panels.tutors.schedule')}
-        </Button>
+        {isMobile ? (
+          <XStack gap="$2" width="100%">
+            <Button
+              variant="primary"
+              backgroundColor="$myLessonsPrimaryButton"
+              borderColor="$myLessonsPrimaryButtonBorder"
+              color="$myLessonsPrimaryButtonText"
+              borderRadius={999}
+              paddingHorizontal="$3"
+              height={34}
+              fontSize={12}
+              fontWeight="700"
+              flex={1}
+            >
+              {t('panels.tutors.schedule')}
+            </Button>
 
-        <Button
-          chromeless
-          backgroundColor="$myLessonsLessonsActionSecondaryBg"
-          borderWidth={1}
-          borderColor="$myLessonsLessonsActionSecondaryBorder"
-          color="$myLessonsLessonsActionSecondaryText"
-          borderRadius={999}
-          paddingHorizontal="$4"
-          height={34}
-          fontSize={12}
-          fontWeight="700"
-        >
-          {t('panels.tutors.message')}
-        </Button>
+            <Button
+              variant="primary"
+              backgroundColor="$myLessonsPrimaryButton"
+              borderColor="$myLessonsPrimaryButtonBorder"
+              color="$myLessonsPrimaryButtonText"
+              borderRadius={999}
+              paddingHorizontal="$3"
+              height={34}
+              fontSize={12}
+              fontWeight="700"
+              flex={1}
+            >
+              {t('panels.tutors.message')}
+            </Button>
+          </XStack>
+        ) : (
+          <>
+            <Button
+              variant="primary"
+              backgroundColor="$myLessonsPrimaryButton"
+              borderColor="$myLessonsPrimaryButtonBorder"
+              color="$myLessonsPrimaryButtonText"
+              borderRadius={999}
+              paddingHorizontal="$4"
+              height={34}
+              fontSize={12}
+              fontWeight="700"
+            >
+              {t('panels.tutors.schedule')}
+            </Button>
+
+            <Button
+              chromeless
+              backgroundColor="$myLessonsLessonsActionSecondaryBg"
+              borderWidth={1}
+              borderColor="$myLessonsLessonsActionSecondaryBorder"
+              color="$myLessonsLessonsActionSecondaryText"
+              borderRadius={999}
+              paddingHorizontal="$4"
+              height={34}
+              fontSize={12}
+              fontWeight="700"
+            >
+              {t('panels.tutors.message')}
+            </Button>
+          </>
+        )}
 
         <Text color="$myLessonsLessonsMutedText" fontSize={18} lineHeight={18} paddingHorizontal={6}>
           ...

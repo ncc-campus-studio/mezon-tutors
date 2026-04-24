@@ -32,7 +32,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'solito/navigation'
 import { useState } from 'react'
 import { useAtomValue } from 'jotai'
-import { GestureResponderEvent } from 'react-native'
+import { GestureResponderEvent, useWindowDimensions } from 'react-native'
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -56,12 +56,13 @@ export function TutorCard({
   const t = useTranslations('Tutors.TutorCard')
   const media = useMedia()
   const theme = useTheme()
+  const { width: viewportWidth } = useWindowDimensions()
   const router = useRouter()
   const currentUser = useAtomValue(userAtom)
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
-
-  const isVertical = media.sm
+  const isViewportInRange1020To1248 = viewportWidth >= 1000 && viewportWidth <= 1248
+  const isVertical = media.sm || isViewportInRange1020To1248
   const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280'
 
   const proficiencyTags = Array.from(

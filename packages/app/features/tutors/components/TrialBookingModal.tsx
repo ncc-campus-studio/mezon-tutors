@@ -14,7 +14,7 @@ import {
   timeToMinutes,
   type TrialTimeSlot,
 } from '@mezon-tutors/shared'
-import { Image, useTheme } from 'tamagui'
+import { Image, useMedia, useTheme } from 'tamagui'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { EDayOfWeek, EPeriod } from '@mezon-tutors/shared'
@@ -67,6 +67,8 @@ export function TrialBookingModal({
 }: TrialBookingModalProps) {
   const t = useTranslations('Tutors.TrialBookingModal')
   const isAuthenticated = useAtomValue(isAuthenticatedAtom)
+  const media = useMedia()
+  const isMobile = media.sm || media.xs
   const [duration, setDuration] = useState<number>(DURATION_OPTIONS[0])
   const [timeId, setTimeId] = useState<string>('')
   const [nowTs, setNowTs] = useState<number>(Date.now())
@@ -384,62 +386,86 @@ export function TrialBookingModal({
 
         <Dialog.Content
           key="content"
-          animation="quick"
-          enterStyle={{ scale: 0.95, opacity: 0 }}
-          exitStyle={{ scale: 0.95, opacity: 0 }}
-          borderRadius={16}
-          width="95%"
-          maxWidth={720}
-          maxHeight="92vh"
+          animation="100ms"
+          enterStyle={{ y: isMobile ? '100%' : 0, scale: isMobile ? 1 : 0.95, opacity: 0 }}
+          exitStyle={{ y: isMobile ? '100%' : 0, scale: isMobile ? 1 : 0.95, opacity: 0 }}
+          animateOnly={isMobile ? ['transform'] : ['transform', 'opacity']}
+          borderRadius={isMobile ? 0 : 16}
+          width={isMobile ? '100%' : '95%'}
+          maxWidth={isMobile ? '100%' : 720}
+          maxHeight="100%"
+          position={isMobile ? 'absolute' : undefined}
+          top={isMobile ? 0 : undefined}
+          left={isMobile ? 0 : undefined}
+          right={isMobile ? 0 : undefined}
+          bottom={isMobile ? 0 : undefined}
           backgroundColor="$trialBookingSurface"
           borderColor="$trialBookingBorder"
-          borderWidth={1}
+          borderWidth={isMobile ? 0 : 1}
           overflow="hidden"
           padding={0}
         >
-          <YStack flex={1}>
+          <YStack flex={1} maxHeight="100%">
             <XStack
               alignItems="center"
               justifyContent="space-between"
-              padding="$4"
+              padding={isMobile ? '$3' : '$4'}
               borderBottomWidth={1}
               borderBottomColor="rgba(46, 74, 126, 0.45)"
             >
-              <XStack alignItems="center" gap="$4">
-                <GraduationCapIcon size={36} color={primaryColor} />
-                <Dialog.Title color="$trialBookingBodyText" fontSize={28} fontWeight="700">
+              <XStack alignItems="center" gap={isMobile ? '$2' : '$4'}>
+                <GraduationCapIcon size={isMobile ? 28 : 36} color={primaryColor} />
+                <Dialog.Title 
+                  color="$trialBookingBodyText" 
+                  fontSize={isMobile ? 20 : 28} 
+                  fontWeight="700"
+                >
                   {t('title')}
                 </Dialog.Title>
               </XStack>
               <Dialog.Close asChild>
                 <Button
                   variant="ghost"
-                  minWidth={36}
-                  height={36}
+                  minWidth={isMobile ? 32 : 36}
+                  height={isMobile ? 32 : 36}
                   borderRadius={6}
                   backgroundColor="transparent"
                   borderWidth={0}
-                  padding={8}
+                  padding={isMobile ? 6 : 8}
                 >
-                  <CloseIcon size={22} color={primaryColor} />
+                  <CloseIcon size={isMobile ? 20 : 22} color={primaryColor} />
                 </Button>
               </Dialog.Close>
             </XStack>
 
-            <YStack flex={1} padding="$4" gap="$4" minHeight={0} style={{ overflowY: 'scroll' }}>
+            <YStack 
+              flex={1}
+              minHeight={0}
+              maxHeight="100%"
+              overflow="scroll"
+              padding={isMobile ? '$3' : '$4'} 
+              gap="$4"
+            >
               <XStack gap="$3" alignItems="center">
                 <Image
                   src={tutor.avatar}
-                  width={64}
-                  height={64}
+                  width={isMobile ? 56 : 64}
+                  height={isMobile ? 56 : 64}
                   borderRadius={999}
                   objectFit="cover"
                 />
-                <YStack>
-                  <Text size="xl" fontWeight="700" color="$trialBookingBodyText">
+                <YStack flex={1}>
+                  <Text 
+                    size={isMobile ? 'lg' : 'xl'} 
+                    fontWeight="700" 
+                    color="$trialBookingBodyText"
+                  >
                     {tutor.name}
                   </Text>
-                  <Text color="$trialBookingMetaText">
+                  <Text 
+                    color="$trialBookingMetaText"
+                    fontSize={isMobile ? 13 : undefined}
+                  >
                     {t('expertTutorTitle', { subject: tutor.title })} - ${tutor.pricePerHour}
                     {t('perHour')}
                   </Text>
@@ -453,11 +479,17 @@ export function TrialBookingModal({
               ) : null}
 
               <YStack gap="$2">
-                <Text fontWeight="700" letterSpacing={1} color="$trialBookingSectionLabel">
+                <Text 
+                  fontWeight="700" 
+                  letterSpacing={1} 
+                  color="$trialBookingSectionLabel"
+                  fontSize={isMobile ? 12 : undefined}
+                >
                   {t('selectLessonDuration')}
                 </Text>
                 <XStack
-                  width={260}
+                  width={isMobile ? '100%' : 260}
+                  maxWidth={260}
                   borderRadius={14}
                   backgroundColor="$trialBookingControlWellBg"
                   padding={4}
@@ -489,7 +521,12 @@ export function TrialBookingModal({
               </YStack>
 
               <YStack gap="$2">
-                <Text fontWeight="700" letterSpacing={1} color="$trialBookingBodyText">
+                <Text 
+                  fontWeight="700" 
+                  letterSpacing={1} 
+                  color="$trialBookingBodyText"
+                  fontSize={isMobile ? 12 : undefined}
+                >
                   {t('selectDate')}
                 </Text>
                 <YStack
@@ -567,7 +604,12 @@ export function TrialBookingModal({
               </YStack>
 
               <YStack gap="$2">
-                <Text fontWeight="700" letterSpacing={1} color="$trialBookingSectionLabel">
+                <Text 
+                  fontWeight="700" 
+                  letterSpacing={1} 
+                  color="$trialBookingSectionLabel"
+                  fontSize={isMobile ? 12 : undefined}
+                >
                   {t('availableTimes')}
                 </Text>
                 {isAvailabilityPending ? (
@@ -630,28 +672,42 @@ export function TrialBookingModal({
               </YStack>
             </YStack>
 
-            <Separator borderColor="$trialBookingHairline" />
+            {!isMobile && <Separator borderColor="$trialBookingHairline" />}
 
             <XStack
-              padding="$4"
+              padding={isMobile ? '$3' : '$4'}
               alignItems="center"
               justifyContent="space-between"
               gap="$3"
               flexWrap="wrap"
+              backgroundColor="$trialBookingSurface"
+              borderTopWidth={isMobile ? 1 : 0}
+              borderTopColor={isMobile ? '$trialBookingHairline' : undefined}
+              flexShrink={0}
             >
               <YStack gap="$2">
-                <Text color="$trialBookingSectionLabel" fontWeight="700" letterSpacing={1}>
+                <Text 
+                  color="$trialBookingSectionLabel" 
+                  fontWeight="700" 
+                  letterSpacing={1}
+                  fontSize={isMobile ? 11 : undefined}
+                >
                   {t('totalPrice')}
                 </Text>
                 <XStack alignItems="flex-end" gap="$2">
-                  <Text color="$appPrimary" fontSize={36} fontWeight="800">
+                  <Text 
+                    color="$appPrimary" 
+                    fontSize={isMobile ? 28 : 36} 
+                    fontWeight="800"
+                  >
                     ${totalPrice.toFixed(2)}
                   </Text>
                 </XStack>
               </YStack>
               <Button
                 variant="primary"
-                minWidth={200}
+                minWidth={isMobile ? 140 : 200}
+                size={isMobile ? 'sm' : undefined}
                 disabled={isConfirmDisabled}
                 onPress={handleConfirm}
               >
