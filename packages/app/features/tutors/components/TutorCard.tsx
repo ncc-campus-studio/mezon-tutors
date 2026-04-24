@@ -1,6 +1,5 @@
 import {
   ABOUT_PROFICIENCY_LEVELS,
-  formatToVND,
   ROUTES,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared'
@@ -16,6 +15,7 @@ import {
   type TrialBookingPayload,
   type TrialResumePaymentPayload,
 } from '@mezon-tutors/app/features/tutors/components/TrialBookingModal'
+import { PriceDisplay } from '@mezon-tutors/app/features/tutors/components/PriceDisplay'
 import { H2, Image, Separator, useMedia, useTheme } from 'tamagui'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'solito/navigation'
@@ -134,9 +134,13 @@ export function TutorCard({
                     </Text>
                   </XStack>
                   <XStack alignItems="baseline" gap="$1">
-                    <Text size="xl" fontWeight="700">
-                      {formatToVND(tutor.pricePerHour)}
-                    </Text>
+                    <PriceDisplay 
+                      amount={tutor.pricePerHour} 
+                      currency={tutor.currency}
+                      showOriginal={false}
+                      size="md"
+                      inline
+                    />
                     <Text variant="muted">{t('perLesson')}</Text>
                   </XStack>
                 </XStack>
@@ -226,9 +230,13 @@ export function TutorCard({
                   </Text>
                 </XStack>
                 <XStack alignItems="baseline" gap="$1" justifyContent="flex-end">
-                  <Text size="xl" fontWeight="700">
-                    {formatToVND(tutor.pricePerHour)}
-                  </Text>
+                  <PriceDisplay 
+                    amount={tutor.pricePerHour} 
+                    currency={tutor.currency} 
+                    showOriginal={false}
+                    size="md"
+                    inline
+                  />
                   <Text variant="muted">{t('perLesson')}</Text>
                 </XStack>
               </>

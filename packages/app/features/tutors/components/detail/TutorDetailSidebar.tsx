@@ -1,6 +1,7 @@
 import { Button, Card, Text, XStack, YStack } from '@mezon-tutors/app/ui'
 import { CalendarIcon, CheckIcon, UsersIcon } from '@mezon-tutors/app/ui/icons'
 import { useTranslations } from 'next-intl'
+import { PriceDisplay } from '@mezon-tutors/app/features/tutors/components/PriceDisplay'
 import { TutorAboutTabProps } from './types'
 
 export function TutorDetailSidebar({ tutor }: TutorAboutTabProps) {
@@ -18,9 +19,14 @@ export function TutorDetailSidebar({ tutor }: TutorAboutTabProps) {
       >
         <YStack gap="$1">
           <XStack alignItems="baseline" gap="$1.5">
-            <Text color="$tutorsDetailPrimaryText" fontSize={32} fontWeight="900" lineHeight={34}>
-              ${tutor.pricePerHour}
-            </Text>
+            <PriceDisplay 
+              amount={tutor.pricePerHour} 
+              currency={tutor.currency} 
+              showOriginal={false}
+              size="xl"
+              color="$tutorsDetailPrimaryText"
+              inline
+            />
             <Text color="$tutorsDetailMutedText">{t('perLesson')}</Text>
           </XStack>
         </YStack>

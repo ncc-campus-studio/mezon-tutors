@@ -6,3 +6,4 @@ export * from './tutor-availability/tutor-availability.api';
 export * from './user/user.api';
 export * from './auth/auth.service';
 export * from './storage/token-storage';
+export * from './currency.service';

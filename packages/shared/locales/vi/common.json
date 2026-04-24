@@ -40,5 +40,8 @@
       "terms": "Điều khoản",
       "privacy": "Bảo mật"
     }
+  },
+  "Currency": {
+    "conversionError": "Không thể chuyển đổi, hiển thị giá gốc"
   }
 }

@@ -52,6 +52,12 @@
         "title": "Instant Messaging",
         "description": "Chat with tutors quickly for feedback, follow-ups, and study support."
       }
+    },
+    "CurrencyToggle": {
+      "language": "Language",
+      "currency": "Currency",
+      "english": "English",
+      "vietnamese": "Vietnamese"
     }
   }
 }

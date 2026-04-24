@@ -45,7 +45,7 @@ export function MiniCalendar({ selectedDate, onDateSelect }: MiniCalendarProps) 
   const selectedWeekStart = useMemo(() => getWeekStart(selectedDate), [selectedDate, getWeekStart]);
 
   const weekDays = useMemo(() => {
-    const days = [];
+    const days: string[] = [];
     for (let i = 0; i < 7; i++) {
       const day = dayjs().day(i).locale(locale);
       days.push(day.format('dd').charAt(0).toUpperCase());

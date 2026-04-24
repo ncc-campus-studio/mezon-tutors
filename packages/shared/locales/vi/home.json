@@ -52,6 +52,12 @@
         "title": "Nhắn tin tức thời",
         "description": "Trao đổi nhanh với gia sư để nhận phản hồi và hỗ trợ học tập."
       }
+    },
+    "CurrencyToggle": {
+      "language": "Ngôn ngữ",
+      "currency": "Tiền tệ",
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt"
     }
   }
 }

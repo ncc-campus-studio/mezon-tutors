@@ -7,13 +7,15 @@ import { HEADER_NAV, ROUTES } from '@mezon-tutors/shared'
 import { useCallback } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { XStack, Text, Button } from '@mezon-tutors/app/ui'
+import { XStack, Text } from '@mezon-tutors/app/ui'
 import { LogoIcon } from '@mezon-tutors/app/ui/icons'
 import { themes } from '@mezon-tutors/app/theme/theme'
 import { useThemeName } from 'tamagui'
-import { HeaderLocaleToggle } from './HeaderLocaleToggle'
+import { HeaderCurrencyToggle } from './HeaderCurrencyToggle'
 import { HeaderThemeToggle } from './HeaderThemeToggle'
 import { HeaderNavLink } from './HeaderNavLink'
+import { useCurrency } from '@mezon-tutors/app/hooks/useCurrency'
+import type { Locale } from '@mezon-tutors/shared/i18n/config'
 
 export default function Header() {
   const locale = useLocale()
@@ -26,6 +28,7 @@ export default function Header() {
   const user = useAtomValue(userAtom)
   const themeMode: 'light' | 'dark' = themeName === 'dark' ? 'dark' : 'light'
   const headerTheme = themeMode === 'dark' ? themes.dark : themes.light
+  const { currency, switchCurrency } = useCurrency()
 
   const toggleTheme = useCallback(() => {
     const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
@@ -33,7 +36,7 @@ export default function Header() {
   }, [themeMode])
 
   const switchLocale = useCallback(
-    (nextLocale: 'en' | 'vi') => {
+    (nextLocale: Locale) => {
       if (nextLocale === locale) return
 
       const isHttps = window.location.protocol === 'https:'
@@ -47,10 +50,20 @@ export default function Header() {
     [locale, pathname, router, searchParams]
   )
 
-  const toggleLocale = useCallback(() => {
-    const nextLocale = locale === 'en' ? 'vi' : 'en'
-    void switchLocale(nextLocale)
-  }, [locale, switchLocale])
+  const handleLocaleChange = useCallback(
+    (nextLocale: string) => {
+      switchLocale(nextLocale as Locale)
+    },
+    [switchLocale]
+  )
+
+  const handleCurrencyChange = useCallback(
+    (newCurrency: string) => {
+      switchCurrency(newCurrency)
+      window.location.reload()
+    },
+    [switchCurrency]
+  )
 
   const goToDashboard = useCallback(() => {
     router.push(ROUTES.DASHBOARD.INDEX)
@@ -110,7 +123,13 @@ export default function Header() {
       <XStack alignItems="center" gap={10}>
         {!isAuthenticated ? <LoginButton /> : null}
 
-        <HeaderLocaleToggle locale={locale} onToggle={toggleLocale} iconColor={headerTheme.webHeaderToggleText} />
+        <HeaderCurrencyToggle
+          currency={currency}
+          locale={locale}
+          onCurrencyChange={handleCurrencyChange}
+          onLocaleChange={handleLocaleChange}
+          iconColor={headerTheme.webHeaderToggleText}
+        />
 
         <HeaderThemeToggle isDark={themeMode === 'dark'} onToggleAction={toggleTheme} />
 

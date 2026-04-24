@@ -7,6 +7,7 @@ export * from './CameraIcon';
 export * from './CardIcon';
 export * from './BookingRequestIcon';
 export * from './CheckIcon';
+export * from './ChevronDownIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';

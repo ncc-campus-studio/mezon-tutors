@@ -18,6 +18,7 @@ export function toVerifiedTutorProfileDto(
     motivate: tutor.motivate,
     headline: tutor.headline,
     pricePerHour: Number(tutor.pricePerHour),
+    currency: tutor.currency,
     isProfessional: tutor.isProfessional,
     totalLessonsTaught: tutor.totalLessonsTaught,
     totalStudents: tutor.totalStudents,
