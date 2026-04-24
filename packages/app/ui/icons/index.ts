@@ -1,5 +1,6 @@
 // Icons
 export * from './ArrowRightIcon';
+export * from './ArrowLeftIcon';
 export * from './ArrowRightLineIcon';
 export * from './BackArrowIcon';
 export * from './CalendarIcon';
@@ -8,6 +9,8 @@ export * from './CardIcon';
 export * from './BookingRequestIcon';
 export * from './CheckIcon';
 export * from './ChevronDownIcon';
+export * from './ChevronLeftIcon';
+export * from './ChevronRightIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';
@@ -30,6 +33,7 @@ export * from './TrashIcon';
 export * from './UploadIcon';
 export * from './UserIcon';
 export * from './SunIcon';
+export * from './AfternoonIcon';
 export * from './FrameIcon';
 export * from './VerifiedIcon';
 export * from './WalletIcon';
@@ -53,6 +57,7 @@ export * from './LanguageIcon'
 export * from './StarOutlineIcon'
 export * from './LogoutIcon'
 export * from './LogoIcon'
+export * from './MenuIcon'
 export * from './FeatureEveningClassesIcon'
 export * from './FeatureFlexibleWeekendsIcon'
 export * from './FeatureLearnViaMezonIcon'

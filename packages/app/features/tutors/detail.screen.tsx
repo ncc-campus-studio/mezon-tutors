@@ -10,7 +10,7 @@ import {
   useGetVerifiedTutorReviews,
   useGetVerifiedTutorResources,
 } from '@mezon-tutors/app/services/tutor-profile/tutor-profile.api'
-import { TUTOR_DETAIL_DEFAULT_TAB } from '@mezon-tutors/shared'
+import { TUTOR_DETAIL_DEFAULT_TAB, TUTOR_DETAIL_LAYOUT_CONFIG } from '@mezon-tutors/shared'
 import { useMedia } from 'tamagui'
 import { TutorAboutTab } from './components/detail/TutorAboutTab'
 import { TutorDetailHeader } from './components/detail/TutorDetailHeader'
@@ -20,16 +20,18 @@ import { TutorReviewsTab } from './components/detail/TutorReviewsTab'
 import { TutorScheduleTab } from './components/detail/TutorScheduleTab'
 import { TutorDetailTab } from './components/detail/types'
 
-const PAGE_MAX_WIDTH = 1320
-const SIDEBAR_WIDTH = 320
-const PAGE_BOTTOM_PADDING = 24
+type TutorDetailScreenProps = {
+  initialTab?: TutorDetailTab
+}
 
-export function TutorDetailScreen() {
+export function TutorDetailScreen({
+  initialTab = TUTOR_DETAIL_DEFAULT_TAB,
+}: TutorDetailScreenProps = {}) {
   const t = useTranslations('Tutors.Detail')
   const { id } = useParams<{ id: string }>()
   const media = useMedia()
   const tutorId = useMemo(() => (typeof id === 'string' ? id.trim() : ''), [id])
-  const [activeTab, setActiveTab] = useState<TutorDetailTab>(TUTOR_DETAIL_DEFAULT_TAB)
+  const [activeTab, setActiveTab] = useState<TutorDetailTab>(initialTab)
   const isInvalidTutorId = !tutorId
 
   const { data: aboutData, isLoading: isLoadingAbout, isError: isErrorAbout } = useGetVerifiedTutorAbout(tutorId)
@@ -49,7 +51,9 @@ export function TutorDetailScreen() {
           return <Text color="$tutorsDetailSecondaryText">{t('loading')}</Text>
         }
         return aboutData && scheduleData ? (
-          <TutorScheduleTab tutor={{ ...aboutData, availability: scheduleData.availability }} />
+          <TutorScheduleTab
+            tutor={{ ...aboutData, availability: scheduleData.availability }}
+          />
         ) : null
       case 'reviews':
         if (isLoadingReviews) {
@@ -79,8 +83,18 @@ export function TutorDetailScreen() {
 
   return (
     <Screen backgroundColor="$tutorsPageBackground">
-      <ScrollView flex={1} contentContainerStyle={{ paddingBottom: PAGE_BOTTOM_PADDING }}>
-        <Container padded flex={0} width="100%" maxWidth={PAGE_MAX_WIDTH} marginHorizontal="auto" paddingVertical="$4">
+      <ScrollView
+        flex={1}
+        contentContainerStyle={{ paddingBottom: TUTOR_DETAIL_LAYOUT_CONFIG.bottomPadding }}
+      >
+        <Container
+          padded
+          flex={0}
+          width="100%"
+          maxWidth={TUTOR_DETAIL_LAYOUT_CONFIG.maxWidth}
+          marginHorizontal="auto"
+          paddingVertical="$4"
+        >
           {isLoading ? (
             <YStack
               width="100%"
@@ -109,8 +123,16 @@ export function TutorDetailScreen() {
               flexDirection={media.md ? 'column' : 'row'}
               alignItems="flex-start"
             >
-              <YStack flex={1} gap="$4" width="100%">
-                <TutorDetailHeader tutor={aboutData} activeTab={activeTab} onTabChange={setActiveTab} />
+              <YStack
+                flex={1}
+                gap="$4"
+                width="100%"
+              >
+                <TutorDetailHeader
+                  tutor={aboutData}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                />
 
                 <YStack
                   backgroundColor="$tutorsDetailCardBackground"
@@ -123,7 +145,7 @@ export function TutorDetailScreen() {
                 </YStack>
               </YStack>
 
-              <YStack width={media.md ? '100%' : SIDEBAR_WIDTH}>
+              <YStack width={media.md ? '100%' : TUTOR_DETAIL_LAYOUT_CONFIG.sidebarWidth}>
                 <TutorDetailSidebar tutor={aboutData} />
               </YStack>
             </XStack>
