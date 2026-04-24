@@ -6,7 +6,7 @@ import { currencyService } from '../services/currency.service'
 import { DEFAULT_CURRENCY, LOCALE_TO_CURRENCY } from '@mezon-tutors/shared'
 import type { ConversionResult } from '@mezon-tutors/shared'
 
-const STORAGE_KEY = 'CURRENCY'
+const STORAGE_KEY = 'currency'
 
 function readStoredCurrency(): string {
   if (typeof window === 'undefined') return DEFAULT_CURRENCY

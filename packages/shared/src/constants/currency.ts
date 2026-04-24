@@ -27,3 +27,9 @@ export const CURRENCY_NAMES: Record<Currency, string> = {
   [ECurrency.VND]: 'Vietnamese Dong',
   [ECurrency.PHP]: 'Philippine Peso',
 }
+
+export const PRICE_FILTER_RANGE = {
+  min: 3,
+  max: 40,
+  currency: ECurrency.USD,
+} as const

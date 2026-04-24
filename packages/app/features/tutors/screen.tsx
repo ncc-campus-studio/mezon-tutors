@@ -13,7 +13,7 @@ import {
 import { PreviewCard } from './components/PreviewCard'
 import { TutorsFilter } from './components/TutorsFilter'
 import { ECountry, ESubject, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo, useEffect } from 'react'
 import { TutorCard } from './components/TutorCard'
 import { Select } from '@mezon-tutors/app/ui'
 import { ETutorSortBy } from '@mezon-tutors/shared'
@@ -21,6 +21,7 @@ import { useGetVerifiedTutors } from '@mezon-tutors/app/services/tutor-profile/t
 import { useTranslations } from 'next-intl'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useMedia, useTheme } from 'tamagui'
+import { useCurrency } from '@mezon-tutors/app/hooks/useCurrency'
 
 const DEFAULT_LIMIT = 10
 const PREVIEW_WIDTH = 420
@@ -47,7 +48,7 @@ export function TutorsScreen() {
   const [sortByFilter, setSortByFilter] = useState<ETutorSortBy>(ETutorSortBy.POPULARITY)
   const [subjectFilter, setSubjectFilter] = useState<ESubject>(ESubject.ANY_SUBJECT)
   const [countryFilter, setCountryFilter] = useState<ECountry>(ECountry.ANY_COUNTRY)
-  const [priceFilter, setPriceFilter] = useState<string>('')
+  const [priceFilter, setPriceFilter] = useState<[number, number] | null>(null)
   const {
     data: verifiedTutorsResponse,
     isLoading,
@@ -56,7 +57,6 @@ export function TutorsScreen() {
     sortBy: sortByFilter,
     subject: subjectFilter,
     country: countryFilter,
-    pricePerLesson: priceFilter,
   })
   const [hoverTutor, setHoverTutor] = useState<VerifiedTutorProfileDto | null>(null)
   const [previewOffsetY, setPreviewOffsetY] = useState(0)
@@ -104,9 +104,9 @@ export function TutorsScreen() {
     setPreviewOffsetY(0)
   }
 
-  const handlePriceChange = (value: string) => {
+  const handlePriceChange = (min: number, max: number) => {
     suppressCardNavigation()
-    setPriceFilter(value)
+    setPriceFilter([min, max])
     setPage(1)
     setHoverTutor(null)
     setPreviewOffsetY(0)
@@ -122,8 +122,35 @@ export function TutorsScreen() {
 
   const totalTutors = verifiedTutorsResponse?.meta.total ?? 0
   const totalPages = verifiedTutorsResponse?.meta.totalPages ?? 1
-  const items = verifiedTutorsResponse?.items ?? []
+  const allItems = verifiedTutorsResponse?.items ?? []
   const showInitialLoading = isLoading && !verifiedTutorsResponse
+  const { currency, convert } = useCurrency()
+
+  const [convertedPrices, setConvertedPrices] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    const convertAllPrices = async () => {
+      const prices: Record<string, number> = {}
+      for (const tutor of allItems) {
+        const result = await convert(tutor.pricePerHour, tutor.currency)
+        prices[tutor.id] = result.convertedAmount
+      }
+      setConvertedPrices(prices)
+    }
+    if (allItems.length > 0) {
+      convertAllPrices()
+    }
+  }, [allItems, currency, convert])
+
+  const items = useMemo(() => {
+    if (!priceFilter) return allItems
+    
+    return allItems.filter((tutor) => {
+      const convertedPrice = convertedPrices[tutor.id]
+      if (convertedPrice === undefined) return true
+      return convertedPrice >= priceFilter[0] && convertedPrice <= priceFilter[1]
+    })
+  }, [allItems, priceFilter, convertedPrices])
 
   return (
     <Screen
@@ -140,7 +167,6 @@ export function TutorsScreen() {
           <TutorsFilter
             subject={subjectFilter}
             country={countryFilter}
-            pricePerLesson={priceFilter}
             onSubjectChange={handleSubjectChange}
             onCountryChange={handleCountryChange}
             onPricePerLessonChange={handlePriceChange}

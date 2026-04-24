@@ -9,6 +9,7 @@ import {
   type TrialBookingPayload,
   type TrialResumePaymentPayload,
 } from '@mezon-tutors/app/features/tutors/components/TrialBookingModal'
+import { PriceDisplay } from '@mezon-tutors/app/features/tutors/components/PriceDisplay'
 import { useRouter } from 'solito/navigation'
 import { ROUTES } from '@mezon-tutors/shared'
 
@@ -58,14 +59,13 @@ export function TutorDetailSidebar({ tutor }: TutorAboutTabProps) {
       >
         <YStack gap="$1">
           <XStack alignItems="baseline" gap="$1.5">
-            <Text 
-              color="$tutorsDetailPrimaryText" 
-              fontSize={isMobile ? 28 : 32} 
-              fontWeight="900" 
-              lineHeight={isMobile ? 30 : 34}
-            >
-              ${tutor.pricePerHour}
-            </Text>
+            <PriceDisplay 
+              amount={tutor.pricePerHour} 
+              currency={tutor.currency} 
+              showOriginal={false} 
+              size="xl" 
+              inline 
+            />
             <Text 
               color="$tutorsDetailMutedText"
               fontSize={isMobile ? 13 : undefined}

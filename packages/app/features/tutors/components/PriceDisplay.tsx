@@ -17,14 +17,6 @@ type PriceDisplayProps = {
   inline?: boolean
 }
 
-
-const fontSizeMap: Record<Size, { price: number; currency: number; original: number }> = {
-  sm: { price: 16, currency: 12, original: 10 },
-  md: { price: 20, currency: 13, original: 11 },
-  lg: { price: 24, currency: 14, original: 12 },
-  xl: { price: 32, currency: 14, original: 12 },
-}
-
 export function PriceDisplay({
   amount,
   currency,
@@ -70,12 +62,11 @@ export function PriceDisplay({
   }
 
   const displayCurrency = hasError ? currency : preferredCurrency
-  const fontSize = fontSizeMap[size]
   const priceColor = color || '$appPrimary'
 
   if (inline) {
     return (
-      <Text fontSize={fontSize.price} fontWeight="700" color={priceColor}>
+      <Text size={size} fontWeight="700" color={priceColor}>
         {formatCurrency(convertedAmount, displayCurrency)}
       </Text>
     )
@@ -86,22 +77,22 @@ export function PriceDisplay({
   return (
     <YStack gap={4}>
       <XStack alignItems="baseline" gap={4}>
-        <Text fontSize={fontSize.price} fontWeight="700" color={priceColor}>
+        <Text size={size} fontWeight="700" color={priceColor}>
           {formatCurrency(convertedAmount, displayCurrency)}
         </Text>
-        <Text fontSize={fontSize.currency} color="$colorMuted">
+        <Text fontSize={14} color="$colorMuted">
           {displayCurrency.toUpperCase()}
         </Text>
       </XStack>
 
       {showOriginal && !isSameCurrency && !hasError && (
-        <Text fontSize={fontSize.original} color="$colorMuted">
+        <Text fontSize={12} color="$colorMuted">
           ≈ {formatCurrency(amount, currency)} {currency.toUpperCase()}
         </Text>
       )}
 
       {hasError && (
-        <Text fontSize={fontSize.original} color="$red10">
+        <Text fontSize={12} color="$red10">
           {t('conversionError')}
         </Text>
       )}

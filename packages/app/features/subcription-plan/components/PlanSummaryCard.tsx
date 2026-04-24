@@ -8,7 +8,7 @@ import {
 import { SubscriptionPlanOption } from './PlanSelectionList'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'tamagui'
-import { formatToVND } from '@mezon-tutors/shared'
+import { formatCurrency } from '@mezon-tutors/shared'
 
 type PlanSummaryCardProps = {
   selectedPlan: SubscriptionPlanOption
@@ -95,7 +95,7 @@ export function PlanSummaryCard({ selectedPlan, onContinue }: PlanSummaryCardPro
         </Text>
         <XStack alignItems="baseline" gap="$1">
           <Text color={headingColor} fontSize={36} lineHeight={46} fontWeight="800">
-            {formatToVND(selectedPlan.monthlyPrice)}
+            {formatCurrency(selectedPlan.monthlyPrice, 'VND')}
           </Text>
           <Text color={mutedColor}>{t('perMonth')}</Text>
         </XStack>

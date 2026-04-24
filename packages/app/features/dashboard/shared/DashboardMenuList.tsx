@@ -66,9 +66,9 @@ export function DashboardMenuList({
         const content = (
           <Button
             onPress={() => onItemPress?.(item)}
-            borderWidth={active ? 1 : 0}
-            borderColor="$dashboardTutorSidebarItemActiveBorder"
-            backgroundColor={active ? '$dashboardTutorSidebarItemActiveBg' : 'transparent'}
+            borderWidth={1}
+            borderColor={active ? '$dashboardTutorSidebarItemActiveBorder' : 'rgba(59, 130, 246, 0.15)'}
+            backgroundColor={active ? '$dashboardTutorSidebarItemActiveBg' : 'rgba(59, 130, 246, 0.04)'}
             color={labelColor}
             paddingVertical={config.itemPaddingVertical}
             paddingHorizontal={config.itemPaddingHorizontal}
@@ -82,6 +82,9 @@ export function DashboardMenuList({
               backgroundColor: '$dashboardTutorSidebarItemHover',
               borderColor: '$dashboardTutorSidebarItemActiveBorder',
             }}
+            style={{
+              transition: 'all 0.2s ease',
+            }}
           >
             <Icon
               size={iconSize}
@@ -90,6 +93,7 @@ export function DashboardMenuList({
             <Text
               color={labelColor}
               fontWeight={active ? '700' : '500'}
+              fontSize={15}
             >
               {t(`sidebar.${item.labelKey}`)}
             </Text>
@@ -117,11 +121,6 @@ export function DashboardMenuList({
           </YStack>
         );
       })}
-
-      <YStack
-        marginTop="auto"
-        width="100%"
-      />
     </>
   );
 }

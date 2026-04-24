@@ -1,6 +1,6 @@
 import { Button, Card, Text, XStack, YStack } from '@mezon-tutors/app/ui'
 import { ArrowRightIcon, WalletIcon } from '@mezon-tutors/app/ui/icons'
-import { formatToVND } from '@mezon-tutors/shared'
+import { formatCurrency } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'tamagui'
 
@@ -132,7 +132,7 @@ export function PaymentMethodPanel({
           : isPayLoading
             ? t('processing')
             : total > 0
-              ? t('bookAndPay', { amount: formatToVND(total) })
+              ? t('bookAndPay', { amount: formatCurrency(total, 'VND') })
               : t('bookLesson')}
         {!isPayLoading ? <ArrowRightIcon size={16} color={onPrimary} /> : null}
       </Button>

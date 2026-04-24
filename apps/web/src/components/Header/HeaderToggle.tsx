@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { Button, Text, XStack, YStack } from '@mezon-tutors/app/ui'
 import { WorldIcon, ChevronDownIcon } from '@mezon-tutors/app/ui/icons'
-import { ECurrency } from '@mezon-tutors/shared'
+import { ECurrency, LOCALE_LABEL_KEYS } from '@mezon-tutors/shared'
 
-type HeaderCurrencyToggleProps = {
+type HeaderToggleProps = {
   currency: string
   locale: string
   onCurrencyChange: (currency: string) => void
@@ -14,18 +14,23 @@ type HeaderCurrencyToggleProps = {
   iconColor: string
 }
 
-export function HeaderCurrencyToggle({
+export function HeaderToggle({
   currency,
   locale,
   onCurrencyChange,
   onLocaleChange,
   iconColor,
-}: HeaderCurrencyToggleProps) {
+}: HeaderToggleProps) {
   const t = useTranslations('Home.CurrencyToggle')
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const displayText = `${locale === 'en' ? t('english') : t('vietnamese')}, ${currency}`
+  const localeLabels: Record<string, string> = {
+    en: t(LOCALE_LABEL_KEYS.en),
+    vi: t(LOCALE_LABEL_KEYS.vi),
+  }
+
+  const displayText = `${localeLabels[locale] || locale}, ${currency}`
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

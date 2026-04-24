@@ -1,5 +1,5 @@
 import { Button, Card, Input, Text, XStack, YStack } from '@mezon-tutors/app/ui'
-import { formatToVND } from '@mezon-tutors/shared'
+import { formatCurrency } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'tamagui'
 
@@ -32,13 +32,13 @@ export function OrderSummaryCard() {
         <XStack justifyContent="space-between">
           <Text color={mutedColor}>{t('selectedPlan')}</Text>
           <Text color={bodyColor} fontWeight="700">
-            {formatToVND(142000)}
+            {formatCurrency(142000, 'VND')}
           </Text>
         </XStack>
         <XStack justifyContent="space-between">
           <Text color={mutedColor}>{t('processingFee')}</Text>
           <Text color={bodyColor} fontWeight="700">
-            {formatToVND(2000)}
+            {formatCurrency(2000, 'VND')}
           </Text>
         </XStack>
       </YStack>
@@ -58,7 +58,7 @@ export function OrderSummaryCard() {
           </Text>
         </YStack>
         <Text color={accentColor} fontSize={32} lineHeight={38} fontWeight="800">
-          {formatToVND(144000)}
+          {formatCurrency(144000, 'VND')}
         </Text>
       </XStack>
 
