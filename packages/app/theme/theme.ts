@@ -96,6 +96,15 @@ export const themes = {
     myLessonsAvatarText: '#2A2D41',
     myLessonsHeaderTitle: '#1D2433',
     myLessonsHeaderDivider: '#E2E7F0',
+    
+    // ===== Select Dropdown =====
+    selectBackground: '#FFFFFF',
+    selectBorder: 'rgba(0, 0, 0, 0.08)',
+    selectBorderHover: 'rgba(59, 130, 246, 0.5)',
+    selectBorderFocus: 'rgba(59, 130, 246, 0.8)',
+    selectShadowHover: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+    selectShadowFocus: '0 0 0 3px rgba(59, 130, 246, 0.15)',
+    
     myLessonsPrimaryButton: '#1D66F2',
     myLessonsPrimaryButtonBorder: '#1D66F2',
     myLessonsPrimaryButtonHover: '#2F7CFF',
@@ -536,6 +545,15 @@ export const themes = {
     myLessonsAvatarText: '#2A2D41',
     myLessonsHeaderTitle: '#F2F6FF',
     myLessonsHeaderDivider: 'rgba(20, 44, 89, 0.9)',
+    
+    // ===== Select Dropdown =====
+    selectBackground: '#0C1629',
+    selectBorder: 'rgba(255, 255, 255, 0.1)',
+    selectBorderHover: 'rgba(59, 130, 246, 0.5)',
+    selectBorderFocus: 'rgba(59, 130, 246, 0.8)',
+    selectShadowHover: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+    selectShadowFocus: '0 0 0 3px rgba(59, 130, 246, 0.15)',
+    
     myLessonsPrimaryButton: '#1D66F2',
     myLessonsPrimaryButtonBorder: '#1D66F2',
     myLessonsPrimaryButtonHover: '#2F7CFF',

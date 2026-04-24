@@ -11,6 +11,35 @@ export const HEADER_LOCALES = [
   { code: 'vi', label: 'VI' },
 ] as const;
 
+export const LOCALE_LABEL_KEYS: Record<string, string> = {
+  en: 'english',
+  vi: 'vietnamese',
+} as const;
+
+export const SELECT_STYLES = {
+  base: {
+    width: '100%',
+    padding: '10px 12px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    border: '1.5px solid rgba(59, 130, 246, 0.2)',
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+    color: 'var(--color-myLessonsHeaderTitle)',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    outline: 'none',
+  },
+  focus: {
+    borderColor: 'rgba(59, 130, 246, 0.5)',
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+  },
+  blur: {
+    borderColor: 'rgba(59, 130, 246, 0.2)',
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+  },
+} as const;
+
 export const HEADER_CONFIG = {
   height: {
     desktop: 80,

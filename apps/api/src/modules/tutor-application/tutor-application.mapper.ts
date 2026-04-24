@@ -35,6 +35,7 @@ export class TutorApplicationMapper {
       motivate: profile.motivate,
       headline: profile.headline,
       pricePerHour: Number(profile.pricePerHour),
+      currency: profile.currency,
       isProfessional: profile.isProfessional,
       verificationStatus: parseEnum(
         profile.verificationStatus,

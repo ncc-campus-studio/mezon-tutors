@@ -6,6 +6,7 @@ export * from './types/auth';
 export * from './types/tutor-profile';
 export * from './types/my-lessons-api';
 export * from './types/trial-lesson-booking';
+export * from './types/currency';
 
 // Enums
 export * from './enums/verification-status';
@@ -36,8 +37,8 @@ export * from './constants/payment';
 export * from './constants/my-schedule';
 export * from './constants/my-lesson';
 export * from './constants/cloudinary';
-
 export * from './constants/review';
+export * from './constants/currency'
 
 // Utils
 export * from './utils/utils';

@@ -1,5 +1,5 @@
 import { Button, Card, Input, Text, XStack, YStack } from '@mezon-tutors/app/ui'
-import { formatToVND } from '@mezon-tutors/shared'
+import { formatCurrency } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'tamagui'
 
@@ -31,7 +31,7 @@ export function PaymentSummaryCard({ durationMinutes, total }: PaymentSummaryCar
         <XStack justifyContent="space-between" alignItems="center">
           <Text color={mutedColor}>{t('trialLesson', { durationMinutes })}</Text>
           <Text color={bodyColor} fontWeight="700">
-            {formatToVND(total)}
+            {formatCurrency(total, 'VND')}
           </Text>
         </XStack>
       </YStack>
@@ -46,7 +46,7 @@ export function PaymentSummaryCard({ durationMinutes, total }: PaymentSummaryCar
           {t('total')}
         </Text>
         <Text color={accentColor} size="xl" fontWeight="800">
-          {formatToVND(total)}
+          {formatCurrency(total, 'VND')}
         </Text>
       </XStack>
 

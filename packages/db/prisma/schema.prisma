@@ -83,6 +83,12 @@ enum EWithdrawalStatus {
   REJECTED
 }
 
+enum ECurrency {
+  USD
+  VND
+  PHP
+}
+
 /// Application users table mapped to `users`
 model User {
   id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -119,6 +125,7 @@ model TutorProfile {
   motivate           String             @default("")
   headline           String             @default("")
   pricePerHour       BigInt             @map("price_per_hour")
+  currency           ECurrency          @default(USD)
   isProfessional     Boolean            @default(false) @map("is_professional")
   verificationStatus VerificationStatus @map("verification_status")
   totalLessonsTaught Int                @default(0) @map("total_lessons_taught")
@@ -249,6 +256,7 @@ model TrialLessonBooking {
   grossAmount         BigInt              @map("gross_amount")
   platformFee         BigInt              @map("platform_fee")
   tutorAmount         BigInt              @map("tutor_amount")
+  currency            ECurrency           @default(USD)
   paymentStatus    EPaymentStatus  @default(PENDING) @map("payment_status")
   idempotencyKey   String?         @unique @map("idempotency_key")
   payosOrderCode   String?         @map("payos_order_code") @db.VarChar(50) @unique

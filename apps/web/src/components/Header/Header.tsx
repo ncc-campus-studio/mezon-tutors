@@ -13,10 +13,12 @@ import { XStack, Text, Button } from '@mezon-tutors/app/ui';
 import { LogoIcon, MenuIcon } from '@mezon-tutors/app/ui/icons';
 import { themes } from '@mezon-tutors/app/theme/theme';
 import { useThemeName, useMedia } from 'tamagui';
-import { HeaderLocaleToggle } from './HeaderLocaleToggle';
 import { HeaderThemeToggle } from './HeaderThemeToggle';
+import { HeaderToggle } from './HeaderToggle';
 import { HeaderNavLink } from './HeaderNavLink';
 import { DashboardMobileDrawer } from '@mezon-tutors/app/features/dashboard/mobile-drawer/DashboardMobileDrawer';
+import { useCurrency } from '@mezon-tutors/app/hooks/useCurrency';
+import type { Locale } from '@mezon-tutors/shared/i18n/config';
 
 export default function Header() {
   const locale = useLocale();
@@ -34,6 +36,7 @@ export default function Header() {
   const themeMode: 'light' | 'dark' = themeName === 'dark' ? 'dark' : 'light';
   const headerTheme = themeMode === 'dark' ? themes.dark : themes.light;
   const dashboardTheme = themeName === 'dark' ? themes.dark : themes.light;
+  const { currency, switchCurrency } = useCurrency();
 
   const isDashboard = pathname.startsWith('/dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -46,7 +49,7 @@ export default function Header() {
   }, [themeMode])
 
   const switchLocale = useCallback(
-    (nextLocale: 'en' | 'vi') => {
+    (nextLocale: Locale) => {
       if (nextLocale === locale) return
 
       const isHttps = window.location.protocol === 'https:'
@@ -60,13 +63,27 @@ export default function Header() {
     [locale, pathname, router, searchParams]
   )
 
-  const toggleLocale = useCallback(() => {
-    const nextLocale = locale === 'en' ? 'vi' : 'en'
-    void switchLocale(nextLocale)
-  }, [locale, switchLocale])
+  const handleLocaleChange = useCallback(
+    (nextLocale: string) => {
+      switchLocale(nextLocale as Locale)
+    },
+    [switchLocale]
+  )
+
+  const handleCurrencyChange = useCallback(
+    (newCurrency: string) => {
+      switchCurrency(newCurrency)
+      window.location.reload()
+    },
+    [switchCurrency]
+  )
 
   const goToDashboard = useCallback(() => {
     router.push(ROUTES.DASHBOARD.INDEX)
+  }, [router])
+
+  const goToHome = useCallback(() => {
+    router.push(ROUTES.HOME.index)
   }, [router])
 
   const handleMenuPress = useCallback(() => {
@@ -122,7 +139,7 @@ export default function Header() {
           $xs={{ gap: 6 }}
           $sm={{ gap: 8 }}
         >
-          {isDashboard && isMobile ? (
+          {isMobile ? (
             <XStack
               alignItems="center"
               gap={HEADER_CONFIG.menu.dashboardGap}
@@ -141,13 +158,19 @@ export default function Header() {
                   color={headerTheme.webHeaderToggleText || '#111827'}
                 />
               </Button>
-              <Text
-                color="$myLessonsBrandText"
-                fontSize={HEADER_CONFIG.logo.mobileDashboardFontSize}
-                fontWeight="700"
+              <Button
+                chromeless
+                onPress={() => router.push(ROUTES.HOME.index)}
+                padding={0}
               >
-                TutorMatch
-              </Text>
+                <Text
+                  color="$myLessonsBrandText"
+                  fontSize={HEADER_CONFIG.logo.mobileDashboardFontSize}
+                  fontWeight="700"
+                >
+                  TutorMatch
+                </Text>
+              </Button>
             </XStack>
           ) : (
             <Link
@@ -252,16 +275,25 @@ export default function Header() {
         >
           {!isAuthenticated ? <LoginButton /> : null}
 
-          <HeaderLocaleToggle
-            locale={locale}
-            onToggle={toggleLocale}
-            iconColor={headerTheme.webHeaderToggleText}
-          />
+          <XStack
+            display="flex"
+            $xs={{ display: 'none' }}
+            $sm={{ display: 'none' }}
+            gap={10}
+          >
+            <HeaderToggle
+              currency={currency}
+              locale={locale}
+              onCurrencyChange={handleCurrencyChange}
+              onLocaleChange={handleLocaleChange}
+              iconColor={headerTheme.webHeaderToggleText}
+            />
 
-          <HeaderThemeToggle
-            isDark={themeMode === 'dark'}
-            onToggleAction={toggleTheme}
-          />
+            <HeaderThemeToggle
+              isDark={themeMode === 'dark'}
+              onToggleAction={toggleTheme}
+            />
+          </XStack>
 
           {isAuthenticated && user?.avatar ? (
             <XStack
@@ -294,7 +326,7 @@ export default function Header() {
       </XStack>
 
       <DashboardMobileDrawer
-        isOpen={isDashboard && isMobile && isSidebarOpen}
+        isOpen={isMobile && isSidebarOpen}
         onClose={handleCloseSidebar}
         items={visibleMenuItems}
         pathname={pathname}
@@ -302,7 +334,15 @@ export default function Header() {
         inactiveIconColor={dashboardTheme.dashboardTutorTextSecondary || '#6B7280'}
         logoutIconColor={dashboardTheme.myLessonsSidebarLogoutIcon || '#EF4444'}
         onLogout={handleLogout}
+        onNavigateHome={goToHome}
         t={tDashboard}
+        currency={currency}
+        locale={locale}
+        isDarkMode={themeMode === 'dark'}
+        isAuthenticated={isAuthenticated}
+        onCurrencyChange={handleCurrencyChange}
+        onLocaleChange={handleLocaleChange}
+        onThemeToggle={toggleTheme}
       />
     </>
   );

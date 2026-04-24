@@ -8,6 +8,8 @@ export * from './CameraIcon';
 export * from './CardIcon';
 export * from './BookingRequestIcon';
 export * from './CheckIcon';
+export * from './ChevronDownIcon';
+export * from './ChevronUpIcon';
 export * from './ChevronLeftIcon';
 export * from './ChevronRightIcon';
 export * from './CircleCheckIcon';
@@ -44,6 +46,7 @@ export * from './EyeIcon';
 export * from './GridIcon';
 export * from './GrowthOutlineIcon';
 export * from './SearchIcon';
+export * from './SettingIcon';
 export * from './TimerIcon';
 export * from './TrendDownIcon';
 export * from './TrendUpIcon';
@@ -73,6 +76,7 @@ export * from './WatchDemoIcon'
 export * from './TutorVideoCardIcon'
 export * from './VercelIcon'
 export * from './MoonIcon'
+export * from './CurrencyIcon'
 
 // Types
 export * from './PersonalIcon';

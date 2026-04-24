@@ -121,6 +121,7 @@ export type TutorProfile = {
   motivate: string
   headline: string
   pricePerHour: number
+  currency: string
   isProfessional: boolean
   verificationStatus: VerificationStatus
   totalLessonsTaught: number
@@ -189,6 +190,7 @@ export interface VerifiedTutorProfileDto {
   motivate: string
   headline: string
   pricePerHour: number
+  currency: string
   isProfessional: boolean
   totalLessonsTaught: number
   totalStudents: number

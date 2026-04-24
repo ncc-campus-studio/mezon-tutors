@@ -52,6 +52,16 @@
         "title": "Nhắn tin tức thời",
         "description": "Trao đổi nhanh với gia sư để nhận phản hồi và hỗ trợ học tập."
       }
+    },
+    "CurrencyToggle": {
+      "settings": "Cài đặt",
+      "language": "Ngôn ngữ",
+      "currency": "Tiền tệ",
+      "theme": "Giao diện",
+      "english": "Tiếng Anh",
+      "vietnamese": "Tiếng Việt",
+      "lightMode": "Sáng",
+      "darkMode": "Tối"
     }
   }
 }

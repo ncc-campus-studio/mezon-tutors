@@ -40,5 +40,8 @@
       "terms": "Terms",
       "privacy": "Privacy"
     }
+  },
+  "Currency": {
+    "conversionError": "Conversion unavailable, showing original price"
   }
 }

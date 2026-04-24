@@ -1,22 +1,21 @@
 import { YStack, XStack, Select, Slider, Text } from '@mezon-tutors/app/ui'
-import { ECountry, ESubject } from '@mezon-tutors/shared'
+import { ECountry, ESubject, PRICE_FILTER_RANGE, formatCurrency } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMedia } from 'tamagui'
+import { useCurrency } from '@mezon-tutors/app/hooks/useCurrency'
 
 type TutorsFilterProps = {
   subject: ESubject
   country: ECountry
-  pricePerLesson: string
   onSubjectChange: (value: ESubject) => void
   onCountryChange: (value: ECountry) => void
-  onPricePerLessonChange: (value: string) => void
+  onPricePerLessonChange: (min: number, max: number) => void
 }
 
 export function TutorsFilter({
   subject,
   country,
-  pricePerLesson,
   onSubjectChange,
   onCountryChange,
   onPricePerLessonChange,
@@ -27,28 +26,33 @@ export function TutorsFilter({
   const tSubject = useTranslations('Tutors.Filter.Subject')
   const tCountry = useTranslations('Tutors.Filter.Country')
   const isCompact = media.md || media.sm || media.xs
+  const { currency, convert } = useCurrency()
 
-  const parsedPriceRange = useMemo(() => {
-    if (!pricePerLesson) return null
-    const [minStr, maxStr] = String(pricePerLesson).split('_')
-    const min = Number(minStr)
-    const max = Number(maxStr)
-    if (!Number.isFinite(min) || !Number.isFinite(max)) return null
-    return [min, max] as number[]
-  }, [pricePerLesson])
-
-  const [pricePerLessonValue, setPricePerLessonValue] = useState<number[]>(
-    () => parsedPriceRange ?? [5, 50]
-  )
+  const [convertedMin, setConvertedMin] = useState<number>(PRICE_FILTER_RANGE.min)
+  const [convertedMax, setConvertedMax] = useState<number>(PRICE_FILTER_RANGE.max)
+  const [sliderStep, setSliderStep] = useState<number>(1)
+  const [pricePerLessonValue, setPricePerLessonValue] = useState<number[]>([PRICE_FILTER_RANGE.min, PRICE_FILTER_RANGE.max])
 
   useEffect(() => {
-    if (!parsedPriceRange) return
-    setPricePerLessonValue(parsedPriceRange)
-  }, [parsedPriceRange])
+    const convertPrices = async () => {
+      const minResult = await convert(PRICE_FILTER_RANGE.min, PRICE_FILTER_RANGE.currency)
+      const maxResult = await convert(PRICE_FILTER_RANGE.max, PRICE_FILTER_RANGE.currency)
+      const min = Math.floor(minResult.convertedAmount)
+      const max = Math.ceil(maxResult.convertedAmount)
+      setConvertedMin(min)
+      setConvertedMax(max)
+      setPricePerLessonValue([min, max])
+      
+      const range = max - min
+      const step = range > 1000 ? 1000 : range > 100 ? 100 : range > 10 ? 1 : 0.1
+      setSliderStep(step)
+    }
+    convertPrices()
+  }, [currency, convert])
 
   const pricePerLessonValueString = useMemo(
-    () => `$${pricePerLessonValue[0]} - $${pricePerLessonValue[1]}`,
-    [pricePerLessonValue]
+    () => `${formatCurrency(pricePerLessonValue[0], currency)} - ${formatCurrency(pricePerLessonValue[1], currency)}`,
+    [pricePerLessonValue, currency]
   )
 
   const handlePricePerLessonChange = (value: number[]) => {
@@ -56,7 +60,7 @@ export function TutorsFilter({
 
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
-      onPricePerLessonChange(value.join('_'));
+      onPricePerLessonChange(value[0], value[1]);
     }, 350)
   };
 
@@ -91,13 +95,13 @@ export function TutorsFilter({
           fontWeight="700"
           textAlign="center"
         >
-          ${pricePerLessonValue[0]} - ${pricePerLessonValue[1]}
+          {formatCurrency(pricePerLessonValue[0], currency)} - {formatCurrency(pricePerLessonValue[1], currency)}
         </Text>
         <Slider
           value={pricePerLessonValue}
-          min={5}
-          max={50}
-          step={1}
+          min={convertedMin}
+          max={convertedMax}
+          step={sliderStep}
           onValueChange={handlePricePerLessonChange}
         />
       </YStack>
@@ -153,13 +157,13 @@ export function TutorsFilter({
                   fontWeight="700"
                   textAlign="center"
                 >
-                  ${pricePerLessonValue[0]} - ${pricePerLessonValue[1]}
+                  {formatCurrency(pricePerLessonValue[0], currency)} - {formatCurrency(pricePerLessonValue[1], currency)}
                 </Text>
                 <Slider
                   value={pricePerLessonValue}
-                  min={5}
-                  max={50}
-                  step={1}
+                  min={convertedMin}
+                  max={convertedMax}
+                  step={sliderStep}
                   onValueChange={handlePricePerLessonChange}
                 />
               </YStack>
