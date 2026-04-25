@@ -12,6 +12,7 @@
     "web:extract": "DISABLE_EXTRACTION=false yarn workspace @mezon-tutors/web dev",
     "web:prod": "yarn workspace @mezon-tutors/web build",
     "web:prod:serve": "yarn workspace @mezon-tutors/web serve",
+    "vercel:web": "npx vercel",
     "api": "yarn build && cd apps/api && yarn dev",
     "api:prod": "yarn workspace @mezon-tutors/api build",
     "r2": "cd apps/r2-worker && yarn dev",

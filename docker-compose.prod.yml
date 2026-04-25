@@ -23,12 +23,33 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "${API_PORT:-4000}:4000"
+      - "127.0.0.1:${API_PORT:-4000}:4000"
     depends_on:
       postgres:
         condition: service_healthy
     env_file:
       - .env.production
 
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - caddy
+      - reverse-proxy
+      - --from
+      - ${API_PUBLIC_HOST:-api.mezonly.site}
+      - --to
+      - api:4000
+    depends_on:
+      - api
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:

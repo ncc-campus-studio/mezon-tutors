@@ -116,7 +116,6 @@ export function AvailabilityModal({
             </YStack>
           ) : (
             <AvailabilityEditor
-              mode="edit"
               initialData={initialData}
               onSave={handleSave}
               showActions={false}

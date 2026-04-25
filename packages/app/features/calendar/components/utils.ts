@@ -118,7 +118,7 @@ export class CalendarLayoutEngine {
     let closestLowerHour = -1;
     let closestLowerY = 0;
 
-    for (const [hour, y] of this.hourYs.entries()) {
+    for (const [hour, y] of Array.from(this.hourYs.entries())) {
       if (hour <= targetHour && hour > closestLowerHour) {
         closestLowerHour = hour;
         closestLowerY = y;
