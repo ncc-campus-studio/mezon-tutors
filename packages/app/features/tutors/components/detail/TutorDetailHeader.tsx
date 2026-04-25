@@ -1,8 +1,8 @@
 import { Chip, ChipText, Text, XStack, YStack } from '@mezon-tutors/app/ui'
-import { StarOutlineIcon, WorldIcon } from '@mezon-tutors/app/ui/icons'
+import { StarOutlineIcon, WorldIcon, GraduationCapIcon } from '@mezon-tutors/app/ui/icons'
 import { TutorAboutDto, TUTOR_DETAIL_TAB_KEYS } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
-import { Image, useMedia } from 'tamagui'
+import { Image, useMedia, useTheme } from 'tamagui'
 import { TutorDetailTab } from './types'
 
 type TutorDetailHeaderProps = {
@@ -14,7 +14,11 @@ type TutorDetailHeaderProps = {
 export function TutorDetailHeader({ tutor, activeTab, onTabChange }: TutorDetailHeaderProps) {
   const t = useTranslations('Tutors.Detail')
   const media = useMedia()
+  const theme = useTheme()
   const isStack = media.xs
+
+  const iconColor = theme.colorMuted?.get() ?? '#6B7280'
+  const starColor = theme.tutorsDetailStarGold?.get() ?? '#F5C542'
 
   return (
     <YStack
@@ -59,17 +63,20 @@ export function TutorDetailHeader({ tutor, activeTab, onTabChange }: TutorDetail
             )}
           </XStack>
 
-          <Text color="$tutorsDetailSecondaryText">
-            {tutor.subject} • {tutor.headline || t('defaultHeadline')}
-          </Text>
+          <XStack alignItems="center" gap="$1.5">
+            <GraduationCapIcon size={14} color={iconColor} />
+            <Text color="$tutorsDetailSecondaryText">
+              {tutor.subject} • {tutor.headline || t('defaultHeadline')}
+            </Text>
+          </XStack>
 
           <XStack alignItems="center" gap="$4" flexWrap="wrap">
             <XStack alignItems="center" gap="$1.5">
-              <WorldIcon size={14} color="$tutorsDetailMetaIcon" />
+              <WorldIcon size={14} color={iconColor} />
               <Text color="$tutorsDetailSecondaryText">{tutor.country}</Text>
             </XStack>
             <XStack alignItems="center" gap="$1.5">
-              <StarOutlineIcon size={14} color="$tutorsDetailAccentText" />
+              <StarOutlineIcon size={14} color={starColor} />
               <Text color="$tutorsDetailPrimaryText" fontWeight="700">
                 {tutor.ratingAverage.toFixed(2)}
               </Text>
@@ -87,17 +94,26 @@ export function TutorDetailHeader({ tutor, activeTab, onTabChange }: TutorDetail
         paddingHorizontal="$4"
         paddingVertical="$2.5"
         gap="$4"
-        flexWrap="wrap"
+        overflow="scroll"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+        }}
+        $gtSm={{
+          overflow: 'visible',
+        }}
       >
         {TUTOR_DETAIL_TAB_KEYS.map((tab) => {
           const isActive = tab === activeTab
           return (
-            <YStack key={tab} gap="$1">
+            <YStack key={tab} gap="$1" flexShrink={0}>
               <Text
                 cursor="pointer"
                 color={isActive ? '$tutorsDetailAccentText' : '$tutorsDetailSecondaryText'}
                 fontWeight={isActive ? '700' : '500'}
                 onPress={() => onTabChange(tab)}
+                whiteSpace="nowrap"
               >
                 {t(`tabs.${tab}`)}
               </Text>

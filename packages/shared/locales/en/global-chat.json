@@ -1,0 +1,70 @@
+{
+  "title": "Messages",
+  "chatButton": "Chat",
+  "openMezon": "Open Mezon",
+  "listTitle": "Direct Messages",
+  "emptyList": "You do not have any conversations yet.",
+  "emptyConversation": "Select a conversation to start chatting.",
+  "inputPlaceholder": "Type a message...",
+  "send": "Send",
+  "sending": "Sending...",
+  "restoreError": "Cannot restore chat session. Please log in again.",
+  "noticeTitle": "CHAT GUIDANCE",
+  "noticePrefix": "To access your permanent chat logs and transaction history, please refer to ",
+  "noticeLink": "Mezon.",
+  "noticeOpenChatPrefix": "Click ",
+  "noticeOpenChatLink": "here",
+  "noticeOpenChatSuffix": " to open this chat in Mezon.",
+  "fakeSets": {
+    "set1": [
+      "Hi {peerName}, I want to book a trial lesson this week.",
+      "Sure, I am available on Thursday and Saturday evening. Which time works for you?",
+      "Thursday at 8 PM works for me. I will book it now."
+    ],
+    "set2": [
+      "Do you teach beginner communication classes, {peerName}?",
+      "Yes, I have a 6-session roadmap for beginners.",
+      "Great, I would like to start this week."
+    ],
+    "set3": [
+      "I need to improve pronunciation quickly. Can you help?",
+      "Yes, I can correct pronunciation live sentence by sentence.",
+      "Perfect, I will send my learning goals before class."
+    ],
+    "set4": [
+      "What teaching materials do you usually use?",
+      "I combine custom slides with practical exercises in every session.",
+      "Sounds good, that matches what I need."
+    ],
+    "set5": [
+      "Can I book lessons on weekends?",
+      "Yes, I still have Saturday morning slots available.",
+      "Nice, I will book Saturday at 9 AM."
+    ],
+    "set6": [
+      "I want to prepare for job interviews. Do you have experience with that?",
+      "Yes, I have coached many learners for interviews.",
+      "Awesome, I want to start this week."
+    ],
+    "set7": [
+      "Is your fee charged hourly or by package?",
+      "It is hourly, and there are discounts for long-term plans.",
+      "Then I want to start with a 10-hour package."
+    ],
+    "set8": [
+      "Do you assign homework after each class?",
+      "Yes, I always give short review tasks after every lesson.",
+      "Great, I really need that."
+    ],
+    "set9": [
+      "My goal is IELTS 6.5 in 4 months.",
+      "That is achievable if we study consistently 3 sessions per week.",
+      "Okay, I will arrange my schedule based on that plan."
+    ],
+    "set10": [
+      "Can you explain in both English and Vietnamese?",
+      "Sure, I can teach bilingually so it is easier to follow.",
+      "Thanks {peerName}, that approach fits me well."
+    ]
+  }
+}

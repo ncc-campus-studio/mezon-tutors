@@ -354,6 +354,11 @@ export class TutorProfileService {
         where,
         include: {
           languages: true,
+          user: {
+            select: {
+              mezonUserId: true,
+            },
+          },
         },
         skip: (page - 1) * limit,
         take: limit,
@@ -387,6 +392,11 @@ export class TutorProfileService {
       where: { id },
       include: {
         languages: true,
+        user: {
+          select: {
+            mezonUserId: true,
+          },
+        },
       },
     })
 

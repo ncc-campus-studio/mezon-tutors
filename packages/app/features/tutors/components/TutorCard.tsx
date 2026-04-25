@@ -4,7 +4,16 @@ import {
   ROUTES,
   VerifiedTutorProfileDto,
 } from '@mezon-tutors/shared'
-import { Button, Card, Chip, ChipText, Paragraph, Text, XStack, YStack } from '@mezon-tutors/app/ui'
+import {
+  Button,
+  Card,
+  Chip,
+  ChipText,
+  Paragraph,
+  Text,
+  XStack,
+  YStack,
+} from '@mezon-tutors/app/ui'
 import {
   GraduationCapIcon,
   LanguageIcon,
@@ -16,10 +25,14 @@ import {
   type TrialBookingPayload,
   type TrialResumePaymentPayload,
 } from '@mezon-tutors/app/features/tutors/components/TrialBookingModal'
+import { TutorMessageModal } from '@mezon-tutors/app/features/tutors/components/TutorMessageModal'
+import { userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { H2, Image, Separator, useMedia, useTheme } from 'tamagui'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'solito/navigation'
 import { useState } from 'react'
+import { useAtomValue } from 'jotai'
+import { GestureResponderEvent, useWindowDimensions } from 'react-native'
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -43,15 +56,21 @@ export function TutorCard({
   const t = useTranslations('Tutors.TutorCard')
   const media = useMedia()
   const theme = useTheme()
+  const { width: viewportWidth } = useWindowDimensions()
   const router = useRouter()
+  const currentUser = useAtomValue(userAtom)
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false)
-
-  const isVertical = media.sm
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const isViewportInRange1020To1248 = viewportWidth >= 1000 && viewportWidth <= 1248
+  const isVertical = media.sm || isViewportInRange1020To1248
   const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280'
 
   const proficiencyTags = Array.from(
     new Set(tutor.languages.map((language) => language.proficiency).filter(Boolean))
   )
+  const studentId = currentUser?.id ?? ''
+  const studentMezonUserId = currentUser?.mezonUserId
+  const tutorId = tutor.userId
 
   const handleCardClick = () => {
     router.push(ROUTES.TUTOR.DETAIL(tutor.id))
@@ -82,6 +101,11 @@ export function TutorCard({
     }
     setIsTrialModalOpen(false)
     router.push(`${ROUTES.CHECKOUT.TRIAL_LESSON}?${sp.toString()}`)
+  }
+
+  const handleOpenMessageModal = (e: GestureResponderEvent) => {
+    e.stopPropagation()
+    setIsMessageModalOpen(true)
   }
 
   return (
@@ -245,7 +269,7 @@ export function TutorCard({
               >
                 {t('bookTrial')}
               </Button>
-              <Button variant="outline" width="100%" size="sm">
+              <Button variant="outline" width="100%" size="sm" onPress={handleOpenMessageModal}>
                 {t('sendMessage')}
               </Button>
             </YStack>
@@ -265,6 +289,16 @@ export function TutorCard({
         }}
         onConfirm={handleConfirmBooking}
         onResumePayment={handleResumePayment}
+      />
+
+      <TutorMessageModal
+        open={isMessageModalOpen}
+        tutorFirstName={tutor.firstName}
+        studentId={studentId}
+        studentMezonUserId={studentMezonUserId}
+        tutorId={tutorId}
+        tutorMezonUserId={tutor.mezonUserId}
+        onOpenChange={setIsMessageModalOpen}
       />
     </>
   )

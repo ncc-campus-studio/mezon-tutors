@@ -1,0 +1,1 @@
+export const MEZON_LIGHT_SERVER_KEY = "HTTP3m3zonPr0dkey";
