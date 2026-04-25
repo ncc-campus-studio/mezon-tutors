@@ -17,7 +17,8 @@ type MessageLoaderConfig = {
     | 'Dashboard'
     | 'TrialLessonCheckout'
     | 'SubscriptionPlan'
-    | 'SubscriptionCheckout';
+    | 'SubscriptionCheckout'
+    | 'GlobalChat';
   file: string;
   pick?: (payload: Record<string, unknown>) => unknown;
 };
@@ -48,6 +49,7 @@ const MESSAGE_LOADERS: MessageLoaderConfig[] = [
     file: 'subscription-checkout',
     pick: (payload) => payload.SubscriptionCheckout,
   },
+  { messageKey: 'GlobalChat', file: 'global-chat' },
 ];
 
 export default getRequestConfig(async ({ requestLocale }) => {

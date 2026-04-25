@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import './globals.css';
 import { AppProviders } from './providers';
 import AuthInitializer from '@mezon-tutors/app/components/AuthInitializer';
+import GlobalChatBubble from '@mezon-tutors/app/components/chat/GlobalChatBubble';
 import { DEFAULT_THEME } from '@mezon-tutors/app';
 import { getLocale } from 'next-intl/server';
 import { hasLocale } from 'next-intl';
@@ -62,6 +63,7 @@ export default async function RootLayout({
             <Header />
             {children}
             <Footer />
+            <GlobalChatBubble />
           </AppProviders>
         </NextIntlClientProvider>
       </body>

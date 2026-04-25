@@ -51,6 +51,7 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
       if (payload.type === 'MEZON_AUTH_SUCCESS') {
         const accessToken = payload.data?.accessToken;
         const loginUser = payload.data?.user;
+        const idToken = payload.data?.idToken;
 
         if (!accessToken) {
           console.warn('[OAUTH] SUCCESS but missing accessToken');
@@ -59,12 +60,12 @@ export function LoginButton({ label, redirectTo }: LoginButtonProps) {
 
         void tokenStorage.setAccessToken(accessToken);
         if (loginUser?.mezonUserId) {
-          setUser(toAuthUser(loginUser));
+          setUser(toAuthUser({ ...loginUser, idToken }));
         } else {
           void authService
             .getMe()
             .then((data) => {
-              setUser(toAuthUser(data));
+              setUser(toAuthUser({ ...data, idToken }));
             })
             .catch(() => {
               void tokenStorage.clearTokens();

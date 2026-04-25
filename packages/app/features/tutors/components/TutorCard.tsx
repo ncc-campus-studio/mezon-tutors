@@ -3,8 +3,17 @@ import {
   formatToVND,
   ROUTES,
   VerifiedTutorProfileDto,
-} from '@mezon-tutors/shared';
-import { Button, Card, Chip, ChipText, Paragraph, Text, XStack, YStack } from '@mezon-tutors/app/ui'
+} from '@mezon-tutors/shared'
+import {
+  Button,
+  Card,
+  Chip,
+  ChipText,
+  Paragraph,
+  Text,
+  XStack,
+  YStack,
+} from '@mezon-tutors/app/ui'
 import {
   GraduationCapIcon,
   LanguageIcon,
@@ -16,10 +25,14 @@ import {
   type TrialBookingPayload,
   type TrialResumePaymentPayload,
 } from '@mezon-tutors/app/features/tutors/components/TrialBookingModal'
+import { TutorMessageModal } from '@mezon-tutors/app/features/tutors/components/TutorMessageModal'
+import { userAtom } from '@mezon-tutors/app/store/auth.atom'
 import { H2, Image, Separator, useMedia, useTheme } from 'tamagui'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'solito/navigation'
 import { useState } from 'react'
+import { useAtomValue } from 'jotai'
+import { GestureResponderEvent, useWindowDimensions } from 'react-native'
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -35,35 +48,33 @@ export function TutorCard({
   tutor,
   onHover,
   isActive,
-  disableNavigationUntil,
 }: {
-  tutor: VerifiedTutorProfileDto;
-  onHover?: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void;
-  isActive?: boolean;
-  disableNavigationUntil?: number;
+  tutor: VerifiedTutorProfileDto
+  onHover?: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void
+  isActive?: boolean
 }) {
   const t = useTranslations('Tutors.TutorCard')
   const media = useMedia()
   const theme = useTheme()
+  const { width: viewportWidth } = useWindowDimensions()
   const router = useRouter()
+  const currentUser = useAtomValue(userAtom)
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false)
-
-  const isCompact = media.md || media.sm || media.xs;
-  const isMobile = media.sm || media.xs;
-  const isVeryNarrow = media.xs;
-  const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280';
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const isViewportInRange1020To1248 = viewportWidth >= 1000 && viewportWidth <= 1248
+  const isVertical = media.sm || isViewportInRange1020To1248
+  const mutedColor = theme.colorMuted?.get() ?? theme.appTextMuted?.get() ?? '#6B7280'
 
   const proficiencyTags = Array.from(
     new Set(tutor.languages.map((language) => language.proficiency).filter(Boolean))
   )
+  const studentId = currentUser?.id ?? ''
+  const studentMezonUserId = currentUser?.mezonUserId
+  const tutorId = tutor.userId
 
   const handleCardClick = () => {
-    if (disableNavigationUntil && Date.now() < disableNavigationUntil) {
-      return;
-    }
-
-    router.push(ROUTES.TUTOR.DETAIL(tutor.id));
-  };
+    router.push(ROUTES.TUTOR.DETAIL(tutor.id))
+  }
 
   const handleBookTrialClick = () => {
     setIsTrialModalOpen(true)
@@ -92,6 +103,11 @@ export function TutorCard({
     router.push(`${ROUTES.CHECKOUT.TRIAL_LESSON}?${sp.toString()}`)
   }
 
+  const handleOpenMessageModal = (e: GestureResponderEvent) => {
+    e.stopPropagation()
+    setIsMessageModalOpen(true)
+  }
+
   return (
     <>
       <Card
@@ -102,393 +118,163 @@ export function TutorCard({
         overflow="hidden"
         onPress={handleCardClick}
         onMouseEnter={(e) => onHover?.(tutor, e.currentTarget as unknown as HTMLElement)}
-        padding={isMobile ? '$3' : '$4'}
       >
-        <YStack
-          gap="$2"
+        <XStack
+          gap="$4"
+          alignItems="flex-start"
+          flexDirection={isVertical ? 'column' : 'row'}
           width="100%"
+          minWidth={0}
         >
-          <XStack
-            gap="$3"
-            alignItems="flex-start"
-            width="100%"
-          >
-            {isMobile ? (
-              <>
-                <Image
-                  src={tutor.avatar}
-                  width={85}
-                  height={85}
-                  objectFit="cover"
-                  aspectRatio={1}
-                  borderRadius={8}
-                  flexShrink={0}
-                />
-                <YStack
-                  flex={1}
-                  gap="$1.5"
-                  minWidth={0}
-                >
-                  <XStack
-                    alignItems="center"
-                    gap="$1.5"
-                    flexWrap="wrap"
-                    minWidth={0}
-                  >
-                    <H2
-                      size="$4"
-                      fontWeight="700"
-                      numberOfLines={1}
-                      lineHeight={20}
-                    >
-                      {tutor.firstName} {tutor.lastName}
-                    </H2>
-                    {tutor.isProfessional && (
-                      <Chip
-                        tone="primary"
-                        size="sm"
-                        paddingVertical={3}
-                        paddingHorizontal={10}
-                      >
-                        <ChipText
-                          tone="primary"
-                          fontSize={11}
-                        >
-                          {t('professional')}
-                        </ChipText>
-                      </Chip>
-                    )}
-                  </XStack>
-
-                  <XStack
-                    alignItems="baseline"
-                    gap="$1"
-                  >
-                    <Text
-                      size="lg"
-                      fontWeight="700"
-                      lineHeight={18}
-                    >
-                      {formatToVND(tutor.pricePerHour)}
+          <XStack gap="$4" minWidth={0} flexShrink={isVertical ? 1 : 0}>
+            <Image
+              src={tutor.avatar}
+              width={isVertical ? 80 : 150}
+              height={isVertical ? 80 : 150}
+              objectFit="cover"
+              aspectRatio={1}
+              borderRadius={8}
+              maxWidth="100%"
+              flexShrink={0}
+            />
+            {isVertical && (
+              <YStack alignItems="flex-start" gap="$2" flexWrap="wrap" flex={1} minWidth={0}>
+                <H2 size="$5" fontWeight="700" maxWidth="100%">
+                  {tutor.firstName} {tutor.lastName}
+                </H2>
+                {tutor.isProfessional && (
+                  <Chip tone="primary">
+                    <ChipText tone="primary">{t('professional')}</ChipText>
+                  </Chip>
+                )}
+                <XStack alignItems="center" gap="$6" flexWrap="wrap" minWidth={0}>
+                  <XStack alignItems="center" gap="$1" flexShrink={0}>
+                    <StarOutlineIcon />
+                    <Text size="xl" fontWeight="700" flexShrink={0}>
+                      {tutor.ratingAverage.toFixed(2)}
                     </Text>
-                    <Text
-                      variant="muted"
-                      fontSize={11}
-                      lineHeight={16}
-                    >
-                      {t('perLesson')}
-                    </Text>
-                  </XStack>
-
-                  <XStack
-                    alignItems="center"
-                    gap="$1"
-                    minWidth={0}
-                  >
-                    <StarOutlineIcon size={14} />
-                    <Text
-                      size="md"
-                      fontWeight="700"
-                      lineHeight={16}
-                    >
-                      {tutor.ratingAverage.toFixed(1)}
-                    </Text>
-                    <Text
-                      variant="muted"
-                      numberOfLines={1}
-                      flexShrink={1}
-                      fontSize={11}
-                      lineHeight={16}
-                    >
+                    <Text variant="muted" flexShrink={0} whiteSpace="nowrap">
                       {t('reviews', { count: tutor.ratingCount })}
                     </Text>
                   </XStack>
-
-                  <XStack
-                    alignItems="center"
-                    gap="$1.5"
-                    minWidth={0}
-                    flexShrink={1}
-                  >
-                    <YStack flexShrink={0}>
-                      <GraduationCapIcon
-                        color={mutedColor}
-                        size={13}
-                      />
-                    </YStack>
-                    <Text
-                      variant="muted"
-                      flexShrink={1}
-                      fontSize={11}
-                      numberOfLines={1}
-                      lineHeight={16}
-                    >
-                      {tutor.subject}
+                  <XStack alignItems="baseline" gap="$1">
+                    <Text size="xl" fontWeight="700">
+                      {formatToVND(tutor.pricePerHour)}
                     </Text>
+                    <Text variant="muted">{t('perLesson')}</Text>
                   </XStack>
-                </YStack>
-              </>
-            ) : (
-              <>
-                <XStack
-                  gap="$4"
-                  minWidth={0}
-                  flexShrink={0}
-                >
-                  <Image
-                    src={tutor.avatar}
-                    width={isCompact ? 96 : 150}
-                    height={isCompact ? 96 : 150}
-                    objectFit="cover"
-                    aspectRatio={1}
-                    borderRadius={8}
-                    maxWidth="100%"
-                    flexShrink={0}
-                  />
                 </XStack>
-
-              <YStack
-                flex={1}
-                gap="$4"
-                minWidth={0}
-                maxWidth="100%"
-              >
-                {!isCompact && (
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                    flexWrap="wrap"
-                    minWidth={0}
-                  >
-                    <H2
-                      size="$5"
-                      fontWeight="700"
-                      maxWidth="100%"
-                    >
-                      {tutor.firstName} {tutor.lastName}
-                    </H2>
-                    {tutor.isProfessional && (
-                      <Chip tone="primary">
-                        <ChipText tone="primary">{t('professional')}</ChipText>
-                      </Chip>
-                    )}
-                  </XStack>
+              </YStack>
+            )}
+          </XStack>
+          <YStack flex={1} gap="$4" minWidth={0} maxWidth="100%">
+            {!isVertical && (
+              <XStack alignItems="center" gap="$2" flexWrap="wrap" minWidth={0}>
+                <H2 size="$5" fontWeight="700" maxWidth="100%">
+                  {tutor.firstName} {tutor.lastName}
+                </H2>
+                {tutor.isProfessional && (
+                  <Chip tone="primary">
+                    <ChipText tone="primary">{t('professional')}</ChipText>
+                  </Chip>
                 )}
+              </XStack>
+            )}
 
-                <XStack
-                  alignItems="center"
-                  gap="$6"
-                  flexWrap="wrap"
-                  minWidth={0}
-                >
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                    minWidth={0}
-                    flexShrink={1}
-                  >
-                    <YStack flexShrink={0}>
-                      <GraduationCapIcon color={mutedColor} />
-                    </YStack>
-                    <Text
-                      variant="muted"
-                      flexShrink={1}
-                    >
-                      {t('teaches', { subject: tutor.subject })}
-                    </Text>
-                  </XStack>
-                  <XStack
-                    alignItems="center"
-                    gap="$2"
-                    minWidth={0}
-                    flexShrink={1}
-                  >
-                    <YStack flexShrink={0}>
-                      <WorldIcon color={mutedColor} />
-                    </YStack>
-                    <Text
-                      variant="muted"
-                      flexShrink={1}
-                    >
-                      {t('country', { country: tutor.country })}
-                    </Text>
-                  </XStack>
-                </XStack>
-                <XStack
-                  alignItems="flex-start"
-                  gap="$2"
-                  minWidth={0}
-                >
-                  <YStack
-                    flexShrink={0}
-                    paddingTop={2}
-                  >
-                    <LanguageIcon color={mutedColor} />
-                  </YStack>
-                  <Text
-                    variant="muted"
-                    flex={1}
-                    minWidth={0}
-                    style={{ wordBreak: 'break-word' }}
-                  >
-                    {t('speaks', {
-                      languages: tutor.languages.map((language) => language.languageCode).join(', '),
-                    })}
+            <XStack alignItems="center" gap="$6" flexWrap="wrap" minWidth={0}>
+              <XStack alignItems="center" gap="$2" minWidth={0} flexShrink={1}>
+                <YStack flexShrink={0}>
+                  <GraduationCapIcon color={mutedColor} />
+                </YStack>
+                <Text variant="muted" flexShrink={1}>
+                  {t('teaches', { subject: tutor.subject })}
+                </Text>
+              </XStack>
+              <XStack alignItems="center" gap="$2" minWidth={0} flexShrink={1}>
+                <YStack flexShrink={0}>
+                  <WorldIcon color={mutedColor} />
+                </YStack>
+                <Text variant="muted" flexShrink={1}>
+                  {t('country', { country: tutor.country })}
+                </Text>
+              </XStack>
+            </XStack>
+            <XStack alignItems="flex-start" gap="$2" minWidth={0}>
+              <YStack flexShrink={0} paddingTop={2}>
+                <LanguageIcon color={mutedColor} />
+              </YStack>
+              <Text variant="muted" flex={1} minWidth={0} style={{ wordBreak: 'break-word' }}>
+                {t('speaks', {
+                  languages: tutor.languages.map((language) => language.languageCode).join(', '),
+                })}
+              </Text>
+            </XStack>
+            <Paragraph numberOfLines={3} maxWidth="100%">
+              {tutor.introduce}
+            </Paragraph>
+
+            <XStack gap="$2" flexWrap="wrap" minWidth={0}>
+              {proficiencyTags.map((proficiency) => {
+                const isKnownProficiency = (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(
+                  proficiency
+                )
+
+                return (
+                  <Tag key={proficiency}>
+                    {isKnownProficiency ? t(`proficiency.${proficiency}`) : proficiency}
+                  </Tag>
+                )
+              })}
+            </XStack>
+          </YStack>
+
+          {!isVertical && <Separator vertical height="100%" flexShrink={0} />}
+
+          <YStack
+            gap="$3"
+            alignItems="flex-end"
+            justifyContent="flex-start"
+            minWidth={200}
+            flexShrink={0}
+            width={isVertical ? '100%' : undefined}
+          >
+            {!isVertical && (
+              <>
+                <XStack alignItems="center" gap="$1" flexShrink={0} justifyContent="flex-end">
+                  <StarOutlineIcon />
+                  <Text size="xl" fontWeight="700" flexShrink={0}>
+                    {tutor.ratingAverage.toFixed(2)}
+                  </Text>
+                  <Text variant="muted" flexShrink={0} whiteSpace="nowrap">
+                    {t('reviews', { count: tutor.ratingCount })}
                   </Text>
                 </XStack>
-                <Paragraph
-                  numberOfLines={isCompact ? 2 : 3}
-                  maxWidth="100%"
-                >
-                  {tutor.introduce}
-                </Paragraph>
-
-                <XStack
-                  gap="$2"
-                  flexWrap="wrap"
-                  minWidth={0}
-                >
-                  {proficiencyTags.map((proficiency) => {
-                    const isKnownProficiency = (ABOUT_PROFICIENCY_LEVELS as readonly string[]).includes(
-                      proficiency
-                    );
-
-                    return (
-                      <Tag key={proficiency}>
-                        {isKnownProficiency ? t(`proficiency.${proficiency}`) : proficiency}
-                      </Tag>
-                    );
-                  })}
+                <XStack alignItems="baseline" gap="$1" justifyContent="flex-end">
+                  <Text size="xl" fontWeight="700">
+                    {formatToVND(tutor.pricePerHour)}
+                  </Text>
+                  <Text variant="muted">{t('perLesson')}</Text>
                 </XStack>
-              </YStack>
+              </>
+            )}
 
-              {!isCompact && (
-                <Separator
-                  vertical
-                  height="100%"
-                  flexShrink={0}
-                />
-              )}
-
-              <YStack
-                gap="$3"
-                alignItems="flex-end"
-                justifyContent="flex-start"
-                minWidth={200}
-                flexShrink={0}
-                width={isCompact ? '100%' : undefined}
+            <YStack gap="$3" width="100%" minWidth={200}>
+              <Button
+                variant="primary"
+                width="100%"
+                onPress={(e) => {
+                  e.stopPropagation()
+                  handleBookTrialClick()
+                }}
               >
-                {!isCompact && (
-                  <>
-                    <XStack
-                      alignItems="center"
-                      gap="$1"
-                      flexShrink={0}
-                      justifyContent="flex-end"
-                    >
-                      <StarOutlineIcon />
-                      <Text
-                        size="xl"
-                        fontWeight="700"
-                        flexShrink={0}
-                      >
-                        {tutor.ratingAverage.toFixed(2)}
-                      </Text>
-                      <Text
-                        variant="muted"
-                        flexShrink={0}
-                        whiteSpace="nowrap"
-                      >
-                        {t('reviews', { count: tutor.ratingCount })}
-                      </Text>
-                    </XStack>
-                    <XStack
-                      alignItems="baseline"
-                      gap="$1"
-                      justifyContent="flex-end"
-                    >
-                      <Text
-                        size="xl"
-                        fontWeight="700"
-                      >
-                        {formatToVND(tutor.pricePerHour)}
-                      </Text>
-                      <Text variant="muted">{t('perLesson')}</Text>
-                    </XStack>
-                  </>
-                )}
-
-                {isCompact && !isVeryNarrow ? (
-                  <XStack
-                    gap="$2"
-                    width="100%"
-                  >
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      flex={1}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleBookTrialClick();
-                      }}
-                    >
-                      {t('bookTrial')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      flex={1}
-                    >
-                      {t('sendMessage')}
-                    </Button>
-                  </XStack>
-                ) : (
-                  <YStack
-                    gap="$3"
-                    width="100%"
-                    minWidth={200}
-                  >
-                    <Button
-                      variant="primary"
-                      width="100%"
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        handleBookTrialClick();
-                      }}
-                    >
-                      {t('bookTrial')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      width="100%"
-                      size="sm"
-                    >
-                      {t('sendMessage')}
-                    </Button>
-                  </YStack>
-                )}
-              </YStack>
-            </>
-          )}
-          </XStack>
-
-          {isMobile && (
-            <YStack
-              gap="$1.5"
-              width="100%"
-            >
-              <Paragraph
-                numberOfLines={2}
-                maxWidth="100%"
-                fontSize={12}
-                lineHeight={17}
-                color="$appText"
-              >
-                {tutor.introduce}
-              </Paragraph>
+                {t('bookTrial')}
+              </Button>
+              <Button variant="outline" width="100%" size="sm" onPress={handleOpenMessageModal}>
+                {t('sendMessage')}
+              </Button>
             </YStack>
-          )}
-        </YStack>
+          </YStack>
+        </XStack>
       </Card>
 
       <TrialBookingModal
@@ -503,6 +289,16 @@ export function TutorCard({
         }}
         onConfirm={handleConfirmBooking}
         onResumePayment={handleResumePayment}
+      />
+
+      <TutorMessageModal
+        open={isMessageModalOpen}
+        tutorFirstName={tutor.firstName}
+        studentId={studentId}
+        studentMezonUserId={studentMezonUserId}
+        tutorId={tutorId}
+        tutorMezonUserId={tutor.mezonUserId}
+        onOpenChange={setIsMessageModalOpen}
       />
     </>
   )

@@ -15,6 +15,7 @@ import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module
 import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { DmChannelModule } from './modules/dm-channel/dm-channel.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     MyScheduleModule,
     CloudinaryModule,
     ReviewsModule,
+    DmChannelModule,
   ],
   controllers: [HealthController],
   providers: [
