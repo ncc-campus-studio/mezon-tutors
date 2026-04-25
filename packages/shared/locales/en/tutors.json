@@ -27,6 +27,22 @@
     "perLesson": "/ lesson",
     "bookTrial": "Book trial lesson",
     "sendMessage": "Send message",
+    "messageModal": {
+      "title": "Send message to {tutorName}",
+      "placeholder": "Enter the message content...",
+      "cancel": "Cancel",
+      "send": "Send",
+      "sending": "Sending...",
+      "errors": {
+        "missingStudentId": "Cannot send message: student ID is required.",
+        "missingStudentMezonUserId": "Cannot send message: student Mezon user ID is required.",
+        "missingTutorMezonUserId": "Cannot send message: tutor Mezon user ID is required.",
+        "missingTutorId": "Cannot send message: tutor ID is required.",
+        "emptyContent": "Please enter the message content.",
+        "missingChannelId": "Cannot send message: channel ID is required.",
+        "sendFailed": "Cannot send message."
+      }
+    },
     "proficiency": {
       "Native": "Native",
       "Near-Native": "Near-Native",
@@ -295,6 +311,7 @@
     "motivationTitle": "Motivation",
     "emptySection": "No information yet.",
     "scheduleTitle": "Schedule",
+    "scheduleDescription": "Check when this tutor is available to teach",
     "scheduleEmpty": "No available schedule yet.",
     "reviewsEmpty": "No reviews yet.",
     "resourcesTitle": "Resources",
@@ -309,6 +326,15 @@
     "videoIntroTitle": "Do you want to sound like a native speaker?",
     "languagesTitle": "I speak",
     "scheduleHint": "Times are shown in your local timezone: {timezone}",
+    "mobileSchedule": {
+      "seeMySchedule": "See My Schedule",
+      "backToSchedule": "Back",
+      "periods": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "evening": "Evening"
+      }
+    },
     "scheduleUnavailable": "No slots",
     "weekdays": {
       "sun": "Sun",
@@ -338,8 +364,12 @@
     "basedOnReviews": "Based on {count} student reviews",
     "showMore": "Show more",
     "showLess": "Show less",
-    "allReviewsTitle": "All Reviews",
+    "allReviewsTitle": "Reviews",
+    "reviews": "reviews",
     "loadingReviews": "Loading reviews...",
+    "loadMoreReviews": "Load more reviews",
+    "reviewsEmpty": "No reviews yet",
+    "reviewsCount": "({count} reviews)",
     "reviewModal": {
       "editTitle": "Edit Review",
       "postTitle": "Post Review",

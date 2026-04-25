@@ -2,11 +2,12 @@ import { TutorLanguage, TutorProfile, TutorReview, User } from '@mezon-tutors/db
 import { TutorDetailDto, TutorReviewDto, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
 
 export function toVerifiedTutorProfileDto(
-  tutor: TutorProfile & { languages: TutorLanguage[] },
+  tutor: TutorProfile & { languages: TutorLanguage[]; user?: Pick<User, 'mezonUserId'> },
 ): VerifiedTutorProfileDto {
   return {
     id: tutor.id,
     userId: tutor.userId,
+    mezonUserId: tutor.user?.mezonUserId ?? '',
     firstName: tutor.firstName,
     lastName: tutor.lastName,
     avatar: tutor.avatar,

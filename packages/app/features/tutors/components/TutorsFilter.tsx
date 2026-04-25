@@ -2,6 +2,7 @@ import { YStack, XStack, Select, Slider, Text } from '@mezon-tutors/app/ui'
 import { ECountry, ESubject } from '@mezon-tutors/shared'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMedia } from 'tamagui'
 
 type TutorsFilterProps = {
   subject: ESubject
@@ -21,9 +22,11 @@ export function TutorsFilter({
   onPricePerLessonChange,
 }: TutorsFilterProps) {
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const media = useMedia()
   const t = useTranslations('Tutors.Filter')
   const tSubject = useTranslations('Tutors.Filter.Subject')
   const tCountry = useTranslations('Tutors.Filter.Country')
+  const isCompact = media.md || media.sm || media.xs
 
   const parsedPriceRange = useMemo(() => {
     if (!pricePerLesson) return null
@@ -51,53 +54,144 @@ export function TutorsFilter({
   const handlePricePerLessonChange = (value: number[]) => {
     setPricePerLessonValue(value)
 
-    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
-      onPricePerLessonChange(value.join('_'))
+      onPricePerLessonChange(value.join('_'));
     }, 350)
-  }
+  };
 
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current)
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     }
   }, [])
 
-  return (
-      <XStack gap="$4" flexWrap="wrap">
-        <Select
-          label={t('subjectLabel')}
-          value={subject}
-          onValueChange={(value) => onSubjectChange(value as ESubject)}
-          options={(Object.values(ESubject) as ESubject[]).map((value) => ({
-            label: tSubject(value),
-            value: value as string,
-          }))}
+  const subjectSelect = (
+    <Select
+      label={isCompact ? undefined : t('subjectLabel')}
+      value={subject}
+      width={isCompact ? 160 : 220}
+      onValueChange={(value) => onSubjectChange(value as ESubject)}
+      options={(Object.values(ESubject) as ESubject[]).map((value) => ({
+        label: tSubject(value),
+        value: value as string,
+      }))}
+    />
+  );
+
+  const priceSelect = (
+    <Select
+      label={isCompact ? undefined : t('priceLabel')}
+      value={pricePerLessonValueString}
+      width={isCompact ? 145 : 220}
+    >
+      <YStack gap="$4">
+        <Text
+          fontSize="lg"
+          fontWeight="700"
+          textAlign="center"
+        >
+          ${pricePerLessonValue[0]} - ${pricePerLessonValue[1]}
+        </Text>
+        <Slider
+          value={pricePerLessonValue}
+          min={5}
+          max={50}
+          step={1}
+          onValueChange={handlePricePerLessonChange}
         />
-        <Select label={t('priceLabel')} value={pricePerLessonValueString}>
-          <YStack gap="$4">
-            <Text fontSize="lg" fontWeight="700" textAlign="center">
-              ${pricePerLessonValue[0]} - ${pricePerLessonValue[1]}
-            </Text>
-            <Slider
-              value={pricePerLessonValue}
-              min={5}
-              max={50}
-              step={1}
-              onValueChange={handlePricePerLessonChange}
+      </YStack>
+    </Select>
+  );
+
+  const countrySelect = (
+    <Select
+      label={isCompact ? undefined : t('countryLabel')}
+      value={country}
+      width={isCompact ? 150 : 220}
+      onValueChange={(value) => onCountryChange(value as ECountry)}
+      options={(Object.values(ECountry) as ECountry[]).map((value) => ({
+        label: tCountry(value),
+        value: value as string,
+      }))}
+    />
+  );
+
+  if (isCompact) {
+    return (
+      <YStack gap="$2.5">
+        <XStack gap="$2">
+          <YStack
+            flex={1}
+            minWidth={0}
+            backgroundColor="$tutorsFilterSelectBackground"
+            borderRadius="$4"
+          >
+            <Select
+              value={subject}
+              width="100%"
+              onValueChange={(value) => onSubjectChange(value as ESubject)}
+              options={(Object.values(ESubject) as ESubject[]).map((value) => ({
+                label: tSubject(value),
+                value: value as string,
+              }))}
             />
           </YStack>
-        </Select>
+          <YStack
+            flex={1}
+            minWidth={0}
+            backgroundColor="$tutorsFilterSelectBackground"
+            borderRadius="$4"
+          >
+            <Select
+              value={pricePerLessonValueString}
+              width="100%"
+            >
+              <YStack gap="$4">
+                <Text
+                  fontSize="lg"
+                  fontWeight="700"
+                  textAlign="center"
+                >
+                  ${pricePerLessonValue[0]} - ${pricePerLessonValue[1]}
+                </Text>
+                <Slider
+                  value={pricePerLessonValue}
+                  min={5}
+                  max={50}
+                  step={1}
+                  onValueChange={handlePricePerLessonChange}
+                />
+              </YStack>
+            </Select>
+          </YStack>
+        </XStack>
+        <YStack
+          backgroundColor="$tutorsFilterSelectBackground"
+          borderRadius="$4"
+        >
+          <Select
+            value={country}
+            width="100%"
+            onValueChange={(value) => onCountryChange(value as ECountry)}
+            options={(Object.values(ECountry) as ECountry[]).map((value) => ({
+              label: tCountry(value),
+              value: value as string,
+            }))}
+          />
+        </YStack>
+      </YStack>
+    );
+  }
 
-        <Select
-          label={t('countryLabel')}
-          value={country}
-          onValueChange={(value) => onCountryChange(value as ECountry)}
-          options={(Object.values(ECountry) as ECountry[]).map((value) => ({
-            label: tCountry(value),
-            value: value as string,
-          }))}
-        />
-      </XStack>
-  )
+  return (
+    <XStack
+      gap="$4"
+      flexWrap="wrap"
+    >
+      {subjectSelect}
+      {priceSelect}
+      {countrySelect}
+    </XStack>
+  );
 }

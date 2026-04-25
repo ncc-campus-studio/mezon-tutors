@@ -98,3 +98,31 @@ export const ABOUT_PROFICIENCY_LEVELS = [
   'Basic',
   'Beginner',
 ] as const;
+
+export const TUTOR_DETAIL_MOBILE_CONFIG = {
+  videoHeight: 200,
+  typography: {
+    aboutTitle: 18,
+    languageTitle: 16,
+    paragraph: 14,
+    chip: 13,
+  },
+  lineHeight: {
+    aboutTitle: 24,
+    languageTitle: 22,
+    paragraph: 20,
+  },
+  spacing: '$3',
+  gap: '$1.5',
+  padding: '$2',
+  chip: {
+    paddingHorizontal: '$2',
+    paddingVertical: '$1',
+  },
+} as const;
+
+export const TUTOR_DETAIL_LAYOUT_CONFIG = {
+  maxWidth: 1320,
+  sidebarWidth: 320,
+  bottomPadding: 24,
+} as const;

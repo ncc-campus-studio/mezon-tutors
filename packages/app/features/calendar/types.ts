@@ -79,3 +79,76 @@ export type BaseCalendarProps<TEvent = unknown> = {
   themePrefix?: string;
   isCompact?: boolean;
 };
+
+export type MobileCalendarItemBase = {
+  id: string;
+  dayIndex: number;
+  timeLabel: string;
+  category?: string;
+};
+
+export type MobileCalendarPersonInfo = {
+  name: string;
+  avatar?: string;
+  role?: 'tutor' | 'student';
+};
+
+export type MobileCalendarItem = MobileCalendarItemBase & {
+  title: string;
+  person: MobileCalendarPersonInfo;
+  actionLabel?: string;
+  onAction?: () => void;
+};
+
+export type MobileCalendarMeta = {
+  title: string;
+  weekDays: CalendarWeekDay[];
+  currentDayIndex?: number;
+};
+
+export type MobileCalendarConfig = {
+  weekDay: {
+    minWidth: number;
+    maxWidth: number;
+    width: number;
+    padding: { vertical: number; horizontal: number };
+    contentGap: number;
+    borderRadius: number;
+    dayFontSize: number;
+    dayLineHeight: number;
+    dateFontSize: number;
+    dateLineHeight: number;
+  };
+  card: {
+    borderRadius: number;
+    padding: number;
+    gap: number;
+    avatar: { size: number; borderRadius: number };
+    title: { fontSize: number; lineHeight: number };
+    subtitle: { fontSize: number; lineHeight: number };
+    time: { fontSize: number; lineHeight: number; iconSize: number };
+    button: {
+      fontSize: number;
+      borderRadius: number;
+      padding: { vertical: number; horizontal: number };
+    };
+  };
+  category: {
+    dotSize: number;
+    fontSize: number;
+    padding: { horizontal: number; vertical: number };
+    borderRadius: number;
+  };
+  navigation: {
+    iconSize: number;
+    buttonPadding: number;
+    buttonBorderRadius: number;
+    titleFontSize: number;
+  };
+  empty: {
+    minHeight: number;
+    borderRadius: number;
+    padding: number;
+    fontSize: number;
+  };
+};

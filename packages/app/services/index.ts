@@ -4,3 +4,8 @@ export * from './cloudinary/cloudinary.service';
 export * from './tutor-profile/tutor-profile.api';
 export * from './tutor-availability/tutor-availability.api';
 export * from './user/user.api';
+export * from './auth/auth.service';
+export * from './storage/token-storage';
+export * from './mezon-light/mezon-light.client';
+export * from './mezon-light/mezon-light.service';
+export * from './dm-channel/dm-channel.api';

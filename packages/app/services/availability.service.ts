@@ -36,9 +36,8 @@ export const availabilityService = {
   async updateAvailability(data: AvailabilityData): Promise<{ success: boolean }> {
     const availability: AvailabilitySlot[] = [];
     
-    DAY_KEYS.forEach((dayKey) => {
-      const slots = data.slotsByDay[dayKey] ?? [];
-      const dayIndex = DAY_KEYS.indexOf(dayKey);
+    Object.entries(data.slotsByDay).forEach(([dayKey, slots]) => {
+      const dayIndex = DAY_KEYS.indexOf(dayKey as typeof DAY_KEYS[number]);
       const dayOfWeek = dayIndex === 6 ? 0 : dayIndex + 1;
 
       slots.forEach((slot) => {

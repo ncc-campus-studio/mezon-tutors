@@ -95,6 +95,8 @@ model User {
   tutorProfile        TutorProfile?
   trialLessonBookings TrialLessonBooking[]
   tutorReviews        TutorReview[]        @relation("TutorReviewAuthor")
+  studentDmChannels   UserDmChannel[]      @relation("UserDmChannelStudent")
+  tutorDmChannels     UserDmChannel[]      @relation("UserDmChannelTutor")
   refreshTokens       RefreshToken[]
   wallet              Wallet?
   withdrawals         Withdrawal[]
@@ -269,6 +271,24 @@ model TrialLessonBooking {
   @@index([tutorId])
   @@index([tutorId, startAt])
   @@map("trial_lesson_booking")
+}
+
+/// DM channel mapping between one student and one tutor user
+model UserDmChannel {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId String   @map("student_id") @db.Uuid
+  tutorId   String   @map("tutor_id") @db.Uuid
+  channelId String   @unique @map("channel_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  student User @relation("UserDmChannelStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  tutor   User @relation("UserDmChannelTutor", fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, tutorId])
+  @@index([studentId])
+  @@index([tutorId])
+  @@map("user_dm_channels")
 }
 
 /// Refresh token for session management

@@ -6,6 +6,7 @@ import {
   TutorReviewDto,
   TutorResourceDto,
 } from '@mezon-tutors/shared'
+import type { ReactNode } from 'react'
 
 export type TutorDetailTab = TutorDetailTabKey
 
@@ -35,4 +36,11 @@ export type TutorResourcesTabProps = {
   tutor: TutorAboutDto & {
     resources: TutorResourceDto[]
   }
+}
+
+export type TutorSchedulePeriodSectionProps = {
+  icon: ReactNode
+  title: string
+  slots: TutorDetailAvailabilitySlotDto[]
+  emptyText: string
 }

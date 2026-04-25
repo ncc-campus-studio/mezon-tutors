@@ -178,6 +178,7 @@ export type FullTutorApplication = {
 export interface VerifiedTutorProfileDto {
   id: string
   userId: string
+  mezonUserId: string
   firstName: string
   lastName: string
   avatar: string

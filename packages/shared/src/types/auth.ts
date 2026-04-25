@@ -7,11 +7,10 @@ export interface MezonAuthSuccessMessage {
       username?: string;
       email?: string | null;
       avatar?: string | null;
+      idToken?: string | null;
     };
-    tokens: {
-      accessToken: string;
-      refreshToken?: string;
-    };
+    accessToken: string;
+    idToken?: string | null;
   };
 }
 
