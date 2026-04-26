@@ -48,10 +48,12 @@ export function TutorCard({
   tutor,
   onHover,
   isActive,
+  disableNavigationUntil,
 }: {
   tutor: VerifiedTutorProfileDto
   onHover?: (tutor: VerifiedTutorProfileDto, el: HTMLElement) => void
   isActive?: boolean
+  disableNavigationUntil?: number
 }) {
   const t = useTranslations('Tutors.TutorCard')
   const media = useMedia()
@@ -73,6 +75,7 @@ export function TutorCard({
   const tutorId = tutor.userId
 
   const handleCardClick = () => {
+    if (disableNavigationUntil != null && Date.now() < disableNavigationUntil) return
     router.push(ROUTES.TUTOR.DETAIL(tutor.id))
   }
 

@@ -121,14 +121,14 @@ export class MyScheduleService {
       let status: 'upcoming' | 'pending' | 'blocked';
       if (booking.status === ETrialLessonStatus.CANCELLED) {
         status = 'blocked';
-      } else if (lesson.status === ETrialLessonStatus.PENDING) {
+      } else if (booking.status === ETrialLessonStatus.PENDING) {
         status = 'pending';
       } else {
         status = 'upcoming';
       }
 
       return {
-        id: lesson.id,
+        id: booking.id,
         dayIndex,
         startHour: this.toDecimalHour(startsAt),
         endHour: this.toDecimalHour(endsAt),

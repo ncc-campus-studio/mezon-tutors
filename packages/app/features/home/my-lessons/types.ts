@@ -21,6 +21,7 @@ export type LessonItem = {
   startHour: number;
   endHour: number;
   status: LessonStatus;
+  rating?: number;
 };
 
 export type TutorItem = {

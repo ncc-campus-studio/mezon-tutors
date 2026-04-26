@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "yarn workspace @mezon-tutors/shared build",
     "dev": "rm -rf .next/cache && next dev",
     "build": "cd ../.. && yarn build && cd apps/web && next build",
     "start": "next start",

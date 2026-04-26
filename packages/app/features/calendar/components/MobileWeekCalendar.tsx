@@ -36,8 +36,9 @@ export function MobileWeekCalendar({
   const localizedWeekDays = useMemo(() => formatWeekDays(weekDays, locale), [weekDays, locale]);
 
   const baseConfig = MOBILE_CALENDAR_CONFIG;
+  const variantKey = type === 'booking' ? 'mySchedule' : type;
   const variantConfig =
-    MOBILE_CALENDAR_CONFIG.variants[type] ?? MOBILE_CALENDAR_CONFIG.variants.myLessons;
+    MOBILE_CALENDAR_CONFIG.variants[variantKey] ?? MOBILE_CALENDAR_CONFIG.variants.myLessons;
   const weekDayConfig = baseConfig.weekDay;
   const dayFontSize = variantConfig.weekDay.dayFontSize ?? weekDayConfig.dayFontSize;
   const dateFontSize = variantConfig.weekDay.dateFontSize ?? weekDayConfig.dateFontSize;
