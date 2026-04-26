@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@mezon-tutors/db": "*",
-    "next-intl": "^4.8.3",
+    "next-intl": "^4.9.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

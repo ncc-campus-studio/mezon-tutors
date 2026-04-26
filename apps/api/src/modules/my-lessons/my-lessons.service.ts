@@ -39,7 +39,7 @@ export class MyLessonsService {
     return dt.hour() + dt.minute() / 60;
   }
 
-  async getOverview(studentMezonUserId?: string, weekStartDate?: string): Promise<MyLessonsApiResponse> {
+  async getOverview(studentMezonUserId: string, weekStartDate?: string): Promise<MyLessonsApiResponse> {
     const studentId = await this.resolveStudentId(studentMezonUserId);
 
     if (!studentId) {
@@ -87,8 +87,8 @@ export class MyLessonsService {
     };
   }
 
-  private async resolveStudentId(studentMezonUserId?: string): Promise<string | null> {
-    if (!studentMezonUserId) {
+  private async resolveStudentId(studentMezonUserId: string): Promise<string | null> {
+    if (!studentMezonUserId?.trim()) {
       return null;
     }
 

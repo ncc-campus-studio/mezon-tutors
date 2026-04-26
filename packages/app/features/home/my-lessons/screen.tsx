@@ -42,7 +42,7 @@ export function MyLessonsScreen() {
   const user = useAtomValue(userAtom);
   const isAuthLoading = useAtomValue(isLoadingAtom);
 
-  const { data, isLoading } = useMyLessons(user?.mezonUserId, selectedDate);
+  const { data, isLoading } = useMyLessons(selectedDate);
 
   const media = useMedia();
   const isNarrow = media.md || media.sm || media.xs;

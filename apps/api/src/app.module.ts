@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { SharedModule } from './shared/shared.module';
@@ -22,6 +23,15 @@ import { DmChannelModule } from './modules/dm-channel/dm-channel.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'default',
+          ttl: 60000,
+          limit: 120,
+        },
+      ],
+    }),
     SharedModule,
     PrismaModule,
     AuthModule,
@@ -41,6 +51,10 @@ import { DmChannelModule } from './modules/dm-channel/dm-channel.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

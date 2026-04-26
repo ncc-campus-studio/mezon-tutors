@@ -51,15 +51,9 @@ export async function getMyLessonsData(): Promise<MyLessonsViewData> {
   };
 }
 
-export async function getMyLessonsDataByMezonUserId(
-  studentMezonUserId?: string
-): Promise<MyLessonsViewData> {
-  if (!studentMezonUserId) {
-    return getMyLessonsData();
-  }
-
+export async function getMyLessonsDataFromApi(): Promise<MyLessonsViewData> {
   try {
-    return await myLessonsService.getOverview(studentMezonUserId);
+    return await myLessonsService.getOverview();
   } catch (error) {
     console.error('[my-lessons] Failed to load lessons from API', error);
     return getMyLessonsData();

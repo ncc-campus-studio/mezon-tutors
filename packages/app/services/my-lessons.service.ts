@@ -88,13 +88,9 @@ function mapCalendarMeta(data: MyLessonsApiResponse): MyLessonsCalendarMeta {
 }
 
 export const myLessonsService = {
-  async getOverview(studentMezonUserId?: string, weekStartDate?: string): Promise<MyLessonsViewData> {
+  async getOverview(weekStartDate?: string): Promise<MyLessonsViewData> {
     const params: Record<string, string> = {};
-    
-    if (studentMezonUserId) {
-      params.student_mezon_user_id = studentMezonUserId;
-    }
-    
+
     if (weekStartDate) {
       params.week_start_date = weekStartDate;
     }

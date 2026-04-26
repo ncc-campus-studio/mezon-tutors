@@ -6,8 +6,10 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -15,6 +17,7 @@ import { CloudinaryService } from './cloudinary.service';
 
 @Controller('cloudinary')
 @ApiTags('Cloudinary')
+@UseGuards(JwtAuthGuard)
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
 

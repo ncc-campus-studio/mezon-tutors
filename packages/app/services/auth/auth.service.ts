@@ -42,7 +42,7 @@ class AuthService {
     return res.url;
   }
 
-  async exchangeCode(code: string, state?: string): Promise<ExchangeResponse> {
+  async exchangeCode(code: string, state: string): Promise<ExchangeResponse> {
     const data = await apiClient.post<ExchangeResponse>('/auth/mezon/exchange', { code, state });
     return data;
   }

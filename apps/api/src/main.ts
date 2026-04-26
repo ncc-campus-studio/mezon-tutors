@@ -12,19 +12,15 @@ async function bootstrap() {
   app.set('trust proxy', 1);
   const configService = app.get(AppConfigService);
 
-  // Security headers
   app.use(helmet());
 
-  // Parse cookies
   app.use(cookieParser());
 
-  // Enable CORS
   app.enableCors({
     origin: configService.corsOrigins?.split(',') || [],
     credentials: true,
   });
 
-  // Global prefix
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
@@ -32,18 +28,18 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
     })
-  )
+  );
 
+  if (configService.nodeEnv !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Mezon tutors API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
 
-  // Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('Mezon tutors API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   const port = configService.port;
   await app.listen(port);

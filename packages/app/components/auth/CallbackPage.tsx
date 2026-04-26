@@ -30,6 +30,11 @@ export default function MezonAuthCallbackPage() {
       return;
     }
 
+    if (!state) {
+      setError('Missing OAuth state.');
+      return;
+    }
+
     async function exchangeCode() {
       try {
         const exchangeData = await authService.exchangeCode(code, state);
