@@ -16,36 +16,66 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Securox Scanner
+        id: scan
+        continue-on-error: true
         uses: duy6019/securox-tool@main
         with:
           fail-on: 'none'
-          format: 'hbs'
+          format: 'html'
+          output: 'securox-report.html'
           targetPath: '.'
 
-      - name: Setup Node.js
-        if: always()
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Convert HBS to HTML
+      - name: List generated files
         if: always()
         run: |
-          npm install -g handlebars
-          find . -name "*.hbs" -type f | while read file; do
-            output="${file%.hbs}.html"
-            echo "Converting $file to $output"
-            handlebars "$file" -f "$output" || echo "Failed to convert $file"
-          done
+          echo "=== Files in current directory ==="
+          ls -la
+          echo "=== Searching for report files ==="
+          find . -name "*report*" -o -name "*.hbs" -o -name "*.html" | head -20
+
+      - name: Ensure HTML report exists
+        if: always()
+        run: |
+          if [ -f "securox-report.html" ]; then
+            echo "Found securox-report.html"
+          else
+            echo "securox-report.html was not generated, creating fallback file."
+            cat > securox-report.html <<'EOF'
+            <!doctype html>
+            <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <title>Securox Report</title>
+            </head>
+            <body>
+              <h1>Securox report was not generated</h1>
+              <p>Please check the scanner step logs for details.</p>
+            </body>
+            </html>
+            EOF
+          fi
+
+      - name: Generate PDF from HTML report
+        if: always()
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wkhtmltopdf
+          wkhtmltopdf --enable-local-file-access securox-report.html securox-report.pdf
+          ls -la securox-report.pdf
+
+      - name: Set artifact date
+        if: always()
+        run: echo "ARTIFACT_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
 
       - name: Upload Security Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: securox-security-report
+          name: securox-security-report-${{ env.ARTIFACT_DATE }}
           path: |
             **/*.hbs
             **/*.html
+            **/*.pdf
             **/securox-report.*
             **/security-report.*
           retention-days: 30
