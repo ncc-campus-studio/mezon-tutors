@@ -1,11 +1,15 @@
 // Icons
 export * from './ArrowRightIcon';
+export * from './ArrowLeftIcon';
 export * from './ArrowRightLineIcon';
 export * from './BackArrowIcon';
 export * from './CalendarIcon';
 export * from './CameraIcon';
 export * from './CardIcon';
+export * from './BookingRequestIcon';
 export * from './CheckIcon';
+export * from './ChevronLeftIcon';
+export * from './ChevronRightIcon';
 export * from './CircleCheckIcon';
 export * from './CircleCloseIcon';
 export * from './ClockCircleIcon';
@@ -17,7 +21,9 @@ export * from './GalleryIcon';
 export * from './GraduationCapIcon';
 export * from './InfoIcon';
 export * from './MailIcon';
+export * from './MessageDotsIcon';
 export * from './PlusCircleIcon';
+export * from './PlusIcon';
 export * from './ProfileCameraIcon';
 export * from './ScanIcon';
 export * from './ShieldCheckIcon';
@@ -26,6 +32,7 @@ export * from './TrashIcon';
 export * from './UploadIcon';
 export * from './UserIcon';
 export * from './SunIcon';
+export * from './AfternoonIcon';
 export * from './FrameIcon';
 export * from './VerifiedIcon';
 export * from './WalletIcon';
@@ -47,11 +54,31 @@ export * from './TrianglePlayOutlineIcon'
 export * from './WorldIcon'
 export * from './LanguageIcon'
 export * from './StarOutlineIcon'
+export * from './LogoutIcon'
+export * from './LogoIcon'
+export * from './MenuIcon'
+export * from './FeatureEveningClassesIcon'
+export * from './FeatureFlexibleWeekendsIcon'
+export * from './FeatureLearnViaMezonIcon'
+export * from './FlashIcon'
+export * from './GlobeIcon'
+export * from './AtSignIcon'
+export * from './CheckBadgeIcon'
+export * from './PlayIcon'
+export * from './SeamlessInstantMessagingIcon'
+export * from './SeamlessVirtualClassroomIcon'
+export * from './StarIcon'
+export * from './StarFilledIcon'
+export * from './WatchDemoIcon'
+export * from './TutorVideoCardIcon'
+export * from './VercelIcon'
+export * from './MoonIcon'
 
 // Types
 export * from './PersonalIcon';
 export * from './VideoIcon';
 export * from './EditListIcon';
+export * from './EditIcon';
 export * from './BadgeIcon';
 export * from './ExternalLinkIcon';
 export * from './LinkIcon';

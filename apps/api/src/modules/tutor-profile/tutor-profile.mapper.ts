@@ -2,11 +2,12 @@ import { TutorLanguage, TutorProfile, TutorReview, User } from '@mezon-tutors/db
 import { TutorDetailDto, TutorReviewDto, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
 
 export function toVerifiedTutorProfileDto(
-  tutor: TutorProfile & { languages: TutorLanguage[] },
+  tutor: TutorProfile & { languages: TutorLanguage[]; user?: Pick<User, 'mezonUserId'> },
 ): VerifiedTutorProfileDto {
   return {
     id: tutor.id,
     userId: tutor.userId,
+    mezonUserId: tutor.user?.mezonUserId ?? '',
     firstName: tutor.firstName,
     lastName: tutor.lastName,
     avatar: tutor.avatar,
@@ -29,7 +30,7 @@ export function toVerifiedTutorProfileDto(
 }
 
 export function toTutorReviewDto(review: TutorReview & { reviewer: Pick<User, 'id' | 'username' | 'avatar'> }): TutorReviewDto {
-  const { id, rating, comment, createdAt, reviewer } = review
+  const { id, rating, comment, createdAt, updatedAt, reviewer } = review
   const { id: reviewerId, username: reviewerName, avatar: reviewerAvatar } = reviewer
 
   return {
@@ -40,6 +41,7 @@ export function toTutorReviewDto(review: TutorReview & { reviewer: Pick<User, 'i
     rating,
     comment,
     createdAt: createdAt.toISOString(),
+    updatedAt: updatedAt.toISOString(),
   }
 }
 

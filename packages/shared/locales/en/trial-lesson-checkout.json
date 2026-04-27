@@ -1,0 +1,67 @@
+{
+  "TrialLessonCheckout": {
+    "Screen": {
+      "title": "Checkout",
+      "subtitle": "Complete your booking for a trial lesson with {tutorName}",
+      "loadingBooking": "Loading your booking...",
+      "trialLessonDetails": "Trial lesson details",
+      "durationLabel": "{durationMinutes} minutes",
+      "loadingPaymentSummary": "Loading payment summary...",
+      "pendingPaymentNotice": "You already have a pending payment with this tutor. Please complete payment below.",
+      "bookedLockedNotice": "You already booked this tutor and cannot create another booking.",
+      "missingInfo": {
+        "title": "Missing booking information",
+        "description": "Open this page from the trial lesson booking flow on a tutor card.",
+        "expectedQuery": "Expected query: tutorId, startAt, durationMinutes, dayOfWeek"
+      },
+      "errors": {
+        "loadTutor": "Could not load tutor profile. Please try again later.",
+        "missingRate": "This tutor has no hourly rate; checkout cannot continue."
+      },
+      "toast": {
+        "alreadyBookedTitle": "Booking already exists",
+        "alreadyBookedDescription": "You already have a booking with this tutor and cannot create another one.",
+        "bookingFailedTitle": "Booking failed",
+        "bookingFailedFallback": "Could not create booking",
+        "popupBlockedTitle": "Unable to open payment window",
+        "popupBlockedDescription": "Please allow popups and try again."
+      },
+      "tutor": {
+        "professionalPrefix": "Professional ",
+        "subjectSuffix": "Tutor",
+        "emptySubtitle": "—",
+        "fallbackName": "Your tutor",
+        "loadingName": "..."
+      },
+      "paymentMethods": {
+        "payos": {
+          "title": "payOS",
+          "subtitle": "VietQR, Napas 24/7"
+        }
+      }
+    },
+    "PaymentMethodPanel": {
+      "title": "Choose how to pay",
+      "processing": "Processing...",
+      "bookAndPay": "Book lesson and pay {amount}",
+      "bookLesson": "Book lesson",
+      "securityNotice": "Secure SSL encrypted payment"
+    },
+    "PaymentSummaryCard": {
+      "title": "Payment Summary",
+      "trialLesson": "Trial Lesson ({durationMinutes} min)",
+      "total": "Total",
+      "promoCode": "Promo Code",
+      "promoPlaceholder": "Enter code",
+      "apply": "Apply"
+    },
+    "TrialLessonDetailsCard": {
+      "trialLesson": "Trial Lesson",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "policy": "Policy",
+      "freeCancellation": "Free cancellation"
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "Dashboard": {
+    "sidebar": {
+      "bookingRequests": "Yêu cầu đặt lịch",
+      "mySchedule": "Lịch dạy",
+      "students": "Học viên",
+      "earnings": "Thu nhập",
+      "myLessons": "Buổi học của tôi",
+      "logout": "Đăng xuất"
+    },
+    "bookingRequests": {
+      "title": "Yêu cầu đặt lịch",
+      "subtitle": "Quản lý các buổi dạy sắp tới. Bạn có {count} yêu cầu mới đang chờ sáng nay.",
+      "levels": {
+        "undergraduateStudent": "Sinh viên đại học",
+        "highSchoolJunior": "Học sinh trung học",
+        "postGradPreparation": "Ôn tập sau đại học"
+      },
+      "subjects": {
+        "advancedCalculus": "Giải tích nâng cao",
+        "apPhysics1": "AP Physics 1",
+        "dataScience": "Khoa học dữ liệu",
+        "biochemistry2": "Hóa sinh học II"
+      },
+      "dates": {
+        "dateTomorrow": "Ngày mai, 24/10",
+        "dateFriday": "Thứ Sáu, 25/10",
+        "dateMonday": "Thứ Hai, 28/10",
+        "datePastSession": "21/10/2023",
+        "dateSaturday": "Thứ Bảy, 26/10"
+      },
+      "times": {
+        "slot0400To0530": "4:00 CH - 5:30 CH",
+        "slot0200To0300": "2:00 CH - 3:00 CH",
+        "slotCompletedSession": "Buổi học đã hoàn thành",
+        "slot1000To1200": "10:00 SA - 12:00 TR"
+      },
+      "filters": {
+        "all": "Tất cả yêu cầu",
+        "pending": "Đang chờ",
+        "confirmed": "Đã xác nhận",
+        "completed": "Hoàn thành"
+      },
+      "table": {
+        "student": "Học viên",
+        "subject": "Môn học",
+        "requestedTime": "Thời gian yêu cầu",
+        "rate": "Mức phí",
+        "status": "Trạng thái",
+        "actions": "Hành động",
+        "noResults": "Không có yêu cầu đặt lịch nào với bộ lọc này."
+      },
+      "status": {
+        "pending": "Đang chờ",
+        "confirmed": "Đã xác nhận",
+        "completed": "Hoàn thành"
+      },
+      "actions": {
+        "approve": "Duyệt",
+        "decline": "Từ chối",
+        "message": "Nhắn tin",
+        "feedback": "Phản hồi"
+      },
+      "summary": {
+        "conversionRate": "Tỉ lệ chuyển đổi",
+        "responseTime": "Thời gian phản hồi",
+        "nextPayout": "Đợt thanh toán tiếp theo",
+        "conversionRateHint": "Tỉ lệ duyệt yêu cầu tháng này",
+        "responseTimeHint": "Thời gian phản hồi trung bình",
+        "nextPayoutHint": "Dự kiến thanh toán vào 28/10",
+        "conversionHint": "Tỉ lệ duyệt yêu cầu tháng này",
+        "responseHint": "Thời gian phản hồi trung bình",
+        "payoutHint": "Dự kiến thanh toán vào 28/10"
+      }
+    },
+    "placeholder": {
+      "title": "Tính năng sắp ra mắt",
+      "description": "Mục dashboard này đang được phát triển."
+    }
+  }
+}

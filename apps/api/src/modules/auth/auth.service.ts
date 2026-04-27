@@ -11,6 +11,9 @@ import type {
 } from './interfaces/auth.interfaces';
 import { UserService } from '../user/user.service';
 
+const ACCESS_TOKEN_EXPIRES_IN = '60m';
+const REFRESH_TOKEN_EXPIRES_IN = '30d';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,17 +23,18 @@ export class AuthService {
     private readonly userService: UserService
   ) {}
 
-  getMezonOAuthUrl(): string {
+  buildMezonAuthorizeUrl(): { url: string; state: string } {
     const oauth = this.appConfig.oauthConfig;
+    const state = crypto.randomUUID();
     const params = new URLSearchParams({
       client_id: oauth.clientId,
       redirect_uri: oauth.redirectUri,
       response_type: 'code',
       scope: 'openid offline',
-      state: crypto.randomUUID().substring(0, 10),
+      state,
     });
 
-    return `${oauth.baseUri}/oauth2/auth?${params.toString()}`;
+    return { url: `${oauth.baseUri}/oauth2/auth?${params.toString()}`, state };
   }
 
   async exchangeCodeForToken(code: string, state?: string): Promise<MezonTokenResponse> {
@@ -110,7 +114,7 @@ export class AuthService {
 
   async createRefreshToken(userId: string): Promise<string> {
     const jwtConfig = this.appConfig.jwtConfig;
-    const expiresIn = '30d';
+    const expiresIn = REFRESH_TOKEN_EXPIRES_IN;
 
     const token = await this.jwtService.signAsync(
       { sub: userId, type: 'refresh' },
@@ -182,12 +186,18 @@ export class AuthService {
     } catch {}
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
+  async refreshAccessToken(refreshToken: string | undefined): Promise<AuthTokens> {
+    if (!refreshToken?.trim()) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
     const user = await this.validateRefreshToken(refreshToken);
 
     if (!user) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
+
+    await this.revokeRefreshToken(refreshToken);
 
     const payload: AuthUserPayload = {
       sub: user.id,
@@ -199,12 +209,14 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
+
+    const newRefreshToken = await this.createRefreshToken(user.id);
 
     return {
       accessToken,
-      refreshToken,
+      refreshToken: newRefreshToken,
     };
   }
 
@@ -220,7 +232,7 @@ export class AuthService {
     };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
+      expiresIn: ACCESS_TOKEN_EXPIRES_IN,
     });
 
     const refreshToken = await this.createRefreshToken(user.id);
@@ -247,6 +259,7 @@ export class AuthService {
         email: mezonUser.email ?? null,
       },
       tokens,
+      idToken: tokenData.id_token ?? null,
     };
 
     return {

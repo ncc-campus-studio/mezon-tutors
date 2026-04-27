@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect, useMemo } from 'react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,34 +15,25 @@ import {
   YStack,
   ScrollView,
   Input,
-  Label,
 } from '@mezon-tutors/app/ui';
+import { WalletIcon } from '@mezon-tutors/app/ui/icons';
 import {
-  WalletIcon,
-  CalendarIcon,
-  TrashIcon,
-  PlusCircleIcon,
-  ArrowRightIcon,
-} from '@mezon-tutors/app/ui/icons';
-import {
-  selectedDayIndexAtom,
-  hourlyRateAtom,
-  slotsByDayAtom,
-  defaultSlot,
-  type TimeSlot,
-  submitTutorProfileAtom,
-  buildSubmitTutorProfilePayload,
+  tutorProfileAvailabilityAtom,
+  resetTutorProfileAfterSubmitAtom,
   tutorProfileAboutAtom,
   tutorProfilePhotoAtom,
   tutorProfileCertificationAtom,
   tutorProfileVideoAtom,
-  tutorProfileIdentityAtom,
 } from '@mezon-tutors/app/store/tutor-profile.atom';
 import { TutorProfileProgress } from './components/tutor-profile-progress';
 import { TutorProfileHeader } from './components/tutor-profile-header';
 import { tutorProfileLastSavedAtAtom } from '@mezon-tutors/app/store/tutor-profile.atom';
-import { DAY_KEYS, getDayKey, formatLastSavedTime } from '@mezon-tutors/shared';
+import { DAY_KEYS, formatLastSavedTime, HOURLY_RATE_REGEX } from '@mezon-tutors/shared';
 import { TutorProfileStickyActions } from '@mezon-tutors/app/features/tutor-profile/components/tutor-profile-sticky-actions';
+import { useSubmitTutorProfileMutation } from '@mezon-tutors/app/services';
+import { AvailabilityEditor } from '@mezon-tutors/app/features/availability';
+import type { AvailabilityData } from '@mezon-tutors/app/features/availability';
+import type { SubmitTutorProfileDto, TimeSlot } from '@mezon-tutors/shared';
 
 const ICON_COLOR = '#1253D5';
 const CURRENT_STEP = 5;
@@ -58,98 +49,59 @@ export function TutorProfileAvailabilityScreen() {
   const router = useRouter();
   const about = useAtomValue(tutorProfileAboutAtom);
   const photo = useAtomValue(tutorProfilePhotoAtom);
-  const identity = useAtomValue(tutorProfileIdentityAtom);
   const certification = useAtomValue(tutorProfileCertificationAtom);
   const video = useAtomValue(tutorProfileVideoAtom);
-  const selectedDayIndex = useAtomValue(selectedDayIndexAtom);
-  const setSelectedDayIndex = useSetAtom(selectedDayIndexAtom);
-  const initialHourlyRate = useAtomValue(hourlyRateAtom);
-  const initialSlotsByDay = useAtomValue(slotsByDayAtom);
-  const setHourlyRate = useSetAtom(hourlyRateAtom);
-  const setSlotsByDay = useSetAtom(slotsByDayAtom);
-  const submitProfile = useSetAtom(submitTutorProfileAtom);
+  const [tutorProfileAvailability, setTutorProfileAvailability] = useAtom(tutorProfileAvailabilityAtom);
+  const submitMutation = useSubmitTutorProfileMutation();
+  const resetAfterSubmit = useSetAtom(resetTutorProfileAfterSubmitAtom);
   const lastSavedAt = useAtomValue(tutorProfileLastSavedAtAtom);
   const setLastSavedAt = useSetAtom(tutorProfileLastSavedAtAtom);
 
   const form = useForm<AvailabilityFormValues>({
     defaultValues: {
-      hourlyRate: initialHourlyRate ?? '',
-      slotsByDay: initialSlotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
+      hourlyRate: tutorProfileAvailability.hourlyRate ?? '',
+      slotsByDay: tutorProfileAvailability.slotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
     },
     mode: 'onChange',
   });
 
-  const { control, handleSubmit, reset, watch, setValue } = form;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = form;
 
   useEffect(() => {
     reset({
-      hourlyRate: initialHourlyRate ?? '',
-      slotsByDay: initialSlotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
+      hourlyRate: tutorProfileAvailability.hourlyRate ?? '',
+      slotsByDay: tutorProfileAvailability.slotsByDay ?? Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const dayKey = getDayKey(selectedDayIndex);
-  const slotsByDayForm = watch('slotsByDay');
-  const slots = slotsByDayForm?.[dayKey] ?? [];
+  }, [tutorProfileAvailability.hourlyRate, tutorProfileAvailability.slotsByDay, reset]);
 
   const onSaveExit = () => {
+    if (submitMutation.isPending) return;
     form.handleSubmit((values) => {
-      const payload = buildSubmitTutorProfilePayload({
-        ...about,
-        ...photo,
-        ...certification,
-        videoUrl: video.videoLink,
-        hourlyRate: values.hourlyRate,
-        slotsByDay: values.slotsByDay,
-      });
-      submitProfile(payload);
+      setTutorProfileAvailability((prev) => ({ ...prev, hourlyRate: values.hourlyRate, slotsByDay: values.slotsByDay }));
+      setLastSavedAt(new Date().toISOString());
       router.push('/');
     })();
   };
 
-  const addSlot = () => {
-    const current = form.getValues('slotsByDay') ?? {};
-    const daySlots = current[dayKey] ?? [];
-    setValue('slotsByDay', {
-      ...current,
-      [dayKey]: [...daySlots, { ...defaultSlot }],
-    });
-    setSlotsByDay((prev) => ({
-      ...prev,
-      [dayKey]: [...(prev[dayKey] ?? []), { ...defaultSlot }],
-    }));
-    setLastSavedAt(new Date().toISOString());
-  };
-
-  const removeSlot = (index: number) => {
-    const current = form.getValues('slotsByDay') ?? {};
-    const daySlots = (current[dayKey] ?? []).filter((_, i) => i !== index);
-    setValue('slotsByDay', { ...current, [dayKey]: daySlots });
-    setSlotsByDay((prev) => ({
-      ...prev,
-      [dayKey]: (prev[dayKey] ?? []).filter((_, i) => i !== index),
-    }));
-    setLastSavedAt(new Date().toISOString());
-  };
-
-  const updateSlot = (index: number, patch: Partial<TimeSlot>) => {
-    const current = form.getValues('slotsByDay') ?? {};
-    const list = [...(current[dayKey] ?? [])];
-    list[index] = { ...list[index], ...patch };
-    setValue('slotsByDay', { ...current, [dayKey]: list });
-    setSlotsByDay((prev) => {
-      const nextList = [...(prev[dayKey] ?? [])];
-      nextList[index] = { ...nextList[index], ...patch };
-      return { ...prev, [dayKey]: nextList };
-    });
-    setLastSavedAt(new Date().toISOString());
-  };
-
   const handleHourlyRateChange = (value: string) => {
     setValue('hourlyRate', value);
-    setHourlyRate(value);
+    setTutorProfileAvailability((prev) => ({ ...prev, hourlyRate: value }));
     setLastSavedAt(new Date().toISOString());
+  };
+
+  const handleAvailabilitySave = (data: AvailabilityData) => {
+    setTutorProfileAvailability((prev) => ({ ...prev, slotsByDay: data.slotsByDay }));
+    setLastSavedAt(new Date().toISOString());
+  };
+
+  const handleAvailabilityChange = (data: AvailabilityData) => {
+    setTutorProfileAvailability((prev) => ({ ...prev, slotsByDay: data.slotsByDay }));
   };
 
   const draftSavedLabel =
@@ -157,7 +109,74 @@ export function TutorProfileAvailabilityScreen() {
       ? t('draftSaved', { time: formatLastSavedTime(lastSavedAt) })
       : '';
 
-  const dayTabs = t.raw('availability.tabs') as string[];
+  const availabilityInitialData = useMemo(
+    () => ({ slotsByDay: tutorProfileAvailability.slotsByDay }),
+    [tutorProfileAvailability.slotsByDay]
+  );
+
+  const handleContinue = async () => {
+    const hourlyRate = form.getValues('hourlyRate');
+    const slotsByDay = form.getValues('slotsByDay') ?? {};
+    
+    if (!hourlyRate || !HOURLY_RATE_REGEX.test(hourlyRate.trim()) || Number(hourlyRate) <= 0) {
+      return;
+    }
+
+    const proficiencies = (about.proficiencies || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const languages = (about.languages || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((languageCode, i) => ({
+        languageCode,
+        proficiency: proficiencies[i] ?? '',
+      }));
+
+    const availability: SubmitTutorProfileDto['availability'] = [];
+    Object.entries(slotsByDay).forEach(([dayKey, slots]) => {
+      const dayIndex = DAY_KEYS.indexOf(dayKey as (typeof DAY_KEYS)[number]);
+      if (dayIndex === -1) return;
+      for (const slot of slots) {
+        availability.push({
+          dayOfWeek: dayIndex,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        });
+      }
+    });
+
+    const payload: SubmitTutorProfileDto = {
+      firstName: about.firstName,
+      lastName: about.lastName,
+      email: about.email,
+      country: about.country as SubmitTutorProfileDto['country'],
+      phone: about.phone,
+      subject: about.subject,
+      languages,
+      identityPhotoUrl: photo.identity.uploadedUrl ?? '',
+      headline: photo.headline,
+      motivate: photo.motivate,
+      introduce: photo.introduce,
+      teachingCertificateName: certification.teachingCertificate.name,
+      teachingYear: certification.teachingCertificate.year,
+      teachingCertificateFileUrl: certification.teachingCertificate.file.uploadedUrl ?? '',
+      university: certification.higherEducation.university,
+      degree: certification.higherEducation.degree,
+      specialization: certification.higherEducation.specialization,
+      educationFileUrl: certification.higherEducation.file.uploadedUrl ?? '',
+      videoUrl: video.videoLink,
+      pricePerHour: Number.parseFloat(hourlyRate) || 0,
+      availability,
+    };
+
+    await submitMutation.mutateAsync(payload);
+    resetAfterSubmit();
+    router.push('/become-tutor/final');
+  };
 
   return (
     <Screen backgroundColor="$background">
@@ -196,10 +215,7 @@ export function TutorProfileAvailabilityScreen() {
               />
 
               <YStack gap="$2">
-                <Paragraph
-                  fontSize={24}
-                  fontWeight="700"
-                >
+                <Paragraph fontSize={24} fontWeight="700">
                   {t('title')}
                 </Paragraph>
                 <Text variant="muted">{t('subtitle')}</Text>
@@ -214,32 +230,17 @@ export function TutorProfileAvailabilityScreen() {
                 borderColor="$borderSubtle"
                 $xs={{ padding: '$4' }}
               >
-                <XStack
-                  alignItems="center"
-                  gap="$2"
-                >
-                  <WalletIcon
-                    size={24}
-                    color={ICON_COLOR}
-                  />
-                  <Paragraph
-                    fontWeight="700"
-                    fontSize={18}
-                  >
+                <XStack alignItems="center" gap="$2">
+                  <WalletIcon size={24} color={ICON_COLOR} />
+                  <Paragraph fontWeight="700" fontSize={18}>
                     {t('rateCardTitle')}
                   </Paragraph>
                 </XStack>
-                <Text
-                  size="sm"
-                  variant="muted"
-                >
+                <Text size="sm" variant="muted">
                   {t('rate.question')}
                 </Text>
                 <YStack gap="$2">
-                  <XStack
-                    alignItems="stretch"
-                    gap="$2"
-                  >
+                  <XStack alignItems="stretch" gap="$2">
                     <XStack
                       flex={1}
                       alignItems="center"
@@ -250,15 +251,31 @@ export function TutorProfileAvailabilityScreen() {
                       backgroundColor="$fieldBackground"
                       paddingLeft="$4"
                     >
-                      <Text
-                        color="$colorMuted"
-                        marginRight="$2"
-                      >
+                      <Text color="$colorMuted" marginRight="$2">
                         $
                       </Text>
                       <Controller
                         control={control}
                         name="hourlyRate"
+                        rules={{
+                          validate: (value) => {
+                            const trimmed = value.trim();
+
+                            if (!trimmed) {
+                              return t('validation.hourlyRateRequired');
+                            }
+
+                            if (!HOURLY_RATE_REGEX.test(trimmed)) {
+                              return t('validation.hourlyRateInvalidFormat');
+                            }
+
+                            if (Number(trimmed) <= 0) {
+                              return t('validation.hourlyRateGreaterThanZero');
+                            }
+
+                            return true;
+                          },
+                        }}
                         render={({ field: { value, onChange } }) => (
                           <Input
                             flex={1}
@@ -287,227 +304,39 @@ export function TutorProfileAvailabilityScreen() {
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <Text
-                        size="sm"
-                        variant="muted"
-                      >
+                      <Text size="sm" variant="muted">
                         {t('rate.currencyLabel')}
                       </Text>
                     </YStack>
                   </XStack>
-                  <Text
-                    size="sm"
-                    variant="muted"
-                  >
+                  <Text size="sm" variant="muted">
                     {t('rate.recommended')}
                   </Text>
+                  {errors.hourlyRate?.message && (
+                    <Text size="md" color="#EF4444">
+                      {errors.hourlyRate?.message}
+                    </Text>
+                  )}
                 </YStack>
               </YStack>
 
-              <YStack
-                backgroundColor="$backgroundCard"
-                borderRadius="$4"
-                padding="$6"
-                gap="$4"
-                borderWidth={1}
-                borderColor="$borderSubtle"
-                $xs={{ padding: '$4' }}
-              >
-                <XStack
-                  alignItems="center"
-                  gap="$2"
-                >
-                  <CalendarIcon
-                    size={24}
-                    color={ICON_COLOR}
-                  />
-                  <Paragraph
-                    fontWeight="700"
-                    fontSize={18}
-                  >
-                    {t('availabilityCardTitle')}
-                  </Paragraph>
-                </XStack>
-
-                <XStack
-                  gap="$2"
-                  flexWrap="wrap"
-                >
-                  {dayTabs.map((label, index) => (
-                    <Button
-                      key={label}
-                      variant={selectedDayIndex === index ? 'primary' : 'ghost'}
-                      size="$3"
-                      onPress={() => setSelectedDayIndex(index)}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </XStack>
-
-                <YStack gap="$3">
-                  {slots.map((slot, index) => (
-                    <XStack
-                      key={index}
-                      gap="$2"
-                      alignItems="flex-end"
-                      flexWrap="wrap"
-                      $xs={{ flexDirection: 'column', alignItems: 'stretch' }}
-                    >
-                      <YStack
-                        gap="$1"
-                        flex={1}
-                        minWidth={120}
-                      >
-                        <Label
-                          color="$colorMuted"
-                          fontSize={13}
-                        >
-                          {t('availability.from')}
-                        </Label>
-                        <Input
-                          flex={1}
-                          value={slot.startTime}
-                          onChangeText={(v) => updateSlot(index, { startTime: v })}
-                          placeholder="09:00"
-                          backgroundColor="$fieldBackground"
-                          borderColor="$borderSubtle"
-                          color="$color"
-                          paddingHorizontal="$3"
-                          height={44}
-                          borderRadius="$3"
-                        />
-                      </YStack>
-                      <Text>
-                        <ArrowRightIcon size={25} />
-                      </Text>
-
-                      <YStack
-                        gap="$1"
-                        flex={1}
-                        minWidth={120}
-                      >
-                        <Label
-                          color="$colorMuted"
-                          fontSize={13}
-                        >
-                          {t('availability.to')}
-                        </Label>
-                        <Input
-                          flex={1}
-                          value={slot.endTime}
-                          onChangeText={(v) => updateSlot(index, { endTime: v })}
-                          placeholder="17:00"
-                          backgroundColor="$fieldBackground"
-                          borderColor="$borderSubtle"
-                          color="$color"
-                          paddingHorizontal="$3"
-                          height={44}
-                          borderRadius="$3"
-                        />
-                      </YStack>
-                      <Button
-                        variant="ghost"
-                        size="$2"
-                        padding="$2"
-                        onPress={() => removeSlot(index)}
-                      >
-                        <TrashIcon
-                          size={18}
-                          color="#EF4444"
-                        />
-                      </Button>
-                    </XStack>
-                  ))}
-
-                  <Button
-                    variant="ghost"
-                    borderWidth={1}
-                    borderColor="$borderSubtle"
-                    borderStyle="dashed"
-                    padding="$3"
-                    onPress={addSlot}
-                  >
-                    <XStack
-                      alignItems="center"
-                      gap="$2"
-                    >
-                      <PlusCircleIcon
-                        size={20}
-                        color={ICON_COLOR}
-                      />
-                      <Text
-                        size="sm"
-                        variant="muted"
-                      >
-                        {t('availability.addSlot')}
-                      </Text>
-                    </XStack>
-                  </Button>
-                </YStack>
-              </YStack>
-
-              <XStack
-                justifyContent="space-between"
-                alignItems="center"
-                marginTop="$4"
-                $xs={{
-                  flexDirection: 'column',
-                  alignItems: 'stretch',
-                  gap: '$3',
-                }}
-              >
-                <Button
-                  variant="outline"
-                  onPress={() => router.push('/become-tutor/video')}
-                >
-                  {t('back')}
-                </Button>
-                <Button
-                  variant="primary"
-                  onPress={handleSubmit((values) => {
-                    const payload = buildSubmitTutorProfilePayload({
-                      ...about,
-                      ...photo,
-                      ...certification,
-                      videoUrl: video.videoLink,
-                      hourlyRate: values.hourlyRate,
-                      slotsByDay: values.slotsByDay,
-                    });
-
-                    submitProfile(payload);
-                    router.push('/become-tutor/final');
-                  })}
-                >
-                  {t('continue')}
-                </Button>
-              </XStack>
+              <AvailabilityEditor
+                initialData={availabilityInitialData}
+                onSave={handleAvailabilitySave}
+                onChange={handleAvailabilityChange}
+                showActions={false}
+              />
             </Container>
           </YStack>
         </ScrollView>
         <TutorProfileStickyActions>
-          <Button
-            variant="outline"
-            onPress={() => router.push('/become-tutor/video')}
-          >
+          <Button variant="outline" onPress={() => router.push('/become-tutor/video')}>
             {t('back')}
           </Button>
           <Button
             variant="primary"
-            onPress={handleSubmit((values) => {
-              const payload = buildSubmitTutorProfilePayload({
-                ...about,
-                ...photo,
-                ...identity,
-                ...certification,
-                videoUrl: video.videoLink,
-                hourlyRate: values.hourlyRate,
-                slotsByDay: values.slotsByDay,
-              });
-
-              submitProfile(payload);
-              router.push('/become-tutor/final');
-            })}
+            disabled={submitMutation.isPending}
+            onPress={handleSubmit(handleContinue)}
           >
             {t('continue')}
           </Button>

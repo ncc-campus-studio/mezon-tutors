@@ -1,51 +1,62 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { Screen, ScrollView, Text, YStack } from '@mezon-tutors/app/ui';
 import { isLoadingAtom, userAtom } from '@mezon-tutors/app/store/auth.atom';
 import { useMedia } from 'tamagui';
+import dayjs from 'dayjs';
 import { MyLessonsCalendarSection } from './components/MyLessonsCalendarSection';
 import { MyLessonsHeader } from './components/MyLessonsHeader';
 import { MyLessonsLessonsPanel } from './components/MyLessonsLessonsPanel';
 import { MyLessonsPromoCard } from './components/MyLessonsPromoCard';
 import { MyLessonsTutorsPanel } from './components/MyLessonsTutorsPanel';
-import { getMyLessonsDataByMezonUserId } from './data-source';
-import type { MyLessonsTab, MyLessonsViewData } from './types';
+import { MobileCalendar } from '@mezon-tutors/app';
+import type { MobileCalendarItem } from '@mezon-tutors/app';
+import { MOBILE_CALENDAR_CONFIGS } from '@mezon-tutors/shared';
+import { DEFAULT_AVATAR_URL } from '@mezon-tutors/shared';
+import { useMyLessons } from './hooks/useMyLessons';
+import type { MyLessonsTab, LessonItem } from './types';
+
+function convertLessonsToCalendarItems(lessons: LessonItem[], joinLabel: string): MobileCalendarItem[] {
+  return lessons.map((lesson) => ({
+    id: lesson.id,
+    dayIndex: lesson.dayIndex,
+    title: lesson.subject,
+    person: {
+      name: lesson.tutor,
+      avatar: lesson.tutorAvatar,
+    },
+    timeLabel: lesson.timeLabel,
+    category: lesson.category,
+    actionLabel: joinLabel,
+    onAction: () => {},
+  }));
+}
 
 export function MyLessonsScreen() {
   const t = useTranslations('MyLessons');
   const [activeTab, setActiveTab] = useState<MyLessonsTab>('calendar');
-  const [data, setData] = useState<MyLessonsViewData | null>(null);
+  const [selectedDate, setSelectedDate] = useState(dayjs());
   const user = useAtomValue(userAtom);
   const isAuthLoading = useAtomValue(isLoadingAtom);
 
+  const { data, isLoading } = useMyLessons(selectedDate);
+
   const media = useMedia();
   const isNarrow = media.md || media.sm || media.xs;
+  const isMobile = media.sm || media.xs;
 
-  useEffect(() => {
-    let isMounted = true;
+  const handlePrevWeek = () => {
+    setSelectedDate((prev) => prev.subtract(7, 'day'));
+  };
 
-    if (isAuthLoading) {
-      return () => {
-        isMounted = false;
-      };
-    }
+  const handleNextWeek = () => {
+    setSelectedDate((prev) => prev.add(7, 'day'));
+  };
 
-    const loadData = async () => {
-      const payload = await getMyLessonsDataByMezonUserId(user?.mezonUserId);
-      if (isMounted) {
-        setData(payload);
-      }
-    };
-
-    void loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isAuthLoading, user?.mezonUserId]);
+  const isDataLoading = isAuthLoading || isLoading;
 
   return (
     <Screen backgroundColor="$myLessonsPageBackground">
@@ -58,10 +69,13 @@ export function MyLessonsScreen() {
             paddingHorizontal={isNarrow ? 12 : 28}
             paddingVertical={isNarrow ? 12 : 24}
             gap="$5"
+            $xs={{ paddingHorizontal: 12, paddingVertical: 12, gap: '$3.5' }}
+            $sm={{ paddingHorizontal: 16, paddingVertical: 16, gap: '$4' }}
+            className="my-lessons-screen-container"
           >
             <MyLessonsHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {!data ? (
+            {isDataLoading ? (
               <YStack
                 width="100%"
                 minHeight={220}
@@ -79,32 +93,65 @@ export function MyLessonsScreen() {
             ) : null}
 
             {data && activeTab === 'calendar' ? (
-              isNarrow ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <MyLessonsCalendarSection calendar={data.calendar} lessons={data.calendarLessons} />
-                </ScrollView>
+              isMobile ? (
+                <MobileCalendar
+                  config={MOBILE_CALENDAR_CONFIGS.myLessons}
+                  calendar={{
+                    title: data.calendar.title,
+                    weekDays: data.calendar.weekDays,
+                    currentDayIndex: data.calendar.currentDayIndex,
+                  }}
+                  items={convertLessonsToCalendarItems(data.calendarLessons, t('panels.lessons.upcoming.joinLesson'))}
+                  defaultAvatarUrl={DEFAULT_AVATAR_URL}
+                  onPrevWeek={handlePrevWeek}
+                  onNextWeek={handleNextWeek}
+                  enableCategoryFilter
+                  categoryAllLabel={t('mobile.allLessons')}
+                  categoryLabel={t('mobile.lessons')}
+                  emptyMessage={t('mobile.noLessonsForDay')}
+                />
               ) : (
-                <MyLessonsCalendarSection calendar={data.calendar} lessons={data.calendarLessons} />
+                <YStack gap="$5" width="100%" maxWidth={1032} alignSelf="center">
+                  <MyLessonsPromoCard />
+                  {isNarrow ? (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      <MyLessonsCalendarSection 
+                        calendar={data.calendar} 
+                        lessons={data.calendarLessons}
+                        onPrevWeek={handlePrevWeek}
+                        onNextWeek={handleNextWeek}
+                      />
+                    </ScrollView>
+                  ) : (
+                    <MyLessonsCalendarSection 
+                      calendar={data.calendar} 
+                      lessons={data.calendarLessons}
+                      onPrevWeek={handlePrevWeek}
+                      onNextWeek={handleNextWeek}
+                    />
+                  )}
+                </YStack>
               )
             ) : null}
 
             {data && activeTab === 'lessons' ? (
-              <YStack gap="$5" width="100%" maxWidth={1032} alignSelf="center">
-                <MyLessonsPromoCard />
+              isMobile ? (
                 <MyLessonsLessonsPanel
                   upcomingLessons={data.upcomingLessons}
                   previousLessons={data.previousLessons}
                 />
-              </YStack>
+              ) : (
+                <YStack gap="$5" width="100%" maxWidth={1032} alignSelf="center">
+                  <MyLessonsPromoCard />
+                  <MyLessonsLessonsPanel
+                    upcomingLessons={data.upcomingLessons}
+                    previousLessons={data.previousLessons}
+                  />
+                </YStack>
+              )
             ) : null}
 
             {data && activeTab === 'tutors' ? <MyLessonsTutorsPanel tutors={data.tutors} /> : null}
-
-            <YStack width="100%" alignItems="flex-end" paddingVertical="$2">
-              <Text color="$myLessonsFooterText" fontSize={12}>
-                {t('previewFooter')}
-              </Text>
-            </YStack>
           </YStack>
         </ScrollView>
       </YStack>

@@ -12,6 +12,7 @@ import { config, DEFAULT_THEME } from '../config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { isWeb, TamaguiProvider, Theme, useThemeName } from 'tamagui';
 import { ToastProvider, ToastViewport } from '@tamagui/toast';
+import { MezonLightProvider } from './MezonLightProvider';
 
 /** Syncs Tamagui theme to html[data-theme] for CSS (e.g. autofill styles). */
 function ThemeSyncToDataAttribute() {
@@ -120,7 +121,7 @@ export const NextTamaguiProvider = ({ children }: { children: ReactNode }) => {
             native={isWeb ? [] : ['mobile']}
           >
             <ToastViewport />
-            {children}
+            <MezonLightProvider>{children}</MezonLightProvider>
           </ToastProvider>
         </Theme>
       </TamaguiProvider>

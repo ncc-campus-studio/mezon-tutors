@@ -22,7 +22,8 @@
     "prisma:db:push": "dotenv -e .env -- npx prisma db push",
     "prisma:reset": "dotenv -e .env -- npx prisma migrate reset",
     "prisma:fmt": "dotenv -e .env -- npx prisma format",
-    "prisma:gen": "dotenv -e .env -- npx prisma generate",
+    "prisma:gen:dev": "dotenv -e .env -- npx prisma generate",
+    "prisma:gen": "prisma generate",
     "prisma:migrate": "dotenv -e .env -- npx prisma migrate dev",
     "seed": "dotenv -e .env -- tsx prisma/seed",
     "prisma:migrate:data": "scaffdog generate"

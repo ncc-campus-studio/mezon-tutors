@@ -1,0 +1,14 @@
+import { ETrialLessonStatus } from '@mezon-tutors/db'
+
+export interface TutorTrialLessonBookingRequestDto {
+  id: string
+  studentName: string
+  studentAvatarUrl?: string
+  startAt: string
+  durationMinutes: number
+  grossAmount: number
+  platformFee: number
+  tutorAmount: number
+  status: ETrialLessonStatus
+  createdAt: string
+}

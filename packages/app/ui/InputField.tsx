@@ -18,6 +18,7 @@ export type InputFieldProps<TFieldValues extends FieldValues = FieldValues> = {
   backgroundColor?: ColorTokens | string;
   borderWidth?: number;
   height?: number | string;
+  width?: number | string;
 };
 
 export function InputField<TFieldValues extends FieldValues = FieldValues>({
@@ -33,6 +34,7 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
   backgroundColor,
   borderWidth,
   height,
+  width,
 }: InputFieldProps<TFieldValues>) {
   return (
     <Controller
@@ -53,6 +55,7 @@ export function InputField<TFieldValues extends FieldValues = FieldValues>({
           backgroundColor={backgroundColor}
           borderWidth={borderWidth}
           height={height}
+          width={width}
         />
       )}
     />

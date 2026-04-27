@@ -1,118 +1,47 @@
-'use client'
-import Link from 'next/link'
-import styles from './Header.module.css'
-import { useAtomValue } from 'jotai'
-import { isAuthenticatedAtom, userAtom } from '@mezon-tutors/app/store/auth.atom'
-import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton'
-import { LogoutButton } from '@mezon-tutors/app/components/auth/LogoutButton'
-import { ROUTES } from '@mezon-tutors/shared'
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { useLocale, useTranslations } from 'next-intl'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-
-function ThemeIcon({ isDark }: { isDark: boolean }) {
-  if (isDark) {
-    return (
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden
-      >
-        <path
-          d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    )
-  }
-
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M12 2.5V5.2M12 18.8V21.5M21.5 12H18.8M5.2 12H2.5M18.7 5.3L16.8 7.2M7.2 16.8L5.3 18.7M18.7 18.7L16.8 16.8M7.2 7.2L5.3 5.3"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
+'use client';
+import Link from 'next/link';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { isAuthenticatedAtom, userAtom } from '@mezon-tutors/app/store/auth.atom';
+import { authService, tokenStorage } from '@mezon-tutors/app/services';
+import { LoginButton } from '@mezon-tutors/app/components/auth/LoginButton';
+import { HEADER_NAV, ROUTES, HEADER_CONFIG } from '@mezon-tutors/shared';
+import { getDashboardMenuItemsByRole } from '@mezon-tutors/shared/src/constants/dashboard';
+import { useCallback, useMemo, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { XStack, Text, Button } from '@mezon-tutors/app/ui';
+import { LogoIcon, MenuIcon } from '@mezon-tutors/app/ui/icons';
+import { themes } from '@mezon-tutors/app/theme/theme';
+import { useThemeName, useMedia } from 'tamagui';
+import { HeaderLocaleToggle } from './HeaderLocaleToggle';
+import { HeaderThemeToggle } from './HeaderThemeToggle';
+import { HeaderNavLink } from './HeaderNavLink';
+import { DashboardMobileDrawer } from '@mezon-tutors/app/features/dashboard/mobile-drawer/DashboardMobileDrawer';
 
 export default function Header() {
-  const locale = useLocale()
-  const t = useTranslations('Common.Header')
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const isAuthenticated = useAtomValue(isAuthenticatedAtom)
-  const user = useAtomValue(userAtom)
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('light')
-  const [showUserMenu, setShowUserMenu] = useState(false)
+  const locale = useLocale();
+  const t = useTranslations('Common.Header');
+  const tDashboard = useTranslations('Dashboard');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const themeName = useThemeName();
+  const media = useMedia();
+  const isMobile = media.sm || media.xs;
+  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+  const user = useAtomValue(userAtom);
+  const setUser = useSetAtom(userAtom);
+  const themeMode: 'light' | 'dark' = themeName === 'dark' ? 'dark' : 'light';
+  const headerTheme = themeMode === 'dark' ? themes.dark : themes.light;
+  const dashboardTheme = themeName === 'dark' ? themes.dark : themes.light;
 
-  const headerThemeVarsByMode = {
-    light: {
-      '--header-bg-start': '#0b1628',
-      '--header-bg-end': '#101f3f',
-      '--header-border': 'rgba(255, 255, 255, 0.10)',
-      '--header-logo-text': '#ffffff',
-      '--header-nav-text': '#cbd5e1',
-      '--header-nav-hover': '#ffffff',
-      '--header-toggle-border': 'rgba(255, 255, 255, 0.22)',
-      '--header-toggle-bg': 'rgba(255, 255, 255, 0.04)',
-      '--header-toggle-text': '#e7eeff',
-      '--header-toggle-hover': 'rgba(255, 255, 255, 0.12)',
-      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.75)',
-      '--header-locale-active-text': '#ffffff',
-    } as CSSProperties,
-    dark: {
-      '--header-bg-start': '#050d19',
-      '--header-bg-end': '#0b1628',
-      '--header-border': 'rgba(148, 163, 184, 0.20)',
-      '--header-logo-text': '#f8fafc',
-      '--header-nav-text': '#cbd5e1',
-      '--header-nav-hover': '#ffffff',
-      '--header-toggle-border': 'rgba(148, 163, 184, 0.35)',
-      '--header-toggle-bg': 'rgba(15, 23, 42, 0.45)',
-      '--header-toggle-text': '#e2e8f0',
-      '--header-toggle-hover': 'rgba(148, 163, 184, 0.18)',
-      '--header-locale-active-bg': 'rgba(29, 102, 242, 0.82)',
-      '--header-locale-active-text': '#ffffff',
-    } as CSSProperties,
-  }
+  const isDashboard = pathname.startsWith('/dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute('data-theme')
-    if (currentTheme === 'dark' || currentTheme === 'light') {
-      setThemeMode(currentTheme)
-      return
-    }
-
-    const savedTheme = window.localStorage.getItem('app-theme')
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      setThemeMode(savedTheme)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Prevent accidental dropdown open right after auth state changes/navigation.
-    setShowUserMenu(false)
-  }, [isAuthenticated, pathname])
+  const visibleMenuItems = useMemo(() => getDashboardMenuItemsByRole(user?.role), [user?.role]);
 
   const toggleTheme = useCallback(() => {
     const nextTheme = themeMode === 'dark' ? 'light' : 'dark'
-    setThemeMode(nextTheme)
     window.dispatchEvent(new CustomEvent('app-theme-change', { detail: nextTheme }))
   }, [themeMode])
 
@@ -120,8 +49,8 @@ export default function Header() {
     (nextLocale: 'en' | 'vi') => {
       if (nextLocale === locale) return
 
-      // Persist selected locale for next-intl middleware/request config.
-      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax; secure`
+      const isHttps = window.location.protocol === 'https:'
+      document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax${isHttps ? '; secure' : ''}`
 
       const query = searchParams.toString()
       const nextPath = query ? `${pathname}?${query}` : pathname
@@ -131,103 +60,250 @@ export default function Header() {
     [locale, pathname, router, searchParams]
   )
 
-  const headerCssVars = useMemo(() => headerThemeVarsByMode[themeMode], [themeMode])
+  const toggleLocale = useCallback(() => {
+    const nextLocale = locale === 'en' ? 'vi' : 'en'
+    void switchLocale(nextLocale)
+  }, [locale, switchLocale])
+
+  const goToDashboard = useCallback(() => {
+    router.push(ROUTES.DASHBOARD.INDEX)
+  }, [router])
+
+  const handleMenuPress = useCallback(() => {
+    setIsSidebarOpen(true);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      await tokenStorage.clearTokens();
+      setUser(null);
+      setIsSidebarOpen(false);
+      router.push(ROUTES.HOME.index);
+    }
+  }, [setUser, router]);
 
   return (
-    <header className={styles.header} style={headerCssVars}>
-      <div className={styles.logo}>
-        <Link href={ROUTES.HOME.index} className={styles.logoLink}>
-          <div
-            style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-            className={styles.icons}
-          >
-            <img src="/icons/Background.svg" alt="background" />
-            <span style={{ margin: 0 }}>TutorMatch</span>
-          </div>
-        </Link>
-      </div>
-
-      <nav className={styles.nav}>
-        <Link href={ROUTES.TUTOR.INDEX}>{t('findTutors')}</Link>
-        <Link href={ROUTES.MY_LESSONS.INDEX}>{t('myLessons')}</Link>
-        <Link href={ROUTES.BECOME_TUTOR.INDEX}>{t('becomeTutor')}</Link>
-      </nav>
-
-      <div className={styles.actions}>
-        <button type="button" className={styles.themeToggle} onClick={toggleTheme}>
-          <ThemeIcon isDark={themeMode === 'dark'} />
-        </button>
-
-        <div className={styles.localeToggle}>
-          <button
-            type="button"
-            className={locale === 'en' ? styles.localeActive : ''}
-            onClick={() => switchLocale('en')}
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            className={locale === 'vi' ? styles.localeActive : ''}
-            onClick={() => switchLocale('vi')}
-          >
-            VI
-          </button>
-        </div>
-
-        {isAuthenticated ? (
-          <div className={styles.userMenuWrapper}>
-            <button 
-              type="button"
-              className={styles.userInfo}
-              onClick={() => setShowUserMenu(!showUserMenu)}
+    <>
+      <XStack
+        top={0}
+        zIndex={200}
+        height={HEADER_CONFIG.height.desktop}
+        paddingHorizontal={HEADER_CONFIG.padding.desktop}
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="$myLessonsTopNavBackground"
+        borderBottomWidth={1}
+        borderBottomColor="$myLessonsTopNavBorder"
+        $xs={{
+          height: HEADER_CONFIG.height.mobile,
+          paddingHorizontal: HEADER_CONFIG.padding.mobile,
+        }}
+        $sm={{
+          height: HEADER_CONFIG.height.tablet,
+          paddingHorizontal: HEADER_CONFIG.padding.tablet,
+        }}
+        style={{
+          position: 'sticky',
+          backdropFilter: HEADER_CONFIG.backdrop.blur,
+          backgroundImage: `linear-gradient(90deg, ${headerTheme.webHeaderBgStart}, ${headerTheme.webHeaderBgEnd})`,
+          boxShadow: `${headerTheme.webHeaderContainerShadow}`,
+          transition: `background-image ${HEADER_CONFIG.transition.duration} ${HEADER_CONFIG.transition.easing}, box-shadow ${HEADER_CONFIG.transition.duration} ${HEADER_CONFIG.transition.easing}, border-color ${HEADER_CONFIG.transition.borderDuration} ease`,
+        }}
+      >
+        <XStack
+          alignItems="center"
+          gap={10}
+          $xs={{ gap: 6 }}
+          $sm={{ gap: 8 }}
+        >
+          {isDashboard && isMobile ? (
+            <XStack
+              alignItems="center"
+              gap={HEADER_CONFIG.menu.dashboardGap}
             >
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.username ?? 'User avatar'} className={styles.avatar} />
-              ) : (
-                <div className={styles.avatar}>
-                  {user?.username?.substring(0, 2).toUpperCase() || 'U'}
-                </div>
-              )}
-              <span className={styles.username}>{user?.username}</span>
-              <svg 
-                width="12" 
-                height="12" 
-                viewBox="0 0 12 12" 
-                fill="none"
-                style={{ 
-                  transition: 'transform 200ms',
-                  transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)'
+              <Button
+                chromeless
+                onPress={handleMenuPress}
+                padding={HEADER_CONFIG.menu.buttonPadding}
+                borderRadius={HEADER_CONFIG.menu.buttonBorderRadius}
+                hoverStyle={{
+                  backgroundColor: '$dashboardTutorSidebarItemHover',
                 }}
               >
-                <path 
-                  d="M3 4.5L6 7.5L9 4.5" 
-                  stroke="currentColor" 
-                  strokeWidth="1.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
+                <MenuIcon
+                  size={HEADER_CONFIG.menu.iconSize}
+                  color={headerTheme.webHeaderToggleText || '#111827'}
                 />
-              </svg>
-            </button>
-            
-            {showUserMenu && (
-              <>
-                <div 
-                  className={styles.menuOverlay} 
-                  onClick={() => setShowUserMenu(false)}
-                />
-                <div className={styles.userMenu}>
-                  <div className={styles.menuItem}>
-                    <LogoutButton />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
-          <LoginButton />
-        )}
-      </div>
-    </header>
-  )
+              </Button>
+              <Text
+                color="$myLessonsBrandText"
+                fontSize={HEADER_CONFIG.logo.mobileDashboardFontSize}
+                fontWeight="700"
+              >
+                TutorMatch
+              </Text>
+            </XStack>
+          ) : (
+            <Link
+              href={ROUTES.HOME.index}
+              style={{ textDecoration: 'none' }}
+            >
+              <XStack
+                alignItems="center"
+                gap={10}
+                borderRadius={HEADER_CONFIG.logo.borderRadius}
+                paddingVertical={HEADER_CONFIG.logo.padding.vertical}
+                paddingHorizontal={HEADER_CONFIG.logo.padding.horizontal}
+                backgroundColor="$webHeaderLogoChipBg"
+                borderWidth={1}
+                borderColor="$webHeaderLogoChipBorder"
+                $xs={{
+                  paddingVertical: HEADER_CONFIG.logo.mobilePadding.vertical,
+                  paddingHorizontal: HEADER_CONFIG.logo.mobilePadding.horizontal,
+                  gap: 0,
+                }}
+                $sm={{
+                  paddingVertical: HEADER_CONFIG.logo.mobilePadding.vertical,
+                  paddingHorizontal: HEADER_CONFIG.logo.mobilePadding.horizontal,
+                  gap: 0,
+                }}
+                style={{
+                  transition: `all ${HEADER_CONFIG.transition.borderDuration} ${HEADER_CONFIG.transition.easing}`,
+                  cursor: 'pointer',
+                }}
+                className="mobile-header-logo"
+                hoverStyle={{
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
+                }}
+                pressStyle={{
+                  transform: 'scale(0.95)',
+                }}
+              >
+                <LogoIcon size={HEADER_CONFIG.logo.size} />
+                <Text
+                  color="$myLessonsBrandText"
+                  fontSize={HEADER_CONFIG.logo.fontSize}
+                  fontWeight="700"
+                  lineHeight={HEADER_CONFIG.logo.lineHeight}
+                  display="block"
+                  $xs={{ display: 'none' }}
+                  $sm={{ display: 'none' }}
+                >
+                  TutorMatch
+                </Text>
+              </XStack>
+            </Link>
+          )}
+        </XStack>
+
+        <XStack
+          gap={HEADER_CONFIG.nav.gap.desktop}
+          alignItems="center"
+          $xs={{ display: 'none' }}
+          $sm={{ display: 'none' }}
+        >
+          {HEADER_NAV.map((item) => (
+            <HeaderNavLink
+              key={item.href}
+              href={item.href}
+              label={t(item.labelKey)}
+              active={pathname === item.href}
+            />
+          ))}
+        </XStack>
+
+        <XStack
+          gap={12}
+          alignItems="center"
+          display="none"
+          $xs={{ display: 'flex', gap: HEADER_CONFIG.nav.gap.mobile }}
+          $sm={{ display: 'flex', gap: HEADER_CONFIG.nav.gap.tablet }}
+        >
+          <Link
+            href={HEADER_NAV[0].href}
+            style={{ color: 'inherit', textDecoration: 'none' }}
+          >
+            <Text
+              color={
+                pathname === HEADER_NAV[0].href ? '$myLessonsNavActive' : '$myLessonsNavInactive'
+              }
+              fontSize={HEADER_CONFIG.nav.fontSize.desktop}
+              fontWeight={pathname === HEADER_NAV[0].href ? '700' : '500'}
+              $xs={{ fontSize: HEADER_CONFIG.nav.fontSize.mobile }}
+              $sm={{ fontSize: HEADER_CONFIG.nav.fontSize.tablet }}
+            >
+              {t(HEADER_NAV[0].labelKey)}
+            </Text>
+          </Link>
+        </XStack>
+
+        <XStack
+          alignItems="center"
+          gap={10}
+          $xs={{ gap: 4 }}
+          $sm={{ gap: 5 }}
+        >
+          {!isAuthenticated ? <LoginButton /> : null}
+
+          <HeaderLocaleToggle
+            locale={locale}
+            onToggle={toggleLocale}
+            iconColor={headerTheme.webHeaderToggleText}
+          />
+
+          <HeaderThemeToggle
+            isDark={themeMode === 'dark'}
+            onToggleAction={toggleTheme}
+          />
+
+          {isAuthenticated && user?.avatar ? (
+            <XStack
+              borderWidth={1}
+              borderColor="$myLessonsTopNavBorder"
+              borderRadius={999}
+              backgroundColor="transparent"
+              padding={HEADER_CONFIG.avatar.padding.desktop}
+              cursor="pointer"
+              onPress={goToDashboard}
+              $xs={{ padding: HEADER_CONFIG.avatar.padding.mobile }}
+              $sm={{ padding: HEADER_CONFIG.avatar.padding.tablet }}
+            >
+              <img
+                src={user.avatar}
+                alt={user.username ?? 'User avatar'}
+                style={{
+                  width: HEADER_CONFIG.avatar.size.desktop,
+                  height: HEADER_CONFIG.avatar.size.desktop,
+                  borderRadius: '999px',
+                  objectFit: 'cover',
+                  border: `${HEADER_CONFIG.avatar.borderWidth}px solid ${headerTheme.webHeaderAvatarBorder}`,
+                  cursor: 'pointer',
+                }}
+                className="mobile-avatar"
+              />
+            </XStack>
+          ) : null}
+        </XStack>
+      </XStack>
+
+      <DashboardMobileDrawer
+        isOpen={isDashboard && isMobile && isSidebarOpen}
+        onClose={handleCloseSidebar}
+        items={visibleMenuItems}
+        pathname={pathname}
+        activeIconColor={dashboardTheme.dashboardTutorFilterActiveBg || '#3B82F6'}
+        inactiveIconColor={dashboardTheme.dashboardTutorTextSecondary || '#6B7280'}
+        logoutIconColor={dashboardTheme.myLessonsSidebarLogoutIcon || '#EF4444'}
+        onLogout={handleLogout}
+        t={tDashboard}
+      />
+    </>
+  );
 }

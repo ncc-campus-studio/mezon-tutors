@@ -30,4 +30,17 @@ export const ROUTES = {
   MY_LESSONS: {
     INDEX: '/my-lessons',
   },
+  SUBCRIPTION_PLAN: {
+    INDEX: '/subcription-plan',
+  },
+  DASHBOARD: {
+    INDEX: '/dashboard',
+    BOOKING_REQUESTS: '/dashboard/booking-requests',
+    MY_SCHEDULE: '/dashboard/my-schedule',
+    MY_LESSONS: '/dashboard/my-lessons',
+  },
+  CHECKOUT: {
+    TRIAL_LESSON: '/checkout/trial-lesson',
+    SUBCRIPTION_PLAN: '/checkout/subcription-plan',
+  },
 } as const;

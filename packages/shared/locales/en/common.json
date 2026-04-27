@@ -10,5 +10,35 @@
     "getStarted": "Get Started",
     "myMessages": "My Messages",
     "searchPlaceholder": "Search by Subject.."
+  },
+  "Footer": {
+    "description": "The leading language tutor matching platform for working professionals in Vietnam.",
+    "product": {
+      "title": "Product",
+      "findTutor": "Find a tutor",
+      "pricing": "Pricing",
+      "enterprise": "Enterprise"
+    },
+    "community": {
+      "title": "Community",
+      "becomeTutor": "Become a tutor",
+      "blog": "Education blog",
+      "events": "Events"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Help center",
+      "privacyPolicy": "Privacy policy",
+      "contact": "Contact"
+    },
+    "social": {
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn"
+    },
+    "copyright": "© 2026 TutorMatch. All rights reserved.",
+    "bottom": {
+      "terms": "Terms",
+      "privacy": "Privacy"
+    }
   }
 }

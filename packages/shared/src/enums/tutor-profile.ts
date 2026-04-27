@@ -19,7 +19,6 @@ export enum ELanguage {
   DUTCH = 'DUTCH',
   POLISH = 'POLISH',
   TURKISH = 'TURKISH',
-  OTHER = 'OTHER',
 }
 
 export enum ESubject {
@@ -46,4 +45,16 @@ export enum ECountry {
   INDIA = 'INDIA',
   SINGAPORE = 'SINGAPORE',
   PHILIPPINES = 'PHILIPPINES',
+}
+
+export enum EProficiencyLevel {
+  NATIVE = 'NATIVE',
+  NEAR_NATIVE = 'NEAR_NATIVE',
+  FLUENT = 'FLUENT',
+  ADVANCED = 'ADVANCED',
+  UPPER_INTERMEDIATE = 'UPPER_INTERMEDIATE',
+  INTERMEDIATE = 'INTERMEDIATE',
+  ELEMENTARY = 'ELEMENTARY',
+  BASIC = 'BASIC',
+  BEGINNER = 'BEGINNER',
 }

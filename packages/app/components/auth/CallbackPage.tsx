@@ -1,10 +1,8 @@
 'use client';
 
-'use client';
-
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { authService } from '@mezon-tutors/app/services/auth/auth.service';
+import { authService } from '@mezon-tutors/app/services';
 import { MezonAuthMessage } from '@mezon-tutors/shared/src/types/auth';
 
 const OAUTH_CHANNEL = 'mezon-oauth-result';
@@ -24,26 +22,28 @@ export default function MezonAuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const code = searchParams.get('code');
-    const state = searchParams.get('state') ?? undefined;
+    const code = searchParams.get('code') ?? '';
+    const state = searchParams.get('state') ?? '';
 
     if (!code) {
       setError('Missing authorization code from Mezon.');
       return;
     }
 
-    const codeValue = code;
-    const stateValue = searchParams.get('state') ?? undefined;
+    if (!state) {
+      setError('Missing OAuth state.');
+      return;
+    }
 
     async function exchangeCode() {
       try {
-        const { user, tokens } = await authService.exchangeCode(codeValue, stateValue);
+        const exchangeData = await authService.exchangeCode(code, state);
 
+        const { accessToken, user, idToken } = exchangeData;
         const payload = {
           type: 'MEZON_AUTH_SUCCESS' as const,
-          data: { user, tokens },
+          data: { accessToken, user, idToken },
         };
-
         sendResult(payload);
         window.close();
       } catch (err) {

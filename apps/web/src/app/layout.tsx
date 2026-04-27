@@ -1,11 +1,15 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import './globals.css';
 import { AppProviders } from './providers';
 import AuthInitializer from '@mezon-tutors/app/components/AuthInitializer';
+import GlobalChatBubble from '@mezon-tutors/app/components/chat/GlobalChatBubble';
 import { DEFAULT_THEME } from '@mezon-tutors/app';
 import { getLocale } from 'next-intl/server';
+import { hasLocale } from 'next-intl';
+import { cookies } from 'next/headers';
+import { routing } from 'src/i18n/routing';
 import Header from 'src/components/Header/Header';
 import Footer from 'src/components/Footer/Footer';
 
@@ -25,12 +29,26 @@ export const metadata: Metadata = {
     'Learn faster with your best language tutor. Book experienced tutors for 120+ subjects.',
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
+};
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
+  const requestedLocale = await getLocale();
+  const cookieLocale = (await cookies()).get('NEXT_LOCALE')?.value;
+  const preferredLocale = cookieLocale ?? requestedLocale;
+  const locale = hasLocale(routing.locales, preferredLocale)
+    ? preferredLocale
+    : routing.defaultLocale;
 
   return (
     <html
@@ -45,6 +63,7 @@ export default async function RootLayout({
             <Header />
             {children}
             <Footer />
+            <GlobalChatBubble />
           </AppProviders>
         </NextIntlClientProvider>
       </body>

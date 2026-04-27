@@ -4,11 +4,23 @@
     "DISABLE_EXTRACTION",
     "NODE_ENV",
     "EAS_BUILD_PLATFORM",
-    "DATABASE_URL"
+    "DATABASE_URL",
+    "NEXT_PUBLIC_API_ENDPOINT",
+    "IGNORE_TS_CONFIG_PATHS",
+    "TAMAGUI_TARGET",
+    "TAMAGUI_DISABLE_WARN_DYNAMIC_LOAD"
   ],
   "pipeline": {
     "build": {
-      "env": ["DISABLE_EXTRACTION", "NODE_ENV", "EAS_BUILD_PLATFORM"],
+      "env": [
+        "DISABLE_EXTRACTION",
+        "NODE_ENV",
+        "EAS_BUILD_PLATFORM",
+        "NEXT_PUBLIC_API_ENDPOINT",
+        "IGNORE_TS_CONFIG_PATHS",
+        "TAMAGUI_TARGET",
+        "TAMAGUI_DISABLE_WARN_DYNAMIC_LOAD"
+      ],
       "dependsOn": ["^build"],
       "outputs": [
         ".next/**",

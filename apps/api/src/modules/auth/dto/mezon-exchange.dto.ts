@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class MezonExchangeDto {
   @ApiProperty({
@@ -10,11 +10,10 @@ export class MezonExchangeDto {
   code!: string;
 
   @ApiProperty({
-    description: 'Optional state parameter used to prevent CSRF attacks and link login session',
-    required: false,
+    description: 'State parameter from the authorization redirect; must match the value issued with /auth/url',
   })
   @IsString()
-  @IsOptional()
-  state?: string;
+  @IsNotEmpty()
+  state!: string;
 }
 
