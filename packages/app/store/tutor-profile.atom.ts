@@ -69,17 +69,76 @@ export const defaultAvailabilityState: TutorProfileAvailabilityState = {
   slotsByDay: Object.fromEntries(DAY_KEYS.map((d) => [d, []])),
 }
 
+function stripPhotoDataUrlsForStorage(state: TutorProfilePhotoState): TutorProfilePhotoState {
+  return {
+    ...state,
+    photo: { ...state.photo, dataUrl: null },
+    identity: { ...state.identity, dataUrl: null },
+  }
+}
+
+function stripCertificationDataUrlsForStorage(
+  state: TutorProfileCertificationState
+): TutorProfileCertificationState {
+  return {
+    ...state,
+    teachingCertificate: {
+      ...state.teachingCertificate,
+      file: { ...state.teachingCertificate.file, dataUrl: null },
+    },
+    higherEducation: {
+      ...state.higherEducation,
+      file: { ...state.higherEducation.file, dataUrl: null },
+    },
+  }
+}
+
+function createStrippingLocalStorage<T>(
+  strip: (value: T) => T
+): {
+  getItem: (key: string, initialValue: T) => T
+  setItem: (key: string, value: T) => void
+  removeItem: (key: string) => void
+} {
+  return {
+    getItem: (key, initialValue) => {
+      if (typeof localStorage === 'undefined') return initialValue
+      try {
+        const raw = localStorage.getItem(key)
+        if (raw === null) return initialValue
+        return JSON.parse(raw) as T
+      } catch {
+        return initialValue
+      }
+    },
+    setItem: (key, value) => {
+      if (typeof localStorage === 'undefined') return
+      try {
+        localStorage.setItem(key, JSON.stringify(strip(value)))
+      } catch {
+        /* quota / private mode */
+      }
+    },
+    removeItem: (key) => {
+      if (typeof localStorage === 'undefined') return
+      localStorage.removeItem(key)
+    },
+  }
+}
+
 export const tutorProfileAboutAtom = atomWithStorage<TutorProfileAboutState>(
   'tutorProfile.about',
   defaultAboutState
 )
 export const tutorProfilePhotoAtom = atomWithStorage<TutorProfilePhotoState>(
   'tutorProfile.photo',
-  defaultPhotoState
+  defaultPhotoState,
+  createStrippingLocalStorage(stripPhotoDataUrlsForStorage)
 )
 export const tutorProfileCertificationAtom = atomWithStorage<TutorProfileCertificationState>(
   'tutorProfile.certification',
-  defaultCertificationState
+  defaultCertificationState,
+  createStrippingLocalStorage(stripCertificationDataUrlsForStorage)
 )
 export const tutorProfileVideoAtom = atomWithStorage<TutorProfileVideoState>(
   'tutorProfile.video',

@@ -200,20 +200,20 @@ export function TutorProfileCertificationScreen() {
     }
     teachingUploadSeqRef.current += 1;
     const seq = teachingUploadSeqRef.current;
+    const file = teachingCertificateFile;
     const previousPublicId = certificationMerged.teachingCertificate.file.publicId;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
+    void (async () => {
       setCertification((prev) => ({
         ...prev,
         teachingCertificate: {
           ...prev.teachingCertificate,
           file: {
             ...prev.teachingCertificate.file,
-            dataUrl,
+            dataUrl: null,
             uploadedUrl: null,
-            fileName: teachingCertificateFile.name,
+            publicId: null,
+            fileName: file.name,
           },
         },
       }));
@@ -222,7 +222,7 @@ export function TutorProfileCertificationScreen() {
       try {
         setIsUploading(true);
         const uploadedFile = await cloudinaryService.uploadFileWithSignature(
-          teachingCertificateFile,
+          file,
           CLOUDINARY_FOLDER.TUTOR_CERTIFICATE,
           'auto'
         );
@@ -253,8 +253,7 @@ export function TutorProfileCertificationScreen() {
       } finally {
         if (teachingUploadSeqRef.current === seq) setIsUploading(false);
       }
-    };
-    reader.readAsDataURL(teachingCertificateFile);
+    })();
   }, [teachingCertificateFile, t]);
 
   useEffect(() => {
@@ -269,20 +268,20 @@ export function TutorProfileCertificationScreen() {
     }
     educationUploadSeqRef.current += 1;
     const seq = educationUploadSeqRef.current;
+    const file = educationFile;
     const previousPublicId = certificationMerged.higherEducation.file.publicId;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUrl = reader.result as string;
+    void (async () => {
       setCertification((prev) => ({
         ...prev,
         higherEducation: {
           ...prev.higherEducation,
           file: {
             ...prev.higherEducation.file,
-            dataUrl,
+            dataUrl: null,
             uploadedUrl: null,
-            fileName: educationFile.name,
+            publicId: null,
+            fileName: file.name,
           },
         },
       }));
@@ -291,7 +290,7 @@ export function TutorProfileCertificationScreen() {
       try {
         setIsUploading(true);
         const uploadedFile = await cloudinaryService.uploadFileWithSignature(
-          educationFile,
+          file,
           CLOUDINARY_FOLDER.TUTOR_DIPLOMA,
           'auto'
         );
@@ -322,8 +321,7 @@ export function TutorProfileCertificationScreen() {
       } finally {
         if (educationUploadSeqRef.current === seq) setIsUploading(false);
       }
-    };
-    reader.readAsDataURL(educationFile);
+    })();
   }, [educationFile, t]);
 
   useEffect(() => {
@@ -513,10 +511,7 @@ export function TutorProfileCertificationScreen() {
                       prompt={t('teaching.uploadPrompt')}
                       hint={t('teaching.uploadHint')}
                       persistedFileName={
-                        certificationMerged.teachingCertificate.file.dataUrl ||
-                        certificationMerged.teachingCertificate.file.uploadedUrl
-                          ? certificationMerged.teachingCertificate.file.fileName || undefined
-                          : undefined
+                        certificationMerged.teachingCertificate.file.fileName || undefined
                       }
                     />
 
@@ -627,10 +622,7 @@ export function TutorProfileCertificationScreen() {
                       prompt={t('education.uploadPrompt')}
                       hint={t('education.uploadHint')}
                       persistedFileName={
-                        certificationMerged.higherEducation.file.dataUrl ||
-                        certificationMerged.higherEducation.file.uploadedUrl
-                          ? certificationMerged.higherEducation.file.fileName || undefined
-                          : undefined
+                        certificationMerged.higherEducation.file.fileName || undefined
                       }
                     />
                   </YStack>

@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
 import { AppConfigService } from '../../shared/services/app-config.service';
 
@@ -20,7 +25,17 @@ export class CloudinaryService {
     });
   }
 
+  private ensureConfigured() {
+    const c = this.appConfig.cloudinaryConfig;
+    if (!c.cloudName?.trim() || !c.apiKey?.trim() || !c.apiSecret?.trim()) {
+      throw new ServiceUnavailableException(
+        'Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in the API environment.'
+      );
+    }
+  }
+
   async uploadFile(buffer: Buffer, options?: UploadOptions) {
+    this.ensureConfigured();
     if (!buffer?.length) {
       throw new BadRequestException('File buffer is empty');
     }
@@ -70,6 +85,7 @@ export class CloudinaryService {
   }
 
   async deleteFile(publicId: string, resourceType: 'image' | 'video' | 'raw' = 'image') {
+    this.ensureConfigured();
     if (!publicId?.trim()) {
       throw new BadRequestException('publicId is required');
     }
@@ -85,6 +101,7 @@ export class CloudinaryService {
   }
 
   createUploadSignature(params: { folder?: string; publicId?: string; timestamp?: number }) {
+    this.ensureConfigured();
     const timestamp = params.timestamp || Math.floor(Date.now() / 1000);
     const payload: Record<string, string | number> = {
       timestamp,
