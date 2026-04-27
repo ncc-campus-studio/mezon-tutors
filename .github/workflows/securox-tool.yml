@@ -21,61 +21,74 @@ jobs:
         uses: duy6019/securox-tool@main
         with:
           fail-on: 'none'
-          format: 'html'
-          output: 'securox-report.html'
+          format: 'hbs'
+          output: 'securox-report.hbs'
           targetPath: '.'
 
-      - name: List generated files
-        if: always()
-        run: |
-          echo "=== Files in current directory ==="
-          ls -la
-          echo "=== Searching for report files ==="
-          find . -name "*report*" -o -name "*.hbs" -o -name "*.html" | head -20
-
-      - name: Ensure HTML report exists
-        if: always()
-        run: |
-          if [ -f "securox-report.html" ]; then
-            echo "Found securox-report.html"
-          else
-            echo "securox-report.html was not generated, creating fallback file."
-            cat > securox-report.html <<'EOF'
-            <!doctype html>
-            <html lang="en">
-            <head>
-              <meta charset="utf-8" />
-              <title>Securox Report</title>
-            </head>
-            <body>
-              <h1>Securox report was not generated</h1>
-              <p>Please check the scanner step logs for details.</p>
-            </body>
-            </html>
-            EOF
-          fi
-
-      - name: Generate PDF from HTML report
+      - name: Capture terminal-style report and convert to PDF
         if: always()
         run: |
           sudo apt-get update
           sudo apt-get install -y wkhtmltopdf
-          wkhtmltopdf --enable-local-file-access securox-report.html securox-report.pdf
-          ls -la securox-report.pdf
 
-      - name: Set artifact date
-        if: always()
-        run: echo "ARTIFACT_DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_ENV"
+          REPORT_DATE="$(date +'%Y%m%d-%H%M%S')"
+          PDF_NAME="securox-scan-report-${REPORT_DATE}.pdf"
+          TXT_NAME="securox-scan-report-${REPORT_DATE}.txt"
+          HTML_FILE="securox-scan-report-${REPORT_DATE}.html"
+          export TXT_NAME HTML_FILE
+
+          # Prefer a real terminal-like text capture if securox binary is available.
+          # If not, fallback to raw generated report content.
+          if command -v securox >/dev/null 2>&1; then
+            securox scan . 2>&1 | tee "$TXT_NAME" || true
+          elif [ -f "securox-report.hbs" ]; then
+            cp securox-report.hbs "$TXT_NAME"
+          elif [ -f "security-report.hbs" ]; then
+            cp security-report.hbs "$TXT_NAME"
+          else
+            echo "No Securox terminal/report output found." > "$TXT_NAME"
+          fi
+
+          python3 - <<'PY'
+          import html
+          from pathlib import Path
+          import os
+
+          txt_name = os.environ["TXT_NAME"]
+          html_file = os.environ["HTML_FILE"]
+          content = Path(txt_name).read_text(encoding="utf-8", errors="replace")
+          escaped = html.escape(content)
+
+          Path(html_file).write_text(
+              f"""<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Securox Terminal Report</title>
+    <style>
+      body {{
+        margin: 16px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        font-size: 12px;
+        line-height: 1.35;
+      }}
+    </style>
+  </head>
+  <body>{escaped}</body>
+</html>""",
+              encoding="utf-8",
+          )
+          PY
+
+          wkhtmltopdf "$HTML_FILE" "$PDF_NAME"
+          echo "PDF_NAME=$PDF_NAME" >> "$GITHUB_ENV"
 
       - name: Upload Security Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: securox-security-report-${{ env.ARTIFACT_DATE }}
+          name: securox-security-report
           path: |
-            **/*.hbs
-            **/*.html
-            **/*.pdf
-            **/securox-report.*
-            **/security-report.*
+            ${{ env.PDF_NAME }}
           retention-days: 30
