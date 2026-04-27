@@ -25,64 +25,39 @@ jobs:
           output: 'securox-report.hbs'
           targetPath: '.'
 
-      - name: Capture terminal-style report and convert to PDF
+      - name: List generated files
         if: always()
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wkhtmltopdf
+          echo "=== Files in current directory ==="
+          ls -la
+          echo "=== Searching for report files ==="
+          find . -name "*report*" -o -name "*.hbs" -o -name "*.html" | head -20
 
-          REPORT_DATE="$(date +'%Y%m%d-%H%M%S')"
-          PDF_NAME="securox-scan-report-${REPORT_DATE}.pdf"
-          TXT_NAME="securox-scan-report-${REPORT_DATE}.txt"
-          HTML_FILE="securox-scan-report-${REPORT_DATE}.html"
-          export TXT_NAME HTML_FILE
+      - name: Setup Node.js
+        if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-          # Prefer a real terminal-like text capture if securox binary is available.
-          # If not, fallback to raw generated report content.
-          if command -v securox >/dev/null 2>&1; then
-            securox scan . 2>&1 | tee "$TXT_NAME" || true
-          elif [ -f "securox-report.hbs" ]; then
-            cp securox-report.hbs "$TXT_NAME"
-          elif [ -f "security-report.hbs" ]; then
-            cp security-report.hbs "$TXT_NAME"
+      - name: Convert HBS to HTML
+        if: always()
+        run: |
+          echo "Installing handlebars-cli..."
+          npm install -g handlebars
+
+          echo "Looking for HBS files..."
+          if [ -f "securox-report.hbs" ]; then
+            echo "Found securox-report.hbs, converting to HTML..."
+            cp securox-report.hbs securox-report.html
+            echo "Report saved as securox-report.html"
           else
-            echo "No Securox terminal/report output found." > "$TXT_NAME"
+            echo "No securox-report.hbs found, searching for other HBS files..."
+            find . -name "*.hbs" -type f | while read file; do
+              output="${file%.hbs}.html"
+              echo "Converting $file to $output"
+              cp "$file" "$output" || echo "Failed to convert $file"
+            done
           fi
-
-          python3 - <<'PY'
-          import html
-          from pathlib import Path
-          import os
-
-          txt_name = os.environ["TXT_NAME"]
-          html_file = os.environ["HTML_FILE"]
-          content = Path(txt_name).read_text(encoding="utf-8", errors="replace")
-          escaped = html.escape(content)
-
-          Path(html_file).write_text(
-              f"""<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Securox Terminal Report</title>
-    <style>
-      body {{
-        margin: 16px;
-        font-family: monospace;
-        white-space: pre-wrap;
-        font-size: 12px;
-        line-height: 1.35;
-      }}
-    </style>
-  </head>
-  <body>{escaped}</body>
-</html>""",
-              encoding="utf-8",
-          )
-          PY
-
-          wkhtmltopdf "$HTML_FILE" "$PDF_NAME"
-          echo "PDF_NAME=$PDF_NAME" >> "$GITHUB_ENV"
 
       - name: Upload Security Report
         if: always()
@@ -90,5 +65,8 @@ jobs:
         with:
           name: securox-security-report
           path: |
-            ${{ env.PDF_NAME }}
+            **/*.hbs
+            **/*.html
+            **/securox-report.*
+            **/security-report.*
           retention-days: 30
