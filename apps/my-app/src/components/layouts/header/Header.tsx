@@ -1,0 +1,88 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import MezonlyLogo from "@/public/images/Mezonly-logo.png";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
+import { LoginButton } from "@/components/auth/LoginButton";
+import { initAuthAtom, isAuthenticatedAtom, userAtom } from "@/store/auth.atom";
+
+export default function Header() {
+  const t = useTranslations("Common.Header");
+  const locale = useLocale();
+  const router = useRouter();
+  const initAuth = useSetAtom(initAuthAtom);
+  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+  const user = useAtomValue(userAtom);
+  const [mounted, setMounted] = useState(false);
+  const nextLocale = locale === "en" ? "vi" : "en";
+  const navItems = [
+    { label: t("findTutors"), href: "/tutors" },
+    { label: t("becomeTutor"), href: "/become-tutor" },
+    { label: t("myLessons"), href: "/checkout/trial-lesson" },
+  ];
+
+  const userInitials =
+    user?.username
+      ?.split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase())
+      .join("") || "U";
+
+  useEffect(() => {
+    void initAuth();
+  }, [initAuth]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleLocaleToggle = () => {
+    const isHttps = window.location.protocol === "https:";
+    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000; samesite=lax${isHttps ? "; secure" : ""}`;
+    router.refresh();
+  };
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-violet-100 bg-white/90 backdrop-blur">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+        <Link href="/" className="inline-flex items-center gap-2">
+          <Image src={MezonlyLogo} alt="Mezonly" width={32} height={32} />
+          <span className="text-lg font-extrabold text-slate-900">Mezonly</span>
+        </Link>
+
+        <nav className="hidden items-center gap-6 md:flex">
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className="text-md font-medium text-slate-600 transition hover:text-violet-700">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            className="inline-flex h-8 items-center justify-center rounded-full border border-violet-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-violet-50"
+            onClick={handleLocaleToggle}
+          >
+            {locale.toUpperCase()}
+          </Button>
+          {mounted ? <LoginButton label={t("login")} /> : null}
+          {mounted && isAuthenticated && (
+            <Avatar className="size-8 border border-violet-200">
+              {user?.avatar ? (
+                <AvatarImage src={user.avatar} alt={user?.username ?? "User avatar"} />
+              ) : null}
+              <AvatarFallback>{userInitials}</AvatarFallback>
+            </Avatar>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -19,7 +19,14 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/public/*": ["./public/*"],
+      "hooks/*": ["./hooks/*"],
+      "utils/*": ["./utils/*"],
+      "components/*": ["./components/*"],
+      "pages/*": ["./pages/*"],
+      "services/*": ["./services/*"],
+      "providers/*": ["./providers/*"]
     }
   },
   "include": [
