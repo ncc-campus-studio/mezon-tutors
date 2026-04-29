@@ -35,7 +35,7 @@
     "messageModal": {
       "title": "Nhắn tin cho {tutorName}",
       "placeholder": "Nhập nội dung tin nhắn...",
-      "cancel": "Hủy",
+      "clear": "Xóa",
       "send": "Gửi",
       "sending": "Đang gửi...",
       "errors": {

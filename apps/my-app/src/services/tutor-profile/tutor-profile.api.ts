@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
   ETutorSortBy,
   ECountry,
+  ECurrency,
   ESubject,
   VerifiedTutorProfileDto,
   TutorAboutDto,
@@ -20,6 +21,7 @@ type VerifiedTutorFilters = {
   sortBy: ETutorSortBy;
   subject?: ESubject;
   country?: ECountry;
+  currency?: ECurrency;
   minPrice?: number;
   maxPrice?: number;
 };
@@ -30,7 +32,7 @@ export const tutorProfileApi = {
     limit: number,
     filters: VerifiedTutorFilters
   ): Promise<PaginatedData<VerifiedTutorProfileDto> | null> {
-    const { sortBy, subject, country, minPrice, maxPrice } = filters;
+    const { sortBy, subject, country, currency, minPrice, maxPrice } = filters;
 
     const response = await apiClient.get<PaginatedResponse<VerifiedTutorProfileDto>>(
       "/tutor-profiles/verified",
@@ -41,6 +43,7 @@ export const tutorProfileApi = {
           sortBy,
           subject,
           country,
+          currency,
           minPrice,
           maxPrice,
         },
@@ -84,6 +87,7 @@ const useGetVerifiedTutors = (page: number, limit: number, filters: VerifiedTuto
       filters.sortBy,
       filters.subject,
       filters.country,
+      filters.currency,
       filters.minPrice,
       filters.maxPrice
     ),

@@ -208,7 +208,7 @@ export class TrialLessonBookingService {
 
     const tutor = await this.prisma.tutorProfile.findUnique({
       where: { id: dto.tutorId },
-      select: { id: true, pricePerHour: true, verificationStatus: true },
+      select: { id: true, pricePerHour: true, verificationStatus: true, currency: true },
     })
 
     if (!tutor || tutor.verificationStatus !== VerificationStatus.APPROVED) {
@@ -305,6 +305,7 @@ export class TrialLessonBookingService {
         grossAmount,
         platformFee,
         tutorAmount,
+        currency: tutor.currency,
         status: ETrialLessonStatus.PENDING,
         paymentStatus: EPaymentStatus.PENDING,
       },

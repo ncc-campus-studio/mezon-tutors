@@ -2,6 +2,7 @@ import { apiClient } from "@/services/api-client";
 import { getDefaultStore } from "jotai";
 import { accessTokenAtom } from "@/store/token.atom";
 import { useQuery } from "@tanstack/react-query";
+import { storage } from "../storage/storage.service";
 
 export type AuthUser = {
   id?: string;
@@ -65,6 +66,7 @@ class AuthService {
       await apiClient.post("/auth/logout");
     } finally {
       this.store.set(accessTokenAtom, null);
+      await storage.clearMezonLightSession();
     }
   }
 }

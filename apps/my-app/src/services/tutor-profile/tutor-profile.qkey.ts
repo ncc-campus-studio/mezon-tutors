@@ -5,6 +5,7 @@ export const tutorProfileQueryKey = {
     sortBy: string,
     subject?: string,
     country?: string,
+    currency?: string,
     minPrice?: number,
     maxPrice?: number
   ) => [
@@ -14,6 +15,7 @@ export const tutorProfileQueryKey = {
     sortBy,
     subject,
     country,
+    currency,
     minPrice,
     maxPrice,
   ],

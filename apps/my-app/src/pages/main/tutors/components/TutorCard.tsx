@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button, Card, CardContent, Kbd, KbdGroup, Separator } from "@/components/ui";
-import type { VerifiedTutorProfileDto } from "@mezon-tutors/shared";
+import { VerifiedTutorProfileDto, formatToCurrency} from "@mezon-tutors/shared";
 import Image from "next/image";
 import {
   BadgeCheckIcon,
@@ -12,6 +12,11 @@ import {
   StarIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAtomValue } from "jotai";
+import { useState } from "react";
+import { userAtom } from "@/store/auth.atom";
+import { TutorMessageModal } from "./TutorMessageModal";
+import { useCurrency } from "@/hooks";
 
 type TutorCardProps = {
   tutor: VerifiedTutorProfileDto;
@@ -28,10 +33,17 @@ export default function TutorCard({
 }: TutorCardProps) {
   const t = useTranslations("Tutors.TutorCard");
   const tLanguage = useTranslations("Tutors.Filter.Language");
+  const { currency } = useCurrency();
+  const currentUser = useAtomValue(userAtom);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const name = `${tutor.firstName} ${tutor.lastName}`.trim();
+  const studentId = currentUser?.id ?? "";
+  const studentMezonUserId = currentUser?.mezonUserId;
+  const tutorId = tutor.userId;
 
   return (
-    <Card
+    <>
+      <Card
       className={`py-0 cursor-pointer transition-colors border-2 ${isActive ? "border-primary shadow-sm" : "border-violet-100"}`}
       onMouseEnter={() => onHoverAction?.(tutor)}
       onClick={() => onSelectAction?.(tutor)}
@@ -43,7 +55,7 @@ export default function TutorCard({
             alt={name}
             width={150}
             height={150}
-            className="rounded-md shrink-0"
+            className="rounded-md shrink-0 aspect-square object-cover object-center"
             objectFit="cover"
             objectPosition="center"
           />
@@ -109,13 +121,13 @@ export default function TutorCard({
             <StarIcon
               className="size-7 text-yellow-500"
               strokeWidth={3}
-            />{" "}
+            />
             <span className="text-2xl font-bold text-foreground">
               {tutor.ratingAverage.toFixed(1)}
             </span>
           </div>
           <div className="text-sm font-medium text-violet-700">
-            <span className="text-2xl font-bold text-primary">${tutor.pricePerHour}</span>{" "}
+            <span className="text-2xl font-bold text-primary">{formatToCurrency(currency, tutor.pricePerHour)}</span>
             <span className="text-sm text-slate-500">{t("perLesson")}</span>
           </div>
           <Link
@@ -133,11 +145,26 @@ export default function TutorCard({
             variant="outline"
             size="lg"
             className="w-full text-lg"
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsMessageModalOpen(true);
+            }}
           >
             {t("sendMessage")}
           </Button>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+
+      <TutorMessageModal
+        open={isMessageModalOpen}
+        tutorFirstName={tutor.firstName}
+        studentId={studentId}
+        studentMezonUserId={studentMezonUserId}
+        tutorId={tutorId}
+        tutorMezonUserId={tutor.mezonUserId}
+        onOpenChangeAction={setIsMessageModalOpen}
+      />
+    </>
   );
 }

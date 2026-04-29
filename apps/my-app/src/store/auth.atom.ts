@@ -1,5 +1,3 @@
-"use client";
-
 import { atom } from "jotai";
 import { authService } from "@/services";
 import { accessTokenAtom } from "./token.atom";

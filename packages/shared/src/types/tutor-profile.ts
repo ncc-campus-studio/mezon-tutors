@@ -6,6 +6,7 @@ import {
   VALID_PROFESSIONAL_DOCUMENT_TYPES,
   VALID_VERIFICATION_STATUSES,
 } from '../constants/admin-tutor-application'
+import { ECurrency } from '../enums/currency'
 
 export interface TimeSlotDto {
   startTime: string
@@ -49,6 +50,7 @@ export interface SubmitTutorProfileDto {
   videoUrl: string
 
   pricePerHour: number
+  currency: ECurrency
   availability: TutorAvailabilitySlotDto[]
 }
 

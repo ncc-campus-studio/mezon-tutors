@@ -9,8 +9,9 @@ import {
   SelectValue,
   Slider,
 } from "@/components/ui";
-import { ECountry, ESubject } from "@mezon-tutors/shared";
+import { ECountry, ESubject, formatToCurrency, MAX_PRICE, MIN_PRICE, PRICE_STEP } from "@mezon-tutors/shared";
 import { useTranslations } from "next-intl";
+import { useCurrency } from "@/hooks";
 
 type TutorsFilterProps = {
   subject: ESubject;
@@ -34,6 +35,7 @@ export default function TutorsFilter({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tSubject = useTranslations("Tutors.Filter.Subject");
   const tCountry = useTranslations("Tutors.Filter.Country");
+  const { currency } = useCurrency();
   const [priceRange, setPriceRange] = useState<number[]>(() => [minPrice, maxPrice]);
 
   useEffect(() => {
@@ -46,7 +48,11 @@ export default function TutorsFilter({
     };
   }, []);
 
-  const priceLabel = `$${priceRange[0] ?? 0} - $${priceRange[1] ?? 0}`;
+  const isMaxInfinity = priceRange[1] === MAX_PRICE[currency];
+  const priceLabel = `${formatToCurrency(currency, priceRange[0] ?? 0)} - ${formatToCurrency(
+    currency,
+    priceRange[1] ?? 0
+  )}${isMaxInfinity ? "+" : ""}`;
 
   const handlePriceRangeChange = (value: number | readonly number[]) => {
     const nextValue = Array.isArray(value) ? [...value] : [value];
@@ -90,13 +96,13 @@ export default function TutorsFilter({
       </Select>
 
       <div className="flex flex-col h-14 gap-1 items-center rounded-lg border border-primary bg-background px-4">
-        <span className="text-lg font-semibold text-slate-700 whitespace-nowrap">{priceLabel}</span>
+        <span className="text-lg font-bold text-foreground whitespace-nowrap line-clamp-1">{priceLabel}</span>
         <Slider
           className="cursor-pointer **:data-[slot=slider-track]:data-horizontal:h-2 **:data-[slot=slider-thumb]:size-4 **:data-[slot=slider-thumb]:border-2 **:data-[slot=slider-thumb]:bg-background **:data-[slot=slider-thumb]:shadow-sm"
           value={priceRange}
-          min={5}
-          max={50}
-          step={1}
+          min={MIN_PRICE[currency]}
+          max={MAX_PRICE[currency]}
+          step={PRICE_STEP[currency]}
           onValueChange={handlePriceRangeChange}
         />
       </div>

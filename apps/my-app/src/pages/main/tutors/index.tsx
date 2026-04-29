@@ -13,10 +13,16 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { useGetVerifiedTutors } from "@/services/tutor-profile/tutor-profile.api";
+import { useGetCurrencyRates } from "@/services/currency/currency.api";
+import { useCurrency } from "@/hooks";
 import {
+  convertCurrency,
   ECountry,
+  ECurrency,
   ESubject,
   ETutorSortBy,
+  MAX_PRICE,
+  MIN_PRICE,
   type VerifiedTutorProfileDto,
 } from "@mezon-tutors/shared";
 import TutorCard from "./components/TutorCard";
@@ -86,11 +92,12 @@ export default function TutorsPage() {
   const currentPathname = pathname ?? "";
   const currentSearchParams = searchParams ?? new URLSearchParams();
   const t = useTranslations("Tutors");
+  const { currency } = useCurrency();
   const [page, setPage] = useState(DEFAULT_PAGE);
   const [subject, setSubject] = useState<ESubject>(ESubject.ANY_SUBJECT);
   const [country, setCountry] = useState<ECountry>(ECountry.ANY_COUNTRY);
-  const [minPrice, setMinPrice] = useState<number>(5);
-  const [maxPrice, setMaxPrice] = useState<number>(50);
+  const [minPrice, setMinPrice] = useState<number>(MIN_PRICE[currency]);
+  const [maxPrice, setMaxPrice] = useState<number>(MAX_PRICE[currency]);
   const [sortBy, setSortBy] = useState<ETutorSortBy>(ETutorSortBy.POPULARITY);
   const [previewTutor, setPreviewTutor] = useState<VerifiedTutorProfileDto | null>(null);
   const [previewOffsetY, setPreviewOffsetY] = useState(0);
@@ -99,19 +106,33 @@ export default function TutorsPage() {
 
   const subjectParam = subject === ESubject.ANY_SUBJECT ? undefined : subject;
   const countryParam = country === ECountry.ANY_COUNTRY ? undefined : country;
+  const isMaxInfinity = maxPrice === MAX_PRICE[currency];
+  const effectiveMaxPrice = isMaxInfinity ? undefined : maxPrice;
 
   const { data, isLoading, isFetching } = useGetVerifiedTutors(page, DEFAULT_LIMIT, {
     sortBy,
     subject: subjectParam,
     country: countryParam,
+    currency,
     minPrice,
-    maxPrice,
+    maxPrice: effectiveMaxPrice,
   });
+  const { data: rates } = useGetCurrencyRates(ECurrency.VND, currency !== ECurrency.VND);
 
   const items = data?.items ?? [];
+  const displayItems = useMemo(() => {
+    if (currency === ECurrency.VND || !rates) {
+      return items;
+    }
+
+    return items.map((tutor) => ({
+      ...tutor,
+      pricePerHour: convertCurrency(tutor.pricePerHour, ECurrency.VND, currency, rates),
+    }));
+  }, [currency, items, rates]);
   const totalTutors = data?.meta.total ?? 0;
   const totalPages = data?.meta.totalPages ?? 1;
-  const hasItems = items.length > 0;
+  const hasItems = displayItems.length > 0;
 
   const replaceQuery = useCallback(
     (next: Record<string, string | number | null | undefined>) => {
@@ -142,8 +163,8 @@ export default function TutorsPage() {
         Object.values(ECountry),
         ECountry.ANY_COUNTRY
       ),
-      minPrice: parseIntParam(currentSearchParams.get("minPrice"), 5),
-      maxPrice: parseIntParam(currentSearchParams.get("maxPrice"), 50),
+      minPrice: parseIntParam(currentSearchParams.get("minPrice"), MIN_PRICE[currency]),
+      maxPrice: parseIntParam(currentSearchParams.get("maxPrice"), MAX_PRICE[currency]),
       sortBy: parseEnumParam(
         currentSearchParams.get("sortBy"),
         Object.values(ETutorSortBy),
@@ -152,6 +173,23 @@ export default function TutorsPage() {
     }),
     [currentSearchParams]
   );
+
+  useEffect(() => {
+    const nextMinPrice = MIN_PRICE[currency];
+    const nextMaxPrice = MAX_PRICE[currency];
+    const nextEffectiveMaxPrice = nextMaxPrice === MAX_PRICE[currency] ? null : nextMaxPrice;
+
+    setMinPrice(nextMinPrice);
+    setMaxPrice(nextMaxPrice);
+    setPage(DEFAULT_PAGE);
+
+    replaceQuery({
+      minPrice: nextMinPrice,
+      maxPrice: nextEffectiveMaxPrice,
+      page: DEFAULT_PAGE,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
 
   useEffect(() => {
     if (page !== parsedQuery.page) setPage(parsedQuery.page);
@@ -164,20 +202,23 @@ export default function TutorsPage() {
   }, [parsedQuery]);
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (displayItems.length === 0) {
       setPreviewTutor(null);
       setPreviewOffsetY(0);
       return;
     }
 
     setPreviewTutor((current) => {
-      if (current && items.some((item) => item.id === current.id)) {
-        return current;
+      if (current) {
+        const updatedCurrent = displayItems.find((item) => item.id === current.id);
+        if (updatedCurrent) {
+          return updatedCurrent;
+        }
       }
 
-      return items[0] ?? null;
+      return displayItems[0] ?? null;
     });
-  }, [items]);
+  }, [displayItems]);
 
   const updatePreviewOffset = useCallback((tutorId: string) => {
     const anchor = listColumnRef.current;
@@ -230,9 +271,13 @@ export default function TutorsPage() {
       setMinPrice(value.minPrice);
       setMaxPrice(value.maxPrice);
       setPage(DEFAULT_PAGE);
-      replaceQuery({ minPrice: value.minPrice, maxPrice: value.maxPrice, page: DEFAULT_PAGE });
+      replaceQuery({
+        minPrice: value.minPrice,
+        maxPrice: value.maxPrice === MAX_PRICE[currency] ? null : value.maxPrice,
+        page: DEFAULT_PAGE,
+      });
     },
-    [replaceQuery]
+    [replaceQuery, currency]
   );
 
   const handleSortByChange = useCallback(
@@ -290,7 +335,7 @@ export default function TutorsPage() {
                 onValueChange={(value) => handleSortByChange(value as ETutorSortBy)}
               >
                 <SelectTrigger
-                  className="h-11! w-44 px-3 text-base"
+                  className="h-11! w-44 px-3 text-base cursor-pointer"
                   size="default"
                 >
                   <SelectValue placeholder={t("Screen.popularity")}>
@@ -320,7 +365,7 @@ export default function TutorsPage() {
             </Card>
           ) : (
             <section className="space-y-4">
-              {items.map((tutor: VerifiedTutorProfileDto) => (
+              {displayItems.map((tutor: VerifiedTutorProfileDto) => (
                 <div
                   key={tutor.id}
                   ref={(node) => {

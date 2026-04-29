@@ -35,7 +35,7 @@
     "messageModal": {
       "title": "Send message to {tutorName}",
       "placeholder": "Enter the message content...",
-      "cancel": "Cancel",
+      "clear": "Clear",
       "send": "Send",
       "sending": "Sending...",
       "errors": {

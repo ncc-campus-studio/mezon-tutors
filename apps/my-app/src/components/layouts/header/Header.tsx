@@ -7,9 +7,20 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@/components/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 import { LoginButton } from "@/components/auth/LoginButton";
 import { initAuthAtom, isAuthenticatedAtom, userAtom } from "@/store/auth.atom";
+import { useCurrency } from "@/hooks";
 
 export default function Header() {
   const t = useTranslations("Common.Header");
@@ -19,6 +30,7 @@ export default function Header() {
   const isAuthenticated = useAtomValue(isAuthenticatedAtom);
   const user = useAtomValue(userAtom);
   const [mounted, setMounted] = useState(false);
+  const { currency, setCurrency, currencyOptions } = useCurrency();
   const nextLocale = locale === "en" ? "vi" : "en";
   const navItems = [
     { label: t("findTutors"), href: "/tutors" },
@@ -65,9 +77,26 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {mounted ? (
+            <Select
+              value={currency}
+              onValueChange={(value) => setCurrency(value as typeof currency)}
+            >
+              <SelectTrigger className="h-8 w-24">
+                <SelectValue placeholder="Currency" />
+              </SelectTrigger>
+              <SelectContent>
+                {currencyOptions.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
           <Button
-            type="button"
-            className="inline-flex h-8 items-center justify-center rounded-full border border-violet-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-violet-50"
+            variant="outline"
+            className="rounded-full"
             onClick={handleLocaleToggle}
           >
             {locale.toUpperCase()}

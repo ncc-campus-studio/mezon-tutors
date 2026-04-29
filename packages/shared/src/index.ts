@@ -39,6 +39,7 @@ export * from './constants/cloudinary';
 export * from './constants/mezon-light';
 export * from './constants/review';
 export * from './constants/mezon';
+export * from './constants/currency';
 
 // Utils
 export * from './utils/utils';

@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import {
   CountryLabel,
   ECountry,
+  ECurrency,
   ESubject,
   ETutorSortBy,
   SubjectLabel,
@@ -11,6 +12,7 @@ import {
   TutorAvailabilitySlotDto,
   TutorLanguageDto,
   VerifiedTutorProfileDto,
+  CURRENCY_RATE_API_URLS,
 } from '@mezon-tutors/shared';
 import {
   ETrialLessonStatus,
@@ -24,6 +26,52 @@ import {
 import dayjs = require('dayjs');
 import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
+
+type CurrencyAPIResponse = Record<string, Record<string, number>>;
+const EXCHANGE_RATES_TTL_MS = 60 * 60 * 1000; // 1 hour
+const currencyRatesCache = new Map<
+  ECurrency,
+  { rates: Record<string, number>; fetchedAt: number }
+>();
+
+async function fetchRatesFromBaseCurrency(baseCurrency: ECurrency): Promise<Record<string, number>> {
+  const base = baseCurrency.toLowerCase();
+  const urls = CURRENCY_RATE_API_URLS.map((url) => `${url}/${base}.json`);
+
+  let lastError: unknown;
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = (await response.json()) as CurrencyAPIResponse;
+      const rates = data[base] as Record<string, number> | undefined;
+      if (!rates || typeof rates !== 'object') {
+        throw new Error(`Invalid response format for ${baseCurrency}`);
+      }
+
+      return rates;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  console.error('All currency API endpoints failed:', lastError);
+  throw new Error(`Failed to fetch exchange rates for ${baseCurrency}`);
+}
+
+async function getRatesFromBaseCurrencyCached(baseCurrency: ECurrency): Promise<Record<string, number>> {
+  const cached = currencyRatesCache.get(baseCurrency);
+  if (cached && Date.now() - cached.fetchedAt < EXCHANGE_RATES_TTL_MS) {
+    return cached.rates;
+  }
+
+  const rates = await fetchRatesFromBaseCurrency(baseCurrency);
+  currencyRatesCache.set(baseCurrency, { rates, fetchedAt: Date.now() });
+  return rates;
+}
 
 @Injectable()
 export class TutorProfileService {
@@ -90,6 +138,7 @@ export class TutorProfileService {
         motivate: dto.motivate,
         headline: dto.headline,
         pricePerHour: dto.pricePerHour,
+        currency: dto.currency,
         ratingAverage: 0,
         verificationStatus: VerificationStatus.PENDING,
       },
@@ -326,11 +375,10 @@ export class TutorProfileService {
       sortBy = ETutorSortBy.POPULARITY,
       subject = ESubject.ANY_SUBJECT,
       country = ECountry.ANY_COUNTRY,
+      currency = ECurrency.VND,
       minPrice,
       maxPrice,
     } = query
-
-    const orderBy = this.getVerifiedTutorOrderBy(sortBy)
 
     const where: Prisma.TutorProfileWhereInput = {
       verificationStatus: VerificationStatus.APPROVED,
@@ -340,40 +388,119 @@ export class TutorProfileService {
       where.subject = SubjectLabel[subject]
     }
 
-    const priceFilter = this.getPricePerLessonFilter(minPrice, maxPrice)
-    if (priceFilter) {
-      where.pricePerHour = priceFilter
-    }
-
     if (country && country !== ECountry.ANY_COUNTRY) {
       where.country = CountryLabel[country]
     }
 
-    const [data, total] = await Promise.all([
-      this.prisma.tutorProfile.findMany({
-        where,
-        include: {
-          languages: true,
-          user: {
-            select: {
-              mezonUserId: true,
-            },
+    const ratesFromBase = await getRatesFromBaseCurrencyCached(currency)
+    const rateToVnd = ratesFromBase[ECurrency.VND.toLowerCase()]
+
+    const allTutors = await this.prisma.tutorProfile.findMany({
+      where,
+      include: {
+        languages: true,
+        user: {
+          select: {
+            mezonUserId: true,
           },
         },
-        skip: (page - 1) * limit,
-        take: limit,
-        orderBy,
-      }),
-      this.prisma.tutorProfile.count({
-        where,
-      }),
-    ])
+      },
+    })
 
+    const tutorsWithComputedPrices = allTutors.map((tutor) => {
+      const tutorCurrency = tutor.currency as ECurrency
+      const tutorPrice = Number(tutor.pricePerHour)
+
+      let priceInQueryCurrency: number | null = null
+      if (tutorCurrency === currency) {
+        priceInQueryCurrency = tutorPrice
+      } else {
+        const rateFromTutorCurrency = ratesFromBase[tutorCurrency.toLowerCase()]
+        if (typeof rateFromTutorCurrency === 'number' && rateFromTutorCurrency > 0) {
+          priceInQueryCurrency = tutorPrice / rateFromTutorCurrency
+        }
+      }
+
+      let priceInVnd: number | null = null
+      if (priceInQueryCurrency != null) {
+        if (currency === ECurrency.VND) {
+          priceInVnd = priceInQueryCurrency
+        } else if (typeof rateToVnd === 'number' && rateToVnd > 0) {
+          priceInVnd = priceInQueryCurrency * rateToVnd
+        }
+      }
+
+      return {
+        tutor,
+        priceInQueryCurrency,
+        priceInVnd,
+      }
+    })
+
+    const hasMin = typeof minPrice === 'number' && !Number.isNaN(minPrice)
+    const hasMax = typeof maxPrice === 'number' && !Number.isNaN(maxPrice)
+
+    const filtered = tutorsWithComputedPrices.filter((x) => {
+      if (x.priceInQueryCurrency == null) return true
+
+      if (hasMin && x.priceInQueryCurrency < minPrice) return false
+      if (hasMax && x.priceInQueryCurrency > maxPrice) return false
+      return true
+    })
+
+    const getPriceSortValue = (x: (typeof filtered)[number]) =>
+      x.priceInQueryCurrency ?? Number(x.tutor.pricePerHour)
+
+    const sortSecondaryIdAsc = (a: (typeof filtered)[number], b: (typeof filtered)[number]) =>
+      a.tutor.id.localeCompare(b.tutor.id)
+
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case ETutorSortBy.HIGHEST_PRICE: {
+          const diff = getPriceSortValue(b) - getPriceSortValue(a)
+          return diff !== 0 ? diff : sortSecondaryIdAsc(a, b)
+        }
+        case ETutorSortBy.LOWEST_PRICE: {
+          const diff = getPriceSortValue(a) - getPriceSortValue(b)
+          return diff !== 0 ? diff : sortSecondaryIdAsc(a, b)
+        }
+        case ETutorSortBy.NUMBER_OF_REVIEWS: {
+          const diff = b.tutor.ratingCount - a.tutor.ratingCount
+          return diff !== 0 ? diff : sortSecondaryIdAsc(a, b)
+        }
+        case ETutorSortBy.BEST_RATING: {
+          const diff = Number(b.tutor.ratingAverage) - Number(a.tutor.ratingAverage)
+          return diff !== 0 ? diff : sortSecondaryIdAsc(a, b)
+        }
+        case ETutorSortBy.TOP_PICKS: {
+          const diff = b.tutor.totalStudents - a.tutor.totalStudents
+          return diff !== 0 ? diff : sortSecondaryIdAsc(a, b)
+        }
+        default: {
+          const diffRatingAvg = Number(b.tutor.ratingAverage) - Number(a.tutor.ratingAverage)
+          if (diffRatingAvg !== 0) return diffRatingAvg
+          const diffRatingCount = b.tutor.ratingCount - a.tutor.ratingCount
+          if (diffRatingCount !== 0) return diffRatingCount
+          return sortSecondaryIdAsc(a, b)
+        }
+      }
+    })
+
+    const total = filtered.length
     const totalPages = Math.ceil(total / limit)
+    const paged = filtered.slice((page - 1) * limit, page * limit)
 
     return {
       data: {
-        items: data.map((item) => toVerifiedTutorProfileDto(item)),
+        items: paged.map(({ tutor, priceInVnd }) => {
+          const pricePerHourVnd = priceInVnd != null ? Math.round(priceInVnd) : Number(tutor.pricePerHour)
+          const tutorWithVndPrice: typeof tutor = {
+            ...tutor,
+            pricePerHour: BigInt(pricePerHourVnd),
+          }
+
+          return toVerifiedTutorProfileDto(tutorWithVndPrice)
+        }),
         meta: {
           page,
           limit,

@@ -1,5 +1,3 @@
-"use client";
-
 import { atomWithStorage } from "jotai/utils";
 
 export const accessTokenAtom = atomWithStorage<string | null>(

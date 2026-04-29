@@ -16800,6 +16800,7 @@ __metadata:
     clsx: "npm:^2.1.1"
     jotai: "npm:^2.19.1"
     lucide-react: "npm:^1.11.0"
+    mezon-light-sdk: "npm:^1.0.9"
     next: "npm:16.2.4"
     next-intl: "npm:^4.9.1"
     react: "npm:19.2.4"
