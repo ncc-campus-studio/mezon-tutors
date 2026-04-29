@@ -1,4 +1,5 @@
-import { IsEnum, IsOptional } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsEnum, IsInt, IsOptional, Min } from 'class-validator'
 import { ECountry, ESubject, ETutorSortBy } from '@mezon-tutors/shared'
 import { PaginationDto } from '../../../common/dto/pagination.dto'
 
@@ -16,5 +17,14 @@ export class VerifiedTutorQueryDto extends PaginationDto {
   country?: ECountry
 
   @IsOptional()
-  pricePerLesson?: string
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minPrice?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxPrice?: number
 }

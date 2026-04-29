@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 const SUPPORTED_LOCALES = ["vi", "en"] as const;
 
 type MessageLoaderConfig = {
-  messageKey: "Common" | "Home";
+  messageKey: "Common" | "Home" | "Tutors";
   file: string;
   pick?: (payload: Record<string, unknown>) => unknown;
 };
@@ -12,6 +12,7 @@ type MessageLoaderConfig = {
 const MESSAGE_LOADERS: MessageLoaderConfig[] = [
   { messageKey: "Common", file: "common" },
   { messageKey: "Home", file: "home", pick: (payload) => payload.Home },
+  { messageKey: "Tutors", file: "tutors" },
 ];
 
 const loadMessage = async (locale: string, file: string) => {

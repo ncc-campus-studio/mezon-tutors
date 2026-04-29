@@ -4,7 +4,7 @@
     "error": "Error loading verified tutors",
     "empty": "No verified tutors found",
     "totalLabel": "{count} {subject} tutors available",
-    "totalLabelNoSubject": "{count} tutors available",
+    "totalLabelNoSubject": "<highlight>{value}</highlight> tutors available",
     "sortBy": "Sort by:",
     "popularity": "Popularity",
     "top_picks": "Top Picks",
@@ -14,9 +14,14 @@
     "best_rating": "Best Rating"
   },
   "PreviewCard": {
+    "selectTutor": "Select a tutor to preview.",
     "viewSchedule": "View full schedule",
     "seeProfile": "See full profile",
     "popularThisWeek": "Popular this week · {count} students booked in last 24h"
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next"
   },
   "TutorCard": {
     "professional": "PROFESSIONAL",
@@ -44,15 +49,15 @@
       }
     },
     "proficiency": {
-      "Native": "Native",
-      "Near-Native": "Near-Native",
-      "Fluent": "Fluent",
-      "Advanced": "Advanced",
-      "Upper-Intermediate": "Upper-Intermediate",
-      "Intermediate": "Intermediate",
-      "Elementary": "Elementary",
-      "Basic": "Basic",
-      "Beginner": "Beginner"
+      "NATIVE": "Native",
+      "NEAR_NATIVE": "Near-Native",
+      "FLUENT": "Fluent",
+      "ADVANCED": "Advanced",
+      "UPPER_INTERMEDIATE": "Upper-Intermediate",
+      "INTERMEDIATE": "Intermediate",
+      "ELEMENTARY": "Elementary",
+      "BASIC": "Basic",
+      "BEGINNER": "Beginner"
     }
   },
   "TrialBookingModal": {
@@ -368,8 +373,6 @@
     "reviews": "reviews",
     "loadingReviews": "Loading reviews...",
     "loadMoreReviews": "Load more reviews",
-    "reviewsEmpty": "No reviews yet",
-    "reviewsCount": "({count} reviews)",
     "reviewModal": {
       "editTitle": "Edit Review",
       "postTitle": "Post Review",
@@ -391,7 +394,6 @@
       "previous": "Previous",
       "next": "Next"
     },
-    "loadMoreReviews": "Load more reviews",
     "close": "Close"
   }
 }

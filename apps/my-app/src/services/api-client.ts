@@ -24,15 +24,6 @@ export class ApiError extends Error {
 
 let refreshPromise: Promise<string> | null = null;
 const store = getDefaultStore();
-const MAX_RETRY_COUNT = 3;
-const RETRY_BASE_DELAY_MS = 500;
-const RETRY_MAX_DELAY_MS = 3000;
-const SAFE_RETRY_METHODS = new Set(['get', 'head', 'options']);
-
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -71,29 +62,8 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as (
       InternalAxiosRequestConfig & {
         _retry?: boolean;
-        _retryCount?: number;
       }
     ) | undefined;
-
-    const status = error.response?.status;
-    const method = originalRequest?.method?.toLowerCase();
-    const isSafeMethod = !method || SAFE_RETRY_METHODS.has(method);
-    const shouldRetry =
-      !!originalRequest &&
-      isSafeMethod &&
-      status !== 401 &&
-      (!status || status >= 500 || status === 408 || status === 429) &&
-      (originalRequest._retryCount ?? 0) < MAX_RETRY_COUNT;
-
-    if (shouldRetry) {
-      originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
-      const retryDelay = Math.min(
-        RETRY_BASE_DELAY_MS * 2 ** (originalRequest._retryCount - 1),
-        RETRY_MAX_DELAY_MS
-      );
-      await sleep(retryDelay);
-      return apiClient.request(originalRequest);
-    }
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;

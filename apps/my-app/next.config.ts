@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "profile.mezon.ai",
       },
+      {
+        protocol: "https",
+        hostname: "imgproxy.mezon.ai",
+      },
     ],
   },
 };
