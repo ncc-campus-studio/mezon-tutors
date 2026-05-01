@@ -60,7 +60,7 @@
       "BEGINNER": "Beginner"
     }
   },
-  "TrialBookingModal": {
+  "TrialBookingSheet": {
     "title": "Book Trial Lesson",
     "expertTutorTitle": "{subject} Tutor",
     "perHour": "/hr",
@@ -72,8 +72,16 @@
     "noAvailableTimes": "No available times for this day.",
     "totalPrice": "TOTAL PRICE",
     "confirmBooking": "Confirm Booking",
+    "selectScheduleFirst": "Select a schedule first",
     "requestSentWait": "Request sent, please wait",
+    "alreadyBookedConfirmed": "You already booked this tutor",
+    "alreadyBookedCompleted": "You already completed a lesson with this tutor",
     "alreadyBooked": "You already booked this tutor",
+    "loginRequiredTitle": "Login required",
+    "loginRequiredDescription": "Please login to book a trial lesson.",
+    "noTimeSet": "No time set",
+    "clearSelectedTime": "Clear selected time",
+    "bookNow": "Book Now",
     "paymentPendingNotice": "You have an unpaid trial lesson. Continue below to complete payment.",
     "continueToPayment": "Continue to payment",
     "weekday": {

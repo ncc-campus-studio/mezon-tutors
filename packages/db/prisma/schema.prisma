@@ -126,8 +126,6 @@ model TutorProfile {
   experience         String             @default("")
   motivate           String             @default("")
   headline           String             @default("")
-  pricePerHour       BigInt             @map("price_per_hour")
-  currency           ECurrency          @map("currency")
   isProfessional     Boolean            @default(false) @map("is_professional")
   verificationStatus VerificationStatus @map("verification_status")
   totalLessonsTaught Int                @default(0) @map("total_lessons_taught")
@@ -143,12 +141,28 @@ model TutorProfile {
   availability        TutorAvailability[]
   trialLessonBookings TrialLessonBooking[]
   reviews             TutorReview[]
+  trialLessonPrice    TrialLessonPrice?
 
   adminNotes            TutorAdminNote[]
   professionalDocuments ProfessionalDocument[]
   identityVerification  IdentityVerification?
 
   @@map("tutor_profiles")
+}
+
+model TrialLessonPrice {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tutorId       String      @unique @map("tutor_id") @db.Uuid
+  baseCurrency  ECurrency   @default(VND) @map("type")
+  usd           Decimal     @db.Decimal(18, 6)
+  vnd           BigInt      @db.BigInt
+  php           Decimal     @db.Decimal(18, 6)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+
+  @@map("currencies")
 }
 
 /// Reviews from students for tutors
@@ -261,8 +275,8 @@ model TrialLessonBooking {
   currency            ECurrency           @map("currency")
   paymentStatus    EPaymentStatus  @default(PENDING) @map("payment_status")
   idempotencyKey   String?         @unique @map("idempotency_key")
-  payosOrderCode   String?         @map("payos_order_code") @db.VarChar(50) @unique
-  payosPaymentLink String?         @map("payos_payment_link")
+  paymentRef       String?         @map("payment_ref") @db.VarChar(50) @unique
+  paymentUrl       String?         @map("payment_url")
   paidAt           DateTime?       @map("paid_at")
   failedAt         DateTime?       @map("failed_at")
   refundedAt       DateTime?       @map("refunded_at")
@@ -274,7 +288,7 @@ model TrialLessonBooking {
   student User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
   walletTransactions Transaction[]
 
-  @@index([payosOrderCode])
+  @@index([paymentRef])
   @@index([studentId])
   @@index([tutorId])
   @@index([tutorId, startAt])

@@ -12,11 +12,12 @@ import { TutorAvailabilityModule } from './modules/tutor-availability/tutor-avai
 import { MyLessonsModule } from './modules/my-lessons/my-lessons.module';
 import { TutorApplicationModule } from './modules/tutor-application/tutor-application.module';
 import { TrialLessonBookingModule } from './modules/trial-lesson-booking/trial-lesson-booking.module';
-import { PayosWebhookModule } from './modules/payos-webhook/payos-webhook.module';
 import { MyScheduleModule } from './modules/my-schedule/my-schedule.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { DmChannelModule } from './modules/dm-channel/dm-channel.module';
+import { VnpayModule } from './modules/vnpay/vnpay.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
 
 @Module({
   imports: [
@@ -40,11 +41,12 @@ import { DmChannelModule } from './modules/dm-channel/dm-channel.module';
     TutorApplicationModule,
     MyLessonsModule,
     TrialLessonBookingModule,
-    PayosWebhookModule,
     MyScheduleModule,
     CloudinaryModule,
     ReviewsModule,
     DmChannelModule,
+    VnpayModule,
+    WebhookModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -12,7 +12,6 @@ import {
   TutorAvailabilitySlotDto,
   TutorLanguageDto,
   VerifiedTutorProfileDto,
-  CURRENCY_RATE_API_URLS,
 } from '@mezon-tutors/shared';
 import {
   ETrialLessonStatus,
@@ -26,58 +25,42 @@ import {
 import dayjs = require('dayjs');
 import { toTutorReviewDto, toVerifiedTutorProfileDto } from './tutor-profile.mapper';
 import { VerifiedTutorQueryDto } from './dto/verified-tutor-query.dto';
-
-type CurrencyAPIResponse = Record<string, Record<string, number>>;
-const EXCHANGE_RATES_TTL_MS = 60 * 60 * 1000; // 1 hour
-const currencyRatesCache = new Map<
-  ECurrency,
-  { rates: Record<string, number>; fetchedAt: number }
->();
-
-async function fetchRatesFromBaseCurrency(baseCurrency: ECurrency): Promise<Record<string, number>> {
-  const base = baseCurrency.toLowerCase();
-  const urls = CURRENCY_RATE_API_URLS.map((url) => `${url}/${base}.json`);
-
-  let lastError: unknown;
-  for (const url of urls) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = (await response.json()) as CurrencyAPIResponse;
-      const rates = data[base] as Record<string, number> | undefined;
-      if (!rates || typeof rates !== 'object') {
-        throw new Error(`Invalid response format for ${baseCurrency}`);
-      }
-
-      return rates;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  console.error('All currency API endpoints failed:', lastError);
-  throw new Error(`Failed to fetch exchange rates for ${baseCurrency}`);
-}
-
-async function getRatesFromBaseCurrencyCached(baseCurrency: ECurrency): Promise<Record<string, number>> {
-  const cached = currencyRatesCache.get(baseCurrency);
-  if (cached && Date.now() - cached.fetchedAt < EXCHANGE_RATES_TTL_MS) {
-    return cached.rates;
-  }
-
-  const rates = await fetchRatesFromBaseCurrency(baseCurrency);
-  currencyRatesCache.set(baseCurrency, { rates, fetchedAt: Date.now() });
-  return rates;
-}
-
 @Injectable()
 export class TutorProfileService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createReview(tutorId: string, reviewerId: string, rating: number, comment: string): Promise<void> {
+  private buildTrialLessonPriceData(price: number, currency?: ECurrency) {
+    const selectedCurrency = currency ?? ECurrency.VND;
+    const normalized = Math.max(0, Number(price) || 0);
+
+    let usd = normalized / 25000;
+    let vnd = normalized;
+    let php = usd * 57;
+
+    if (selectedCurrency === ECurrency.USD) {
+      usd = normalized;
+      vnd = usd * 25000;
+      php = usd * 57;
+    } else if (selectedCurrency === ECurrency.PHP) {
+      php = normalized;
+      usd = php / 57;
+      vnd = usd * 25000;
+    }
+
+    return {
+      baseCurrency: selectedCurrency,
+      usd: usd.toFixed(6),
+      vnd: BigInt(Math.round(vnd)),
+      php: php.toFixed(6),
+    };
+  }
+
+  async createReview(
+    tutorId: string,
+    reviewerId: string,
+    rating: number,
+    comment: string
+  ): Promise<void> {
     const tutor = await this.prisma.tutorProfile.findUnique({
       where: { id: tutorId },
       select: { ratingCount: true, ratingAverage: true },
@@ -87,8 +70,9 @@ export class TutorProfileService {
       throw new NotFoundException(`Tutor with ID ${tutorId} not found`)
     }
 
-    const newCount = tutor.ratingCount + 1
-    const newAverage = (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount
+    const newCount = tutor.ratingCount + 1;
+    const newAverage =
+      (Number(tutor.ratingCount) * Number(tutor.ratingAverage) + rating) / newCount;
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tutorReview.create({
@@ -137,10 +121,42 @@ export class TutorProfileService {
         experience: dto.specialization,
         motivate: dto.motivate,
         headline: dto.headline,
-        pricePerHour: dto.pricePerHour,
-        currency: dto.currency,
         ratingAverage: 0,
         verificationStatus: VerificationStatus.PENDING,
+      } as unknown as Prisma.TutorProfileCreateInput,
+    });
+
+    const inputPrice = Number((dto as unknown as { price?: number }).price ?? 0);
+    const trialLessonPriceData = this.buildTrialLessonPriceData(inputPrice, dto.currency);
+    const trialLessonPriceDelegate = (
+      this.prisma as unknown as {
+        trialLessonPrice: {
+          upsert: (args: {
+            where: { tutorId: string };
+            update: {
+              baseCurrency: ECurrency;
+              usd: string;
+              vnd: bigint;
+              php: string;
+            };
+            create: {
+              tutorId: string;
+              baseCurrency: ECurrency;
+              usd: string;
+              vnd: bigint;
+              php: string;
+            };
+          }) => Promise<unknown>;
+        };
+      }
+    ).trialLessonPrice;
+
+    await trialLessonPriceDelegate.upsert({
+      where: { tutorId: profile.id },
+      update: trialLessonPriceData,
+      create: {
+        tutorId: profile.id,
+        ...trialLessonPriceData,
       },
     });
 
@@ -157,11 +173,21 @@ export class TutorProfileService {
     }
 
     if (dto.teachingCertificateFileUrl && profile) {
-      await this.createTutorCertificateByUserId(profile.id, dto.teachingCertificateName, dto.teachingCertificateFileUrl, ProfessionalDocumentType.CERTIFICATE);
+      await this.createTutorCertificateByUserId(
+        profile.id,
+        dto.teachingCertificateName,
+        dto.teachingCertificateFileUrl,
+        ProfessionalDocumentType.CERTIFICATE
+      );
     }
 
     if (dto.educationFileUrl && profile) {
-      await this.createTutorCertificateByUserId(profile.id, dto.specialization, dto.educationFileUrl, ProfessionalDocumentType.DEGREE);
+      await this.createTutorCertificateByUserId(
+        profile.id,
+        dto.specialization,
+        dto.educationFileUrl,
+        ProfessionalDocumentType.DEGREE
+      );
     }
   }
 
@@ -188,8 +214,41 @@ export class TutorProfileService {
         experience: dto.specialization,
         motivate: dto.motivate,
         headline: dto.headline,
-        pricePerHour: dto.pricePerHour,
         isProfessional: !!dto.teachingCertificateName,
+      } as unknown as Prisma.TutorProfileUpdateInput,
+    });
+
+    const inputPrice = Number((dto as unknown as { price?: number }).price ?? 0);
+    const trialLessonPriceData = this.buildTrialLessonPriceData(inputPrice, dto.currency);
+    const trialLessonPriceDelegate = (
+      this.prisma as unknown as {
+        trialLessonPrice: {
+          upsert: (args: {
+            where: { tutorId: string };
+            update: {
+              baseCurrency: ECurrency;
+              usd: string;
+              vnd: bigint;
+              php: string;
+            };
+            create: {
+              tutorId: string;
+              baseCurrency: ECurrency;
+              usd: string;
+              vnd: bigint;
+              php: string;
+            };
+          }) => Promise<unknown>;
+        };
+      }
+    ).trialLessonPrice;
+
+    await trialLessonPriceDelegate.upsert({
+      where: { tutorId: profile.id },
+      update: trialLessonPriceData,
+      create: {
+        tutorId: profile.id,
+        ...trialLessonPriceData,
       },
     });
 
@@ -300,7 +359,10 @@ export class TutorProfileService {
     });
   }
 
-  async createTutorIdentityVerificationByUserId(userId: string, identityPhotoUrl: string): Promise<void> {
+  async createTutorIdentityVerificationByUserId(
+    userId: string,
+    identityPhotoUrl: string
+  ): Promise<void> {
     await this.prisma.identityVerification.create({
       data: {
         tutorId: userId,
@@ -327,45 +389,6 @@ export class TutorProfileService {
     });
   }
 
-  private getVerifiedTutorOrderBy(
-    sortBy: ETutorSortBy
-  ): Prisma.TutorProfileOrderByWithRelationInput[] {
-    const defaultOrderBy: Prisma.TutorProfileOrderByWithRelationInput = { id: 'asc' as const }
-
-    switch (sortBy) {
-      case ETutorSortBy.HIGHEST_PRICE:
-        return [{ pricePerHour: 'desc' as const }, defaultOrderBy]
-      case ETutorSortBy.LOWEST_PRICE:
-        return [{ pricePerHour: 'asc' as const }, defaultOrderBy]
-      case ETutorSortBy.NUMBER_OF_REVIEWS:
-        return [{ ratingCount: 'desc' as const }, defaultOrderBy]
-      case ETutorSortBy.BEST_RATING:
-        return [{ ratingAverage: 'desc' as const }, defaultOrderBy]
-      case ETutorSortBy.TOP_PICKS:
-        return [{ totalStudents: 'desc' as const }, defaultOrderBy]
-      default:
-        return [
-          { ratingAverage: 'desc' as const },
-          { ratingCount: 'desc' as const },
-          defaultOrderBy,
-        ]
-    }
-  }
-
-  private getPricePerLessonFilter(minPrice?: number, maxPrice?: number) {
-    const priceFilter: Prisma.IntFilter = {}
-
-    if (typeof minPrice === 'number' && !Number.isNaN(minPrice)) {
-      priceFilter.gte = minPrice
-    }
-
-    if (typeof maxPrice === 'number' && !Number.isNaN(maxPrice)) {
-      priceFilter.lte = maxPrice
-    }
-
-    return Object.keys(priceFilter).length > 0 ? priceFilter : undefined
-  }
-
   async getVerifiedTutors(
     query: VerifiedTutorQueryDto
   ): Promise<PaginatedResponse<VerifiedTutorProfileDto>> {
@@ -389,46 +412,60 @@ export class TutorProfileService {
     }
 
     if (country && country !== ECountry.ANY_COUNTRY) {
-      where.country = CountryLabel[country]
+      where.country = CountryLabel[country];
     }
 
-    const ratesFromBase = await getRatesFromBaseCurrencyCached(currency)
-    const rateToVnd = ratesFromBase[ECurrency.VND.toLowerCase()]
+    type TutorWithComputedPrice = Prisma.TutorProfileGetPayload<{
+      include: {
+        languages: true;
+        user: {
+          select: {
+            mezonUserId: true;
+          };
+        };
+      };
+    }> & {
+      trialLessonPrice?: {
+        usd: Prisma.Decimal;
+        vnd: bigint;
+        php: Prisma.Decimal;
+      } | null;
+    };
 
-    const allTutors = await this.prisma.tutorProfile.findMany({
+    const allTutors = (await this.prisma.tutorProfile.findMany({
       where,
       include: {
+        trialLessonPrice: true,
         languages: true,
         user: {
           select: {
             mezonUserId: true,
           },
         },
-      },
-    })
+      } as unknown as Prisma.TutorProfileInclude,
+    })) as unknown as TutorWithComputedPrice[];
+
+    const getTutorPriceByCurrency = (
+      tutor: TutorWithComputedPrice,
+      targetCurrency: ECurrency
+    ): number | null => {
+      if (!tutor.trialLessonPrice) {
+        return null;
+      }
+
+      switch (targetCurrency) {
+        case ECurrency.USD:
+          return Number(tutor.trialLessonPrice.usd);
+        case ECurrency.PHP:
+          return Number(tutor.trialLessonPrice.php);
+        case ECurrency.VND:
+          return Number(tutor.trialLessonPrice.vnd);
+      }
+    }
 
     const tutorsWithComputedPrices = allTutors.map((tutor) => {
-      const tutorCurrency = tutor.currency as ECurrency
-      const tutorPrice = Number(tutor.pricePerHour)
-
-      let priceInQueryCurrency: number | null = null
-      if (tutorCurrency === currency) {
-        priceInQueryCurrency = tutorPrice
-      } else {
-        const rateFromTutorCurrency = ratesFromBase[tutorCurrency.toLowerCase()]
-        if (typeof rateFromTutorCurrency === 'number' && rateFromTutorCurrency > 0) {
-          priceInQueryCurrency = tutorPrice / rateFromTutorCurrency
-        }
-      }
-
-      let priceInVnd: number | null = null
-      if (priceInQueryCurrency != null) {
-        if (currency === ECurrency.VND) {
-          priceInVnd = priceInQueryCurrency
-        } else if (typeof rateToVnd === 'number' && rateToVnd > 0) {
-          priceInVnd = priceInQueryCurrency * rateToVnd
-        }
-      }
+      const priceInQueryCurrency = getTutorPriceByCurrency(tutor, currency)
+      const priceInVnd = getTutorPriceByCurrency(tutor, ECurrency.VND)
 
       return {
         tutor,
@@ -449,7 +486,7 @@ export class TutorProfileService {
     })
 
     const getPriceSortValue = (x: (typeof filtered)[number]) =>
-      x.priceInQueryCurrency ?? Number(x.tutor.pricePerHour)
+      x.priceInQueryCurrency ?? Number.MAX_SAFE_INTEGER
 
     const sortSecondaryIdAsc = (a: (typeof filtered)[number], b: (typeof filtered)[number]) =>
       a.tutor.id.localeCompare(b.tutor.id)
@@ -492,15 +529,9 @@ export class TutorProfileService {
 
     return {
       data: {
-        items: paged.map(({ tutor, priceInVnd }) => {
-          const pricePerHourVnd = priceInVnd != null ? Math.round(priceInVnd) : Number(tutor.pricePerHour)
-          const tutorWithVndPrice: typeof tutor = {
-            ...tutor,
-            pricePerHour: BigInt(pricePerHourVnd),
-          }
-
-          return toVerifiedTutorProfileDto(tutorWithVndPrice)
-        }),
+        items: paged.map(({ tutor }) =>
+          toVerifiedTutorProfileDto(tutor as unknown as Parameters<typeof toVerifiedTutorProfileDto>[0])
+        ),
         meta: {
           page,
           limit,
@@ -515,17 +546,18 @@ export class TutorProfileService {
   }
 
   async getVerifiedTutorAbout(id: string) {
-    const tutor = await this.prisma.tutorProfile.findUnique({
+    const tutor = (await this.prisma.tutorProfile.findUnique({
       where: { id },
       include: {
+        trialLessonPrice: true,
         languages: true,
         user: {
           select: {
             mezonUserId: true,
           },
         },
-      },
-    })
+      } as unknown as Prisma.TutorProfileInclude,
+    })) as unknown as Parameters<typeof toVerifiedTutorProfileDto>[0] | null;
 
     if (!tutor) {
       throw new NotFoundException(`Tutor with ID ${id} not found`)

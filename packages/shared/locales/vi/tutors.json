@@ -60,7 +60,7 @@
       "BEGINNER": "Người mới bắt đầu"
     }
   },
-  "TrialBookingModal": {
+  "TrialBookingSheet": {
     "title": "Đặt buổi học thử",
     "expertTutorTitle": "Gia sư {subject}",
     "perHour": "/giờ",
@@ -72,8 +72,16 @@
     "noAvailableTimes": "Không có khung giờ trống cho ngày này.",
     "totalPrice": "TỔNG GIÁ",
     "confirmBooking": "Xác nhận đặt lịch",
+    "selectScheduleFirst": "Vui lòng chọn lịch trước",
     "requestSentWait": "Yêu cầu đã được gửi, vui lòng chờ",
+    "alreadyBookedConfirmed": "Bạn đã đặt gia sư này rồi",
+    "alreadyBookedCompleted": "Bạn đã hoàn thành buổi học với gia sư này",
     "alreadyBooked": "Bạn đã đặt gia sư này rồi",
+    "loginRequiredTitle": "Yêu cầu đăng nhập",
+    "loginRequiredDescription": "Vui lòng đăng nhập để đặt buổi học thử.",
+    "noTimeSet": "Chưa chọn thời gian",
+    "clearSelectedTime": "Xóa thời gian đã chọn",
+    "bookNow": "Đặt ngay",
     "paymentPendingNotice": "Bạn có buổi học thử chưa thanh toán. Nhấn bên dưới để tiếp tục thanh toán.",
     "continueToPayment": "Tiếp tục thanh toán",
     "weekday": {

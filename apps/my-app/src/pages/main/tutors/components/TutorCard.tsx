@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Button, Card, CardContent, Kbd, KbdGroup, Separator } from "@/components/ui";
-import { VerifiedTutorProfileDto, formatToCurrency} from "@mezon-tutors/shared";
+import { ECurrency, VerifiedTutorProfileDto, formatToCurrency} from "@mezon-tutors/shared";
 import Image from "next/image";
 import {
   BadgeCheckIcon,
@@ -16,6 +15,7 @@ import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { userAtom } from "@/store/auth.atom";
 import { TutorMessageModal } from "./TutorMessageModal";
+import { TrialBookingSheet } from "./TrialBookingSheet";
 import { useCurrency } from "@/hooks";
 
 type TutorCardProps = {
@@ -40,6 +40,23 @@ export default function TutorCard({
   const studentId = currentUser?.id ?? "";
   const studentMezonUserId = currentUser?.mezonUserId;
   const tutorId = tutor.userId;
+  const [isTrialBookingSheetOpen, setIsTrialBookingSheetOpen] = useState(false);
+  const tutorPrices = (
+    tutor as unknown as {
+      prices?: {
+        baseCurrency?: ECurrency;
+        usd?: number;
+        vnd?: number;
+        php?: number;
+      };
+    }
+  ).prices;
+  const lessonPrice =
+    currency === ECurrency.USD
+      ? (tutorPrices?.usd ?? 0)
+      : currency === ECurrency.PHP
+        ? (tutorPrices?.php ?? 0)
+        : (tutorPrices?.vnd ?? 0);
 
   return (
     <>
@@ -127,20 +144,19 @@ export default function TutorCard({
             </span>
           </div>
           <div className="text-sm font-medium text-violet-700">
-            <span className="text-2xl font-bold text-primary">{formatToCurrency(currency, tutor.pricePerHour)}</span>
+            <span className="text-2xl font-bold text-primary">{formatToCurrency(currency, lessonPrice)}</span>
             <span className="text-sm text-slate-500">{t("perLesson")}</span>
           </div>
-          <Link
-            href={`/tutors/${tutor.id}`}
-            className="w-full"
+          <Button
+            size="lg"
+            className="w-full text-lg"
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsTrialBookingSheetOpen(true);
+            }}
           >
-            <Button
-              size="lg"
-              className="w-full text-lg"
-            >
-              {t("bookTrial")}
-            </Button>
-          </Link>
+            {t("bookTrial")}
+          </Button>
           <Button
             variant="outline"
             size="lg"
@@ -164,6 +180,23 @@ export default function TutorCard({
         tutorId={tutorId}
         tutorMezonUserId={tutor.mezonUserId}
         onOpenChangeAction={setIsMessageModalOpen}
+      />
+
+      <TrialBookingSheet
+        open={isTrialBookingSheetOpen}
+        onOpenChange={setIsTrialBookingSheetOpen}
+        tutor={{
+          id: tutor.id,
+          name,
+          title: tutor.subject,
+          prices: {
+            baseCurrency: tutorPrices?.baseCurrency ?? ECurrency.VND,
+            usd: tutorPrices?.usd ?? 0,
+            vnd: tutorPrices?.vnd ?? 0,
+            php: tutorPrices?.php ?? 0,
+          },
+          avatar: tutor.avatar,
+        }}
       />
     </>
   );

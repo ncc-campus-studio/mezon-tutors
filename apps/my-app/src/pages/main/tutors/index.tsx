@@ -13,10 +13,8 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { useGetVerifiedTutors } from "@/services/tutor-profile/tutor-profile.api";
-import { useGetCurrencyRates } from "@/services/currency/currency.api";
 import { useCurrency } from "@/hooks";
 import {
-  convertCurrency,
   ECountry,
   ECurrency,
   ESubject,
@@ -117,19 +115,9 @@ export default function TutorsPage() {
     minPrice,
     maxPrice: effectiveMaxPrice,
   });
-  const { data: rates } = useGetCurrencyRates(ECurrency.VND, currency !== ECurrency.VND);
 
   const items = data?.items ?? [];
-  const displayItems = useMemo(() => {
-    if (currency === ECurrency.VND || !rates) {
-      return items;
-    }
-
-    return items.map((tutor) => ({
-      ...tutor,
-      pricePerHour: convertCurrency(tutor.pricePerHour, ECurrency.VND, currency, rates),
-    }));
-  }, [currency, items, rates]);
+  const displayItems = useMemo(() => items, [items]);
   const totalTutors = data?.meta.total ?? 0;
   const totalPages = data?.meta.totalPages ?? 1;
   const hasItems = displayItems.length > 0;

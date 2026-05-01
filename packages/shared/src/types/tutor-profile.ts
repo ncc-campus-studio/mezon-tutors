@@ -122,7 +122,12 @@ export type TutorProfile = {
   experience: string
   motivate: string
   headline: string
-  pricePerHour: number
+  prices: {
+    baseCurrency: ECurrency
+    usd: number
+    vnd: number
+    php: number
+  }
   isProfessional: boolean
   verificationStatus: VerificationStatus
   totalLessonsTaught: number
@@ -191,7 +196,12 @@ export interface VerifiedTutorProfileDto {
   experience: string
   motivate: string
   headline: string
-  pricePerHour: number
+  prices: {
+    baseCurrency: ECurrency
+    usd: number
+    vnd: number
+    php: number
+  }
   isProfessional: boolean
   totalLessonsTaught: number
   totalStudents: number

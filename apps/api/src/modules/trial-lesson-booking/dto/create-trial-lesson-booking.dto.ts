@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer'
-import { IsDateString, IsInt, IsUUID, Max, Min } from 'class-validator'
+import { ECurrency } from '@mezon-tutors/db'
+import { IsDateString, IsEnum, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator'
 
 export class CreateTrialLessonBookingDto {
   @IsUUID()
@@ -19,4 +20,8 @@ export class CreateTrialLessonBookingDto {
   @Min(30)
   @Max(60)
   durationMinutes: number
+
+  @IsOptional()
+  @IsEnum(ECurrency)
+  currency?: ECurrency
 }

@@ -6,3 +6,5 @@ export * from "./mezon-light/mezon-light.service";
 export * from "./tutor-profile/tutor-profile.api";
 export * from "./storage/storage.service";
 export * from "./currency/currency.api";
+export * from "./trial-lesson-booking/trial-lesson-booking.api";
+export * from "./tutor-availability/tutor-availability.api";

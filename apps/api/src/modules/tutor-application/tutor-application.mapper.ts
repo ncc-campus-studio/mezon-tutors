@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@mezon-tutors/db';
 import {
   ABOUT_COUNTRIES,
+  ECurrency,
   FullTutorApplication,
   IdentityVerification,
   parseEnum,
@@ -16,7 +17,14 @@ import {
 
 export type TutorProfileWithUser = Prisma.TutorProfileGetPayload<{
   include: { user: true; languages: true };
-}>;
+}> & {
+  trialLessonPrice?: {
+    baseCurrency?: ECurrency;
+    usd?: Prisma.Decimal;
+    vnd: bigint | Prisma.Decimal;
+    php?: Prisma.Decimal;
+  } | null;
+};
 
 @Injectable()
 export class TutorApplicationMapper {
@@ -34,7 +42,12 @@ export class TutorApplicationMapper {
       experience: profile.experience,
       motivate: profile.motivate,
       headline: profile.headline,
-      pricePerHour: Number(profile.pricePerHour),
+      prices: {
+        baseCurrency: profile.trialLessonPrice?.baseCurrency ?? ECurrency.VND,
+        usd: Number(profile.trialLessonPrice?.usd ?? 0),
+        vnd: Number(profile.trialLessonPrice?.vnd ?? 0),
+        php: Number(profile.trialLessonPrice?.php ?? 0),
+      },
       isProfessional: profile.isProfessional,
       verificationStatus: parseEnum(
         profile.verificationStatus,

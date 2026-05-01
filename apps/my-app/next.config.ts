@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "imgproxy.mezon.ai",
       },
+      {
+        protocol: "https",
+        hostname: "scontent.fdad3-6.fna.fbcdn.net",
+      },
     ],
   },
 };
