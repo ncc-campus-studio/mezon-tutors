@@ -1,8 +1,34 @@
-import { TutorLanguage, TutorProfile, TutorReview, User } from '@mezon-tutors/db'
+import { Prisma, TutorLanguage, TutorProfile, TutorReview, User } from '@mezon-tutors/db'
 import { TutorDetailDto, TutorReviewDto, VerifiedTutorProfileDto } from '@mezon-tutors/shared'
+import { ECurrency } from '@mezon-tutors/shared'
+
+type TutorWithPrice = TutorProfile & {
+  languages: TutorLanguage[]
+  user?: Pick<User, 'mezonUserId'>
+  trialLessonPrice?: {
+    baseCurrency?: ECurrency
+    usd?: Prisma.Decimal | number | null
+    vnd: bigint | Prisma.Decimal
+    php?: Prisma.Decimal | number | null
+  } | null
+}
+
+function getTutorPrices(tutor: TutorWithPrice): {
+  baseCurrency: ECurrency
+  usd: number
+  vnd: number
+  php: number
+} {
+  return {
+    baseCurrency: tutor.trialLessonPrice?.baseCurrency ?? ECurrency.VND,
+    usd: Number(tutor.trialLessonPrice?.usd ?? 0),
+    vnd: Number(tutor.trialLessonPrice?.vnd ?? 0),
+    php: Number(tutor.trialLessonPrice?.php ?? 0),
+  }
+}
 
 export function toVerifiedTutorProfileDto(
-  tutor: TutorProfile & { languages: TutorLanguage[]; user?: Pick<User, 'mezonUserId'> },
+  tutor: TutorWithPrice,
 ): VerifiedTutorProfileDto {
   return {
     id: tutor.id,
@@ -18,7 +44,7 @@ export function toVerifiedTutorProfileDto(
     experience: tutor.experience,
     motivate: tutor.motivate,
     headline: tutor.headline,
-    pricePerHour: Number(tutor.pricePerHour),
+    prices: getTutorPrices(tutor),
     isProfessional: tutor.isProfessional,
     totalLessonsTaught: tutor.totalLessonsTaught,
     totalStudents: tutor.totalStudents,
@@ -26,7 +52,7 @@ export function toVerifiedTutorProfileDto(
     ratingAverage: Number(tutor.ratingAverage),
     timezone: tutor.timezone,
     languages: tutor.languages.map((language) => ({ languageCode: language.languageCode, proficiency: language.proficiency })),
-  }
+  } as unknown as VerifiedTutorProfileDto
 }
 
 export function toTutorReviewDto(review: TutorReview & { reviewer: Pick<User, 'id' | 'username' | 'avatar'> }): TutorReviewDto {
@@ -46,8 +72,7 @@ export function toTutorReviewDto(review: TutorReview & { reviewer: Pick<User, 'i
 }
 
 export function toTutorDetailDto(
-  tutor: TutorProfile & {
-    languages: TutorLanguage[]
+  tutor: TutorWithPrice & {
     availability: Array<{
       dayOfWeek: number
       startTime: string

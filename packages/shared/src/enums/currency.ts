@@ -1,4 +1,5 @@
 export enum ECurrency {
-  VIETNAMESE = 'VND',
-  UNITED_STATES = 'USD',
+  VND = 'VND',
+  USD = 'USD',
+  PHP = 'PHP',
 }

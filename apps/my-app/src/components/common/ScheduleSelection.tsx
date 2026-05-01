@@ -1,0 +1,348 @@
+'use client';
+
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui';
+import { cn } from '@/lib/utils';
+
+const SLOT_MINUTES = 30;
+const DAY_COUNT = 7;
+const MINUTES_PER_DAY = 24 * 60;
+
+type SelectionMode = 'single' | 'multiple';
+
+export type ScheduleSlotInput = {
+  date: string; // yyyy-mm-dd (local date)
+  startTime: string; // HH:mm
+  endTime?: string; // HH:mm, default start + 30m
+};
+
+export type SelectedScheduleSlot = {
+  date: string;
+  startTime: string;
+  endTime: string;
+  label: string; // Mon, May 4 . 06:00 - 06:30
+};
+
+export interface ScheduleSelectionProps {
+  availableSlots: ScheduleSlotInput[];
+  selectionMode?: SelectionMode;
+  value?: SelectedScheduleSlot[];
+  defaultValue?: SelectedScheduleSlot[];
+  onChange?: (slots: SelectedScheduleSlot[]) => void;
+  onWeekChange?: (payload: { weekOffset: number; startDate: string; endDate: string }) => void;
+  className?: string;
+  gridClassName?: string;
+  maxBodyHeight?: string;
+}
+
+type WeekDate = {
+  date: Date;
+  id: string;
+};
+
+function pad2(num: number): string {
+  return String(num).padStart(2, '0');
+}
+
+function formatYmd(date: Date): string {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function parseYmd(ymd: string): Date {
+  const [yearText, monthText, dayText] = ymd.split('-');
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  return new Date(year, month - 1, day);
+}
+
+function parseTimeToMinutes(time: string): number {
+  const [hourText, minuteText] = time.split(':');
+  const hour = Number(hourText);
+  const minute = Number(minuteText);
+  return hour * 60 + minute;
+}
+
+function minutesToTime(minutes: number): string {
+  return `${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`;
+}
+
+function getWeekStartMonday(now = new Date()): Date {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const jsDay = today.getDay(); // 0:Sun...6:Sat
+  const distanceToMonday = jsDay === 0 ? 6 : jsDay - 1;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - distanceToMonday);
+  return monday;
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function normalizeEndTime(startTime: string, endTime?: string): string {
+  if (endTime) {
+    return endTime;
+  }
+  return minutesToTime(parseTimeToMinutes(startTime) + SLOT_MINUTES);
+}
+
+function buildSlotLabel(date: string, startTime: string, endTime: string): string {
+  const fullDate = parseYmd(date);
+  const left = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  }).format(fullDate);
+  return `${left} . ${startTime} - ${endTime}`;
+}
+
+function toSelectedSlot(slot: ScheduleSlotInput): SelectedScheduleSlot {
+  const endTime = normalizeEndTime(slot.startTime, slot.endTime);
+  return {
+    date: slot.date,
+    startTime: slot.startTime,
+    endTime,
+    label: buildSlotLabel(slot.date, slot.startTime, endTime),
+  };
+}
+
+function toSlotKey(slot: { date: string; startTime: string }): string {
+  return `${slot.date}|${slot.startTime}`;
+}
+
+export function ScheduleSelection({
+  availableSlots,
+  selectionMode = 'single',
+  value,
+  defaultValue = [],
+  onChange,
+  onWeekChange,
+  className,
+  gridClassName,
+  maxBodyHeight = '520px',
+}: ScheduleSelectionProps) {
+  const t = useTranslations('Common.ScheduleSelection');
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [internalValue, setInternalValue] = useState<SelectedScheduleSlot[]>(defaultValue);
+  const now = useMemo(() => new Date(), []);
+  const baseWeekStart = useMemo(() => getWeekStartMonday(now), [now]);
+
+  const selectedSlots = value ?? internalValue;
+
+  const weekDates = useMemo<WeekDate[]>(() => {
+    const start = addDays(baseWeekStart, weekOffset * DAY_COUNT);
+    return Array.from({ length: DAY_COUNT }).map((_, index) => {
+      const date = addDays(start, index);
+      return { date, id: formatYmd(date) };
+    });
+  }, [baseWeekStart, weekOffset]);
+
+  useEffect(() => {
+    if (!weekDates.length || !onWeekChange) {
+      return;
+    }
+    onWeekChange({
+      weekOffset,
+      startDate: weekDates[0].id,
+      endDate: weekDates[DAY_COUNT - 1].id,
+    });
+  }, [onWeekChange, weekDates, weekOffset]);
+
+  const weekRangeLabel = useMemo(() => {
+    if (!weekDates.length) {
+      return '';
+    }
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    return `${formatter.format(weekDates[0].date)} - ${formatter.format(weekDates[DAY_COUNT - 1].date)}`;
+  }, [weekDates]);
+
+  const timeRows = useMemo(() => {
+    return Array.from({ length: MINUTES_PER_DAY / SLOT_MINUTES }).map((_, index) =>
+      minutesToTime(index * SLOT_MINUTES)
+    );
+  }, []);
+
+  const availableCellSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const slot of availableSlots) {
+      const start = parseTimeToMinutes(slot.startTime);
+      const end = parseTimeToMinutes(normalizeEndTime(slot.startTime, slot.endTime));
+      for (let minute = start; minute + SLOT_MINUTES <= end; minute += SLOT_MINUTES) {
+        set.add(`${slot.date}|${minutesToTime(minute)}`);
+      }
+    }
+    return set;
+  }, [availableSlots]);
+
+  const selectedSet = useMemo(() => {
+    return new Set(selectedSlots.map((slot) => toSlotKey(slot)));
+  }, [selectedSlots]);
+
+  const emitChange = (next: SelectedScheduleSlot[]) => {
+    if (!value) {
+      setInternalValue(next);
+    }
+    onChange?.(next);
+  };
+
+  const handleCellSelect = (date: string, startTime: string) => {
+    const key = `${date}|${startTime}`;
+    if (!availableCellSet.has(key)) {
+      return;
+    }
+
+    const nowDate = new Date();
+    const [hourText, minuteText] = startTime.split(':');
+    const cellDate = parseYmd(date);
+    cellDate.setHours(Number(hourText), Number(minuteText), 0, 0);
+    if (cellDate <= nowDate) {
+      return;
+    }
+
+    const newSlot = toSelectedSlot({ date, startTime });
+    if (selectionMode === 'single') {
+      emitChange([newSlot]);
+      return;
+    }
+
+    const exists = selectedSet.has(key);
+    if (exists) {
+      emitChange(selectedSlots.filter((slot) => toSlotKey(slot) !== key));
+      return;
+    }
+    emitChange(
+      [...selectedSlots, newSlot].sort((a, b) =>
+        `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`)
+      )
+    );
+  };
+
+  return (
+    <div className={cn('space-y-3 rounded-2xl border bg-background p-3 sm:p-4', className)}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-4 text-base text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="size-3 rounded-full bg-primary/70" />
+            <span className="font-medium">{t('status.available')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="size-3 rounded-full border border-border bg-muted/40" />
+            <span className="font-medium">{t('status.notAvailable')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="size-3 rounded-full border border-primary/20 bg-primary" />
+            <span className="font-medium">{t('status.bookedByYou')}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="lg"
+            className="text-base"
+            disabled={weekOffset === 0}
+            onClick={() => setWeekOffset(0)}
+          >
+            <CalendarIcon className="size-4" />
+            {t('today')}
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            disabled={weekOffset === 0}
+            onClick={() => setWeekOffset((prev) => Math.max(0, prev - 1))}
+          >
+            <ChevronLeftIcon className="size-5" />
+          </Button>
+          <span className="w-full text-center text-base font-semibold">{weekRangeLabel}</span>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            onClick={() => setWeekOffset((prev) => prev + 1)}
+          >
+            <ChevronRightIcon className="size-5" />
+          </Button>
+        </div>
+      </div>
+
+      <div
+        className="overflow-auto rounded-xl border"
+        style={{ maxHeight: maxBodyHeight }}
+      >
+        <div className={cn('min-w-[860px]', gridClassName)}>
+          <div className="sticky top-0 z-20 grid grid-cols-[84px_repeat(7,minmax(0,1fr))] border-b bg-background">
+            <div className="sticky left-0 z-30 flex items-center justify-center border-r bg-background px-2 py-2 text-base font-semibold text-muted-foreground">
+              UTC+7
+            </div>
+            {weekDates.map((day) => (
+              <div
+                key={day.id}
+                className="border-r px-1 py-2 text-center last:border-r-0"
+              >
+                <p className="text-sx font-bold text-primary">
+                  {new Intl.DateTimeFormat('en-US', { weekday: 'short' })
+                    .format(day.date)
+                    .toUpperCase()}
+                </p>
+                <p className="text-base font-semibold">{day.date.getDate()}</p>
+              </div>
+            ))}
+          </div>
+
+          {timeRows.map((startTime) => (
+            <div
+              key={startTime}
+              className="grid grid-cols-[84px_repeat(7,minmax(0,1fr))] border-b last:border-b-0"
+            >
+              <div className="sticky left-0 z-10 flex items-center justify-center border-r bg-background px-2 py-2 text-base text-muted-foreground">
+                {startTime}
+              </div>
+              {weekDates.map((day) => {
+                const key = `${day.id}|${startTime}`;
+                const isAvailable = availableCellSet.has(key);
+                const isSelected = selectedSet.has(key);
+                const cellDate = parseYmd(day.id);
+                const [hourText, minuteText] = startTime.split(':');
+                cellDate.setHours(Number(hourText), Number(minuteText), 0, 0);
+                const isPast = cellDate <= new Date();
+                const disabled = !isAvailable || isPast;
+
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleCellSelect(day.id, startTime)}
+                    disabled={disabled}
+                    className={cn(
+                      'h-10 border-r transition-colors last:border-r-0',
+                      isSelected && 'bg-primary',
+                      !isSelected &&
+                        isAvailable &&
+                        !isPast &&
+                        'bg-primary/60 hover:bg-primary/40 cursor-pointer',
+                      !isAvailable && 'bg-muted/25',
+                      isPast && 'bg-muted/10'
+                    )}
+                    aria-label={buildSlotLabel(
+                      day.id,
+                      startTime,
+                      minutesToTime(parseTimeToMinutes(startTime) + SLOT_MINUTES)
+                    )}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

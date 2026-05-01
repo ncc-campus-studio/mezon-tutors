@@ -40,5 +40,21 @@
       "terms": "Điều khoản",
       "privacy": "Bảo mật"
     }
+  },
+  "PaymentMethodSelection": {
+    "title": "Phương thức thanh toán",
+    "continuePayment": "Tiếp tục thanh toán",
+    "bookAndPay": "Đặt và thanh toán ({amount})",
+    "bookLesson": "Đặt lớp học",
+    "processing": "Đang xử lý...",
+    "securityNotice": "Thanh toán 256-bit SSL được mã hóa an toàn"
+  },
+  "ScheduleSelection": {
+    "today": "Hôm nay",
+    "status": {
+      "available": "Lịch trống",
+      "notAvailable": "Không có lịch",
+      "bookedByYou": "Bạn đã đặt"
+    }
   }
 }

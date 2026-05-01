@@ -24,7 +24,9 @@
         "bookingFailedTitle": "Đặt lịch thất bại",
         "bookingFailedFallback": "Không thể tạo booking",
         "popupBlockedTitle": "Không mở được cửa sổ thanh toán",
-        "popupBlockedDescription": "Vui lòng cho phép popup và thử lại."
+        "popupBlockedDescription": "Vui lòng cho phép popup và thử lại.",
+        "paypalUnavailableTitle": "PayPal chưa khả dụng",
+        "paypalUnavailableDescription": "PayPal chưa được cấu hình. Vui lòng chọn VNPAY."
       },
       "tutor": {
         "professionalPrefix": "Chuyên nghiệp ",
@@ -34,9 +36,13 @@
         "loadingName": "..."
       },
       "paymentMethods": {
-        "payos": {
-          "title": "payOS",
-          "subtitle": "VietQR, Napas 24/7"
+        "vnpay": {
+          "title": "VNPAY",
+          "subtitle": "VietQR, ATM, thẻ nội địa"
+        },
+        "paypal": {
+          "title": "PayPal",
+          "subtitle": "Thẻ quốc tế và số dư PayPal"
         }
       }
     },
