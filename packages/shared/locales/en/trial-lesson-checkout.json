@@ -24,7 +24,9 @@
         "bookingFailedTitle": "Booking failed",
         "bookingFailedFallback": "Could not create booking",
         "popupBlockedTitle": "Unable to open payment window",
-        "popupBlockedDescription": "Please allow popups and try again."
+        "popupBlockedDescription": "Please allow popups and try again.",
+        "paypalUnavailableTitle": "PayPal is not available",
+        "paypalUnavailableDescription": "PayPal is not configured yet. Please choose VNPAY."
       },
       "tutor": {
         "professionalPrefix": "Professional ",
@@ -34,9 +36,13 @@
         "loadingName": "..."
       },
       "paymentMethods": {
-        "payos": {
-          "title": "payOS",
-          "subtitle": "VietQR, Napas 24/7"
+        "vnpay": {
+          "title": "VNPAY",
+          "subtitle": "VietQR, ATM, Domestic cards"
+        },
+        "paypal": {
+          "title": "PayPal",
+          "subtitle": "International cards and PayPal balance"
         }
       }
     },

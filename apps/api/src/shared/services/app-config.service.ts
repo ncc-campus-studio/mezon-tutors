@@ -38,9 +38,13 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
 
-  PAYOS_CLIENT_ID: z.string().default(''),
-  PAYOS_API_KEY: z.string().default(''),
-  PAYOS_CHECKSUM_KEY: z.string().default(''),
+  VNPAY_TMN_CODE: z.string().default(''),
+  VNPAY_SECURE_SECRET: z.string().default(''),
+  VNPAY_HOST: z.string().default('https://sandbox.vnpayment.vn'),
+  VNPAY_TEST_MODE: z
+    .string()
+    .default('true')
+    .transform((value) => value === 'true'),
 
   CLOUDINARY_CLOUD_NAME: z.string().default(''),
   CLOUDINARY_API_KEY: z.string().default(''),
@@ -48,9 +52,9 @@ const envSchema = z.object({
 }).superRefine((data, ctx) => {
   if (data.NODE_ENV !== 'production') return;
   const requiredInProd: [string, string][] = [
-    ['PAYOS_CLIENT_ID', data.PAYOS_CLIENT_ID],
-    ['PAYOS_API_KEY', data.PAYOS_API_KEY],
-    ['PAYOS_CHECKSUM_KEY', data.PAYOS_CHECKSUM_KEY],
+    ['VNPAY_TMN_CODE', data.VNPAY_TMN_CODE],
+    ['VNPAY_SECURE_SECRET', data.VNPAY_SECURE_SECRET],
+    ['VNPAY_HOST', data.VNPAY_HOST],
     ['CLOUDINARY_CLOUD_NAME', data.CLOUDINARY_CLOUD_NAME],
     ['CLOUDINARY_API_KEY', data.CLOUDINARY_API_KEY],
     ['CLOUDINARY_API_SECRET', data.CLOUDINARY_API_SECRET],
@@ -88,9 +92,10 @@ export class AppConfigService {
       REDIRECT_URI: this.configService.get('REDIRECT_URI'),
       RESEND_API_KEY: this.configService.get('RESEND_API_KEY'),
       RESEND_FROM_EMAIL: this.configService.get('RESEND_FROM_EMAIL'),
-      PAYOS_CLIENT_ID: this.configService.get('PAYOS_CLIENT_ID'),
-      PAYOS_API_KEY: this.configService.get('PAYOS_API_KEY'),
-      PAYOS_CHECKSUM_KEY: this.configService.get('PAYOS_CHECKSUM_KEY'),
+      VNPAY_TMN_CODE: this.configService.get('VNPAY_TMN_CODE'),
+      VNPAY_SECURE_SECRET: this.configService.get('VNPAY_SECURE_SECRET'),
+      VNPAY_HOST: this.configService.get('VNPAY_HOST'),
+      VNPAY_TEST_MODE: this.configService.get('VNPAY_TEST_MODE'),
       CLOUDINARY_CLOUD_NAME: this.configService.get('CLOUDINARY_CLOUD_NAME'),
       CLOUDINARY_API_KEY: this.configService.get('CLOUDINARY_API_KEY'),
       CLOUDINARY_API_SECRET: this.configService.get('CLOUDINARY_API_SECRET'),
@@ -167,19 +172,20 @@ export class AppConfigService {
     return this.env.RESEND_FROM_EMAIL;
   }
 
-  get payosConfig() {
-    return {
-      clientId: this.env.PAYOS_CLIENT_ID,
-      apiKey: this.env.PAYOS_API_KEY,
-      checksumKey: this.env.PAYOS_CHECKSUM_KEY,
-    };
-  }
-
   get cloudinaryConfig() {
     return {
       cloudName: this.env.CLOUDINARY_CLOUD_NAME,
       apiKey: this.env.CLOUDINARY_API_KEY,
       apiSecret: this.env.CLOUDINARY_API_SECRET,
+    };
+  }
+
+  get vnpayConfig() {
+    return {
+      tmnCode: this.env.VNPAY_TMN_CODE,
+      secureSecret: this.env.VNPAY_SECURE_SECRET,
+      vnpayHost: this.env.VNPAY_HOST,
+      testMode: this.env.VNPAY_TEST_MODE,
     };
   }
 

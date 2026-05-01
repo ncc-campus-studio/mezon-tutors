@@ -4,7 +4,7 @@
     "error": "Error loading verified tutors",
     "empty": "No verified tutors found",
     "totalLabel": "{count} {subject} tutors available",
-    "totalLabelNoSubject": "{count} tutors available",
+    "totalLabelNoSubject": "<highlight>{value}</highlight> tutors available",
     "sortBy": "Sort by:",
     "popularity": "Popularity",
     "top_picks": "Top Picks",
@@ -14,9 +14,14 @@
     "best_rating": "Best Rating"
   },
   "PreviewCard": {
+    "selectTutor": "Select a tutor to preview.",
     "viewSchedule": "View full schedule",
     "seeProfile": "See full profile",
     "popularThisWeek": "Popular this week · {count} students booked in last 24h"
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next"
   },
   "TutorCard": {
     "professional": "PROFESSIONAL",
@@ -30,7 +35,7 @@
     "messageModal": {
       "title": "Send message to {tutorName}",
       "placeholder": "Enter the message content...",
-      "cancel": "Cancel",
+      "clear": "Clear",
       "send": "Send",
       "sending": "Sending...",
       "errors": {
@@ -44,18 +49,18 @@
       }
     },
     "proficiency": {
-      "Native": "Native",
-      "Near-Native": "Near-Native",
-      "Fluent": "Fluent",
-      "Advanced": "Advanced",
-      "Upper-Intermediate": "Upper-Intermediate",
-      "Intermediate": "Intermediate",
-      "Elementary": "Elementary",
-      "Basic": "Basic",
-      "Beginner": "Beginner"
+      "NATIVE": "Native",
+      "NEAR_NATIVE": "Near-Native",
+      "FLUENT": "Fluent",
+      "ADVANCED": "Advanced",
+      "UPPER_INTERMEDIATE": "Upper-Intermediate",
+      "INTERMEDIATE": "Intermediate",
+      "ELEMENTARY": "Elementary",
+      "BASIC": "Basic",
+      "BEGINNER": "Beginner"
     }
   },
-  "TrialBookingModal": {
+  "TrialBookingSheet": {
     "title": "Book Trial Lesson",
     "expertTutorTitle": "{subject} Tutor",
     "perHour": "/hr",
@@ -67,8 +72,16 @@
     "noAvailableTimes": "No available times for this day.",
     "totalPrice": "TOTAL PRICE",
     "confirmBooking": "Confirm Booking",
+    "selectScheduleFirst": "Select a schedule first",
     "requestSentWait": "Request sent, please wait",
+    "alreadyBookedConfirmed": "You already booked this tutor",
+    "alreadyBookedCompleted": "You already completed a lesson with this tutor",
     "alreadyBooked": "You already booked this tutor",
+    "loginRequiredTitle": "Login required",
+    "loginRequiredDescription": "Please login to book a trial lesson.",
+    "noTimeSet": "No time set",
+    "clearSelectedTime": "Clear selected time",
+    "bookNow": "Book Now",
     "paymentPendingNotice": "You have an unpaid trial lesson. Continue below to complete payment.",
     "continueToPayment": "Continue to payment",
     "weekday": {
@@ -368,8 +381,6 @@
     "reviews": "reviews",
     "loadingReviews": "Loading reviews...",
     "loadMoreReviews": "Load more reviews",
-    "reviewsEmpty": "No reviews yet",
-    "reviewsCount": "({count} reviews)",
     "reviewModal": {
       "editTitle": "Edit Review",
       "postTitle": "Post Review",
@@ -391,7 +402,6 @@
       "previous": "Previous",
       "next": "Next"
     },
-    "loadMoreReviews": "Load more reviews",
     "close": "Close"
   }
 }

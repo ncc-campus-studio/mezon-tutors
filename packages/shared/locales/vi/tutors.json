@@ -4,7 +4,7 @@
     "error": "Có lỗi khi tải danh sách gia sư đã xác minh",
     "empty": "Không tìm thấy gia sư đã xác minh nào",
     "totalLabel": "{count} gia sư {subject} đang khả dụng",
-    "totalLabelNoSubject": "Có {count} gia sư đang khả dụng",
+    "totalLabelNoSubject": "Có <highlight>{value}</highlight> gia sư đang khả dụng",
     "sortBy": "Sắp xếp theo:",
     "popularity": "Phổ biến",
     "top_picks": "Lựa chọn hàng đầu",
@@ -14,9 +14,14 @@
     "best_rating": "Đánh giá tốt nhất"
   },
   "PreviewCard": {
+    "selectTutor": "Chọn gia sư để xem preview.",
     "viewSchedule": "Xem toàn bộ lịch dạy",
     "seeProfile": "Xem hồ sơ đầy đủ",
     "popularThisWeek": "Phổ biến tuần này - {count} học viên đã đặt trong 24h qua"
+  },
+  "Pagination": {
+    "previous": "Trước",
+    "next": "Sau"
   },
   "TutorCard": {
     "professional": "CHUYÊN NGHIỆP",
@@ -30,7 +35,7 @@
     "messageModal": {
       "title": "Nhắn tin cho {tutorName}",
       "placeholder": "Nhập nội dung tin nhắn...",
-      "cancel": "Hủy",
+      "clear": "Xóa",
       "send": "Gửi",
       "sending": "Đang gửi...",
       "errors": {
@@ -44,18 +49,18 @@
       }
     },
     "proficiency": {
-      "Native": "Bản ngữ",
-      "Near-Native": "Gần bản ngữ",
-      "Fluent": "Lưu loát",
-      "Advanced": "Nâng cao",
-      "Upper-Intermediate": "Trung cấp nâng cao",
-      "Intermediate": "Trung cấp",
-      "Elementary": "Sơ cấp",
-      "Basic": "Cơ bản",
-      "Beginner": "Người mới bắt đầu"
+      "NATIVE": "Bản ngữ",
+      "NEAR_NATIVE": "Gần bản ngữ",
+      "FLUENT": "Lưu loát",
+      "ADVANCED": "Nâng cao",
+      "UPPER_INTERMEDIATE": "Trung cấp nâng cao",
+      "INTERMEDIATE": "Trung cấp",
+      "ELEMENTARY": "Sơ cấp",
+      "BASIC": "Cơ bản",
+      "BEGINNER": "Người mới bắt đầu"
     }
   },
-  "TrialBookingModal": {
+  "TrialBookingSheet": {
     "title": "Đặt buổi học thử",
     "expertTutorTitle": "Gia sư {subject}",
     "perHour": "/giờ",
@@ -67,8 +72,16 @@
     "noAvailableTimes": "Không có khung giờ trống cho ngày này.",
     "totalPrice": "TỔNG GIÁ",
     "confirmBooking": "Xác nhận đặt lịch",
+    "selectScheduleFirst": "Vui lòng chọn lịch trước",
     "requestSentWait": "Yêu cầu đã được gửi, vui lòng chờ",
+    "alreadyBookedConfirmed": "Bạn đã đặt gia sư này rồi",
+    "alreadyBookedCompleted": "Bạn đã hoàn thành buổi học với gia sư này",
     "alreadyBooked": "Bạn đã đặt gia sư này rồi",
+    "loginRequiredTitle": "Yêu cầu đăng nhập",
+    "loginRequiredDescription": "Vui lòng đăng nhập để đặt buổi học thử.",
+    "noTimeSet": "Chưa chọn thời gian",
+    "clearSelectedTime": "Xóa thời gian đã chọn",
+    "bookNow": "Đặt ngay",
     "paymentPendingNotice": "Bạn có buổi học thử chưa thanh toán. Nhấn bên dưới để tiếp tục thanh toán.",
     "continueToPayment": "Tiếp tục thanh toán",
     "weekday": {
@@ -266,7 +279,7 @@
       "VIETNAMESE": "Tiếng Việt"
     },
     "Country": {
-      "ANY_COUNTRY": "Bất kỳ quốc gia",
+      "ANY_COUNTRY": "Bất kỳ quốc gia nào",
       "VIETNAM": "Việt Nam",
       "UNITED_STATES": "Hoa Kỳ",
       "UNITED_KINGDOM": "Vương quốc Anh",
@@ -368,8 +381,6 @@
     "reviews": "đánh giá",
     "loadingReviews": "Đang tải đánh giá...",
     "loadMoreReviews": "Xem thêm đánh giá",
-    "reviewsEmpty": "Chưa có đánh giá nào",
-    "reviewsCount": "({count} đánh giá)",
     "reviewModal": {
       "editTitle": "Chỉnh sửa đánh giá",
       "postTitle": "Đăng đánh giá",
@@ -391,7 +402,6 @@
       "previous": "Trước",
       "next": "Sau"
     },
-    "loadMoreReviews": "Tải thêm đánh giá",
     "close": "Đóng"
   }
 }
