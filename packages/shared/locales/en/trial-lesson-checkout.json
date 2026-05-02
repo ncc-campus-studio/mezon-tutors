@@ -68,6 +68,155 @@
       "duration": "Duration",
       "policy": "Policy",
       "freeCancellation": "Free cancellation"
+    },
+    "Result": {
+      "success": {
+        "title": "Payment successful",
+        "description": "Thank you. Your trial lesson booking payment went through. You will receive a confirmation shortly.",
+        "primaryCta": "Browse tutors",
+        "secondaryCta": "Back to home"
+      },
+      "cancel": {
+        "primaryCta": "Browse tutors",
+        "secondaryCta": "Back to home",
+        "codes": {
+          "user_cancelled": {
+            "badge": "Checkout not completed",
+            "title": "Booking was cancelled",
+            "description": "This booking was not paid, so the system automatically cancelled it to avoid keeping an unpaid reservation.",
+            "nextStepsTitle": "What this means",
+            "nextSteps": {
+              "noCharge": "No money was charged for this cancelled booking.",
+              "retry": "You can create a new booking and pay again at any time.",
+              "mistake": "This cancellation does not affect your account history or other bookings."
+            }
+          },
+          "payment_declined": {
+            "badge": "Payment declined",
+            "title": "Your bank declined the payment",
+            "description": "The card issuer or payment method declined this charge (for example insufficient funds or policy limits). Your booking stays unconfirmed.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "If the charge did not go through, you owe nothing for this checkout attempt.",
+              "retry": "Try another card, bank account, or method from the tutor’s checkout page.",
+              "mistake": "Contact your bank if you believe this was a mistake, then try again."
+            }
+          },
+          "auth_failed": {
+            "badge": "Verification failed",
+            "title": "Authentication did not succeed",
+            "description": "The bank needs you to approve this payment (OTP, password, etc.) and it was not completed.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "Incomplete authentication usually means nothing was deducted.",
+              "retry": "Start checkout again and complete every step from your bank or VNPAY.",
+              "mistake": "If you did not receive an OTP, check SMS limits or try another registered device."
+            }
+          },
+          "session_expired": {
+            "badge": "Session expired",
+            "title": "This payment session timed out",
+            "description": "You took too long on the payment page, so the session expired for security.",
+            "nextStepsTitle": "What happens next",
+            "nextSteps": {
+              "noCharge": "Expired sessions are not completed charges.",
+              "retry": "Open checkout from the tutor card again to start a fresh payment session.",
+              "mistake": "Use a stable connection and complete the flow without long pauses."
+            }
+          },
+          "gateway_error": {
+            "badge": "Payment issue",
+            "title": "Payment could not be completed",
+            "description": "Something went wrong with the payment gateway or your bank. This booking is not confirmed.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "If the deduction did not succeed, nothing is owed for this checkout attempt.",
+              "retry": "Try again from the tutor’s checkout page, or use another card or payment method.",
+              "mistake": "If money was taken but the page still shows an error, keep the bank’s reference and contact support or your bank."
+            }
+          },
+          "invalid_signature": {
+            "badge": "Security check failed",
+            "title": "We could not verify this return",
+            "description": "The payment return could not be validated. For your safety we are not showing a success state.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "No booking is confirmed from this return until you try again from checkout.",
+              "retry": "Start a new payment from the tutor’s card. If it keeps happening, contact support.",
+              "mistake": "Avoid bookmarking or sharing raw payment URLs; always use the in-app checkout button."
+            }
+          },
+          "order_not_found": {
+            "badge": "Booking not found",
+            "title": "We could not match this payment to a booking",
+            "description": "The reference from the payment provider did not match an open checkout in our system.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "If you never completed checkout, nothing is owed on our side.",
+              "retry": "Create the trial lesson booking again from the tutor’s profile.",
+              "mistake": "If money left your account, save the transaction reference from your bank and contact support immediately."
+            }
+          },
+          "unknown": {
+            "badge": "Payment unsuccessful",
+            "title": "Something went wrong",
+            "description": "The payment did not finish successfully. Your trial lesson booking is not confirmed.",
+            "nextStepsTitle": "What you can do",
+            "nextSteps": {
+              "noCharge": "If your bank shows no debit, retry checkout from the tutor page.",
+              "retry": "Try another payment method or wait a moment and retry.",
+              "mistake": "If you are unsure whether you were charged, check your balance and contact support with the receipt."
+            }
+          }
+        }
+      },
+      "successDetail": {
+        "loading": "Loading your booking…",
+        "errorTitle": "Could not load booking",
+        "errorDescription": "Something went wrong. Please try again.",
+        "notFound": "This booking could not be found or you do not have access.",
+        "unauthorizedTitle": "Sign in to view this page",
+        "unauthorizedDescription": "Log in with the same account you used to book this trial lesson.",
+        "retry": "Try again",
+        "headline": "You’re all set",
+        "subheadline": "Your trial lesson is confirmed on our side. Here’s everything in one place.",
+        "newBookingBadge": "Trial lesson booked",
+        "bookingRef": "Booking reference",
+        "copyRef": "Copy",
+        "copiedToast": "Booking ID copied",
+        "lessonSection": "Lesson schedule",
+        "paymentSection": "Payment",
+        "tutorSection": "Your tutor",
+        "studentSection": "Booked as",
+        "durationLabel": "{minutes} min trial",
+        "lessonTimezoneCaption": "Displayed in your tutor’s timezone ({timezone}).",
+        "amountPaid": "Amount paid",
+        "paidAt": "Paid at",
+        "pendingPaymentHint": "Payment is still processing — this usually updates within a minute after your bank confirms.",
+        "paymentStatus": {
+          "SUCCEEDED": "Paid",
+          "PENDING": "Pending",
+          "FAILED": "Failed",
+          "REFUNDED": "Refunded"
+        },
+        "bookingStatus": {
+          "PENDING": "Pending confirmation",
+          "CONFIRMED": "Confirmed",
+          "COMPLETED": "Completed",
+          "CANCELLED": "Cancelled"
+        },
+        "tipsTitle": "Before the lesson",
+        "tips": {
+          "checkEmail": "Check your email and in-app notifications for messages from the tutor or platform.",
+          "dm": "Open a chat with your tutor in the app to align on materials, link, or platform <brand>MEZON</brand>.",
+          "early": "Join 3–5 minutes early to test camera and microphone.",
+          "policy": "If you need to cancel or reschedule, do it as early as possible and follow the tutor’s policy.",
+          "support": "Keep your booking reference handy when contacting support."
+        },
+        "ctaTutors": "Browse more tutors",
+        "ctaMyLessons": "My lessons",
+        "ctaHome": "Home"
+      }
     }
   }
 }

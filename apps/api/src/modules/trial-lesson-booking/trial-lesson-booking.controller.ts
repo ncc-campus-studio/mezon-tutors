@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { ETrialLessonStatus } from '@mezon-tutors/db'
 import type { PaginatedResponse } from '@mezon-tutors/shared'
@@ -7,6 +17,7 @@ import type { AuthUserPayload } from '../auth/interfaces/auth.interfaces'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CreateTrialLessonBookingDto } from './dto/create-trial-lesson-booking.dto'
 import { GetMyTrialLessonBookingsDto } from './dto/get-my-trial-lesson-bookings.dto'
+import { getRequestClientIp } from '../../common/utils/request-ip.util'
 import { TrialLessonBookingService } from './trial-lesson-booking.service'
 import type { TutorTrialLessonBookingRequestDto } from './dto/tutor-trial-lesson-booking-request.dto'
 
@@ -38,7 +49,11 @@ export class TrialLessonBookingController {
   @Post()
   async create(@Req() req: Request, @Body() body: CreateTrialLessonBookingDto) {
     const user = req.user as AuthUserPayload
-    return this.trialLessonBookingService.createTrialLessonBooking(user.sub, body)
+    return this.trialLessonBookingService.createTrialLessonBooking(
+      user.sub,
+      body,
+      getRequestClientIp(req)
+    )
   }
 
   @UseGuards(JwtAuthGuard)
@@ -57,5 +72,12 @@ export class TrialLessonBookingController {
       page: query.page,
       limit: query.limit,
     })
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getBookingDetail(@Req() req: Request, @Param('id', ParseUUIDPipe) id: string) {
+    const user = req.user as AuthUserPayload
+    return this.trialLessonBookingService.getStudentBookingDetail(user.sub, id)
   }
 }
