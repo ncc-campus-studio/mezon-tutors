@@ -53,6 +53,7 @@
     "today": "Today",
     "status": {
       "available": "Available",
+      "pastAvailable": "Past (view only)",
       "notAvailable": "Not available",
       "bookedByYou": "Booked by you"
     }

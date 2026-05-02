@@ -2,7 +2,7 @@
 
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -13,16 +13,16 @@ const MINUTES_PER_DAY = 24 * 60;
 type SelectionMode = 'single' | 'multiple';
 
 export type ScheduleSlotInput = {
-  date: string; // yyyy-mm-dd (local date)
-  startTime: string; // HH:mm
-  endTime?: string; // HH:mm, default start + 30m
+  date: string;
+  startTime: string;
+  endTime?: string;
 };
 
 export type SelectedScheduleSlot = {
   date: string;
   startTime: string;
   endTime: string;
-  label: string; // Mon, May 4 . 06:00 - 06:30
+  label: string;
 };
 
 export interface ScheduleSelectionProps {
@@ -115,6 +115,45 @@ function toSlotKey(slot: { date: string; startTime: string }): string {
   return `${slot.date}|${slot.startTime}`;
 }
 
+type ScheduleCellType =
+  | 'empty'
+  | 'emptyPast'
+  | 'futureAvailable'
+  | 'pastAvailable'
+  | 'selected'
+  | 'pastSelected';
+
+function getScheduleCellType(input: {
+  isAvailable: boolean;
+  isSelected: boolean;
+  isPast: boolean;
+}): ScheduleCellType {
+  const { isAvailable, isSelected, isPast } = input;
+  if (!isAvailable) {
+    return isPast ? 'emptyPast' : 'empty';
+  }
+  if (isPast) {
+    return isSelected ? 'pastSelected' : 'pastAvailable';
+  }
+  if (isSelected) {
+    return 'selected';
+  }
+  return 'futureAvailable';
+}
+
+function getScheduleCellClassName(type: ScheduleCellType): string {
+  return cn(
+    type === 'empty' && 'bg-muted/25',
+    type === 'emptyPast' && 'bg-muted',
+    type === 'futureAvailable' && 'cursor-pointer bg-primary hover:bg-primary/70',
+    type === 'selected' && 'cursor-pointer bg-[#e7d65c] shadow-inner',
+    type === 'pastAvailable' &&
+      'cursor-not-allowed bg-primary/50 ring-1 ring-inset ring-primary/30',
+    type === 'pastSelected' &&
+      'cursor-not-allowed bg-[#e7d65c]/45 opacity-90 ring-2 ring-inset ring-primary/40'
+  );
+}
+
 export function ScheduleSelection({
   availableSlots,
   selectionMode = 'single',
@@ -194,6 +233,54 @@ export function ScheduleSelection({
     onChange?.(next);
   };
 
+  const scrollTargetRowStartTime = useMemo(() => {
+    const nowMs = Date.now();
+    let bestTs = Number.POSITIVE_INFINITY;
+    let bestRow: string | null = null;
+
+    for (const day of weekDates) {
+      for (const startTime of timeRows) {
+        const key = `${day.id}|${startTime}`;
+        if (!availableCellSet.has(key)) continue;
+        const cellDate = parseYmd(day.id);
+        const [hourText, minuteText] = startTime.split(':');
+        cellDate.setHours(Number(hourText), Number(minuteText), 0, 0);
+        const ts = cellDate.getTime();
+        if (ts <= nowMs) continue;
+        if (ts < bestTs) {
+          bestTs = ts;
+          bestRow = startTime;
+        }
+      }
+    }
+
+    if (bestRow !== null) {
+      return bestRow;
+    }
+
+    for (const startTime of timeRows) {
+      for (const day of weekDates) {
+        if (availableCellSet.has(`${day.id}|${startTime}`)) {
+          return startTime;
+        }
+      }
+    }
+
+    return null;
+  }, [availableCellSet, timeRows, weekDates]);
+
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!scrollTargetRowStartTime || !scrollBodyRef.current) {
+      return;
+    }
+    const rowEl = scrollBodyRef.current.querySelector<HTMLElement>(
+      `[data-schedule-row="${CSS.escape(scrollTargetRowStartTime)}"]`
+    );
+    rowEl?.scrollIntoView({ block: 'center', behavior: 'auto' });
+  }, [scrollTargetRowStartTime, weekOffset, availableSlots]);
+
   const handleCellSelect = (date: string, startTime: string) => {
     const key = `${date}|${startTime}`;
     if (!availableCellSet.has(key)) {
@@ -229,17 +316,35 @@ export function ScheduleSelection({
   return (
     <div className={cn('space-y-3 rounded-2xl border bg-background p-3 sm:p-4', className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-4 text-base text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base text-muted-foreground">
           <div className="flex items-center gap-2">
-            <span className="size-3 rounded-full bg-primary/70" />
+            <span
+              className={cn('size-3 rounded-full', getScheduleCellClassName('futureAvailable'))}
+            />
             <span className="font-medium">{t('status.available')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="size-3 rounded-full border border-border bg-muted/40" />
+            <span
+              className={cn('size-3 rounded-full', getScheduleCellClassName('pastAvailable'))}
+            />
+            <span className="font-medium">{t('status.pastAvailable')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                'size-3 rounded-full border border-border',
+                getScheduleCellClassName('empty')
+              )}
+            />
             <span className="font-medium">{t('status.notAvailable')}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="size-3 rounded-full border border-primary/20 bg-primary" />
+            <span
+              className={cn(
+                'size-3 rounded-full border border-primary/20',
+                getScheduleCellClassName('selected')
+              )}
+            />
             <span className="font-medium">{t('status.bookedByYou')}</span>
           </div>
         </div>
@@ -274,6 +379,7 @@ export function ScheduleSelection({
       </div>
 
       <div
+        ref={scrollBodyRef}
         className="overflow-auto rounded-xl border"
         style={{ maxHeight: maxBodyHeight }}
       >
@@ -300,6 +406,7 @@ export function ScheduleSelection({
           {timeRows.map((startTime) => (
             <div
               key={startTime}
+              data-schedule-row={startTime}
               className="grid grid-cols-[84px_repeat(7,minmax(0,1fr))] border-b last:border-b-0"
             >
               <div className="sticky left-0 z-10 flex items-center justify-center border-r bg-background px-2 py-2 text-base text-muted-foreground">
@@ -314,6 +421,7 @@ export function ScheduleSelection({
                 cellDate.setHours(Number(hourText), Number(minuteText), 0, 0);
                 const isPast = cellDate <= new Date();
                 const disabled = !isAvailable || isPast;
+                const cellType = getScheduleCellType({ isAvailable, isSelected, isPast });
 
                 return (
                   <button
@@ -322,21 +430,22 @@ export function ScheduleSelection({
                     onClick={() => handleCellSelect(day.id, startTime)}
                     disabled={disabled}
                     className={cn(
-                      'h-10 border-r transition-colors last:border-r-0',
-                      isSelected && 'bg-primary',
-                      !isSelected &&
-                        isAvailable &&
-                        !isPast &&
-                        'bg-primary/60 hover:bg-primary/40 cursor-pointer',
-                      !isAvailable && 'bg-muted/25',
-                      isPast && 'bg-muted/10'
+                      'relative isolate h-10 overflow-hidden border-r transition-colors last:border-r-0 disabled:opacity-100 disabled:saturate-100',
+                      getScheduleCellClassName(cellType)
                     )}
                     aria-label={buildSlotLabel(
                       day.id,
                       startTime,
                       minutesToTime(parseTimeToMinutes(startTime) + SLOT_MINUTES)
                     )}
-                  />
+                  >
+                    {cellType === 'pastAvailable' ? (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 z-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_3px,rgb(0_0_0/0.08)_3px,rgb(0_0_0/0.08)_6px)] dark:bg-[repeating-linear-gradient(-45deg,transparent,transparent_3px,rgb(255_255_255/0.12)_3px,rgb(255_255_255/0.12)_6px)]"
+                      />
+                    ) : null}
+                  </button>
                 );
               })}
             </div>

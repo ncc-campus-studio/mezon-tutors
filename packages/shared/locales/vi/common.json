@@ -53,6 +53,7 @@
     "today": "Hôm nay",
     "status": {
       "available": "Lịch trống",
+      "pastAvailable": "Đã qua (chỉ xem)",
       "notAvailable": "Không có lịch",
       "bookedByYou": "Bạn đã đặt"
     }

@@ -15,6 +15,9 @@ const envSchema = z.object({
   // Frontend
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 
+  /** Public origin of this API (no trailing slash), for VNPAY vnp_ReturnUrl. Example: https://api.example.com */
+  PUBLIC_API_URL: z.string().url().optional(),
+
   // Database
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
@@ -83,6 +86,7 @@ export class AppConfigService {
       NODE_ENV: this.configService.get('NODE_ENV'),
       CORS_ORIGINS: this.configService.get('CORS_ORIGINS'),
       FRONTEND_URL: this.configService.get('FRONTEND_URL'),
+      PUBLIC_API_URL: this.configService.get('PUBLIC_API_URL'),
       DATABASE_URL: this.configService.get('DATABASE_URL'),
       JWT_SECRET: this.configService.get('JWT_SECRET'),
       JWT_REFRESH_SECRET: this.configService.get('JWT_REFRESH_SECRET'),
@@ -130,6 +134,15 @@ export class AppConfigService {
 
   get frontendUrl(): string {
     return this.env.FRONTEND_URL;
+  }
+
+  /** Base URL callers use to reach this Nest app (scheme + host + port if needed). */
+  get publicApiBaseUrl(): string {
+    const fromEnv = this.env.PUBLIC_API_URL?.replace(/\/$/, '').trim()
+    if (fromEnv) {
+      return fromEnv
+    }
+    return `http://127.0.0.1:${this.port}`
   }
 
   get databaseUrl(): string {

@@ -1,6 +1,5 @@
 import { ECurrency, Prisma, PrismaClient, Role, VerificationStatus } from '@mezon-tutors/db';
 import {
-  CountryLabel,
   ECountry,
   ELanguage,
   EProficiencyLevel,
@@ -8,7 +7,6 @@ import {
   MAX_PRICE,
   MIN_PRICE,
   PRICE_STEP,
-  SubjectLabel,
 } from '@mezon-tutors/shared';
 
 const prisma = new PrismaClient();
@@ -141,8 +139,8 @@ async function main() {
     const lastName = LAST_NAMES[Math.floor(i / FIRST_NAMES.length) % LAST_NAMES.length];
     const subjectEnum = SUBJECTS[i % SUBJECTS.length];
     const countryEnum = COUNTRIES[i % COUNTRIES.length];
-    const subject = SubjectLabel[subjectEnum];
-    const country = CountryLabel[countryEnum];
+    const subject = subjectEnum;
+    const country = countryEnum;
     const timezone = TIMEZONES[i % TIMEZONES.length];
     const baseCurrency = CURRENCIES[i % CURRENCIES.length];
     const pricing = getTutorPricing(i);

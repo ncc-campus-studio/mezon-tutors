@@ -32,6 +32,8 @@ export default function TutorCard({
   onSelectAction,
 }: TutorCardProps) {
   const t = useTranslations("Tutors.TutorCard");
+  const tSubject = useTranslations("Tutors.Filter.Subject");
+  const tCountry = useTranslations("Tutors.Filter.Country");
   const tLanguage = useTranslations("Tutors.Filter.Language");
   const { currency } = useCurrency();
   const currentUser = useAtomValue(userAtom);
@@ -90,13 +92,13 @@ export default function TutorCard({
               <div className="flex items-center gap-2">
                 <GraduationCapIcon className="size-5 text-slate-500" />
                 <span className="text-sm text-slate-500">
-                  {t("teaches", { subject: tutor.subject })}
+                  {t("teaches", { subject: tSubject(tutor.subject) })}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <EarthIcon className="size-5 text-slate-500" />
                 <span className="text-sm text-slate-500">
-                  {t("country", { country: tutor.country })}
+                  {t("country", { country: tCountry(tutor.country) })}
                 </span>
               </div>
             </div>
@@ -149,7 +151,7 @@ export default function TutorCard({
           </div>
           <Button
             size="lg"
-            className="w-full text-lg"
+            className="w-full text-base"
             onClick={(event) => {
               event.stopPropagation();
               setIsTrialBookingSheetOpen(true);
@@ -160,7 +162,7 @@ export default function TutorCard({
           <Button
             variant="outline"
             size="lg"
-            className="w-full text-lg"
+            className="w-full text-base"
             onClick={(event) => {
               event.stopPropagation();
               setIsMessageModalOpen(true);
