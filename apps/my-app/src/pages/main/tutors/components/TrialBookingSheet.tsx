@@ -6,7 +6,15 @@ import { useTranslations } from 'next-intl';
 import { useAtomValue } from 'jotai';
 import { useEffect, useMemo, useState } from 'react';
 import { XIcon } from 'lucide-react';
-import { Button, Separator, Sheet, SheetContent, SheetHeader, SheetTitle, toast } from '@/components/ui';
+import {
+  Button,
+  Separator,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  toast,
+} from '@/components/ui';
 import { isAuthenticatedAtom } from '@/store/auth.atom';
 import {
   useGetAlreadyBookedTrialLesson,
@@ -142,7 +150,6 @@ export function TrialBookingSheet({
 
   const scheduleAvailableSlots = useMemo(() => {
     const rows = schedule?.availability ?? [];
-    const now = new Date(nowTs);
 
     return calendarDates.flatMap((dateOption) => {
       const fullDate = parseYyyyMmDdToLocalDate(dateOption.id);
@@ -153,19 +160,12 @@ export function TrialBookingSheet({
       const dayOfWeek = jsDayToDbDayOfWeek(fullDate.getDay());
       const daySlots = buildTimeSlotsForDay(rows, dayOfWeek, SLOT_INTERVAL_MINUTES);
 
-      return daySlots
-        .filter((slot) => {
-          const [hourText, minuteText] = slot.startTime.split(':');
-          const slotDate = new Date(fullDate);
-          slotDate.setHours(Number(hourText), Number(minuteText), 0, 0);
-          return slotDate > now;
-        })
-        .map((slot) => ({
-          date: dateString,
-          startTime: slot.startTime,
-        }));
+      return daySlots.map((slot) => ({
+        date: dateString,
+        startTime: slot.startTime,
+      }));
     });
-  }, [calendarDates, nowTs, schedule?.availability]);
+  }, [calendarDates, schedule?.availability]);
 
   const { data: occupiedSlotsResponse } = useGetOccupiedTrialLessonSlots(
     tutor.id,
@@ -177,9 +177,7 @@ export function TrialBookingSheet({
   const alreadyBookedStatus = alreadyBookedResponse?.status ?? null;
   const hasBooked = Boolean(alreadyBookedResponse?.hasBooked);
   const isBookingLocked = Boolean(
-    hasBooked &&
-      alreadyBookedStatus &&
-      alreadyBookedStatus !== ETrialLessonBookingStatus.CANCELLED
+    hasBooked && alreadyBookedStatus && alreadyBookedStatus !== ETrialLessonBookingStatus.CANCELLED
   );
 
   const selectedTime = useMemo(
@@ -397,7 +395,7 @@ export function TrialBookingSheet({
         className="mx-auto h-[90vh]! max-h-screen! w-full gap-0 overflow-hidden rounded-t-2xl border p-0"
       >
         <SheetHeader className="flex-row items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4">
-          <SheetTitle className="text-xl font-bold sm:text-2xl">{t('title')}</SheetTitle>
+          <SheetTitle className="text-2xl! text-primary font-bold sm:text-xl">{t('title')}</SheetTitle>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -489,7 +487,7 @@ export function TrialBookingSheet({
               disabled={isConfirmDisabled}
               onClick={handleConfirm}
             >
-              {confirmButtonLabel} 
+              {confirmButtonLabel}
             </Button>
           </div>
         </div>

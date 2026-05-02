@@ -60,11 +60,11 @@ export default function TutorPreviewCard({
 
         <div className="flex flex-col gap-3">
           <Link href={`/tutors/${tutor.id}`}>
-            <Button className="w-full h-10 text-lg">{t("seeProfile")}</Button>
+            <Button className="w-full h-10 text-base">{t("seeProfile")}</Button>
           </Link>
           <Button
             variant="outline"
-            className="w-full h-10 text-lg"
+            className="w-full h-10 text-base"
           >
             {t("viewSchedule")}
           </Button>

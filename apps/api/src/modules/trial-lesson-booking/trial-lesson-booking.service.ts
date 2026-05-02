@@ -1,4 +1,11 @@
-import { PLATFORM_FEE_PERCENTAGE, ROUTES } from '@mezon-tutors/shared'
+import {
+  PLATFORM_FEE_PERCENTAGE,
+  ROUTES,
+  timeToMinutes,
+  utcDateToHHmm,
+  utcDateToMinutes,
+  type PaginatedResponse,
+} from '@mezon-tutors/shared'
 import {
   BadRequestException,
   ConflictException,
@@ -8,14 +15,13 @@ import {
 } from '@nestjs/common'
 import { ECurrency, EPaymentStatus, ETrialLessonStatus, VerificationStatus } from '@mezon-tutors/db'
 import { Prisma } from '@mezon-tutors/db'
-import { timeToMinutes, utcDateToHHmm, utcDateToMinutes } from '@mezon-tutors/shared'
-import type { PaginatedResponse } from '@mezon-tutors/shared'
 import dayjs = require('dayjs')
 import { PrismaService } from '../../prisma/prisma.service'
 import { AppConfigService } from '../../shared/services/app-config.service'
 import { VnpayService } from '../vnpay/vnpay.service'
 import { CreateTrialLessonBookingDto } from './dto/create-trial-lesson-booking.dto'
 import type { TutorTrialLessonBookingRequestDto } from './dto/tutor-trial-lesson-booking-request.dto'
+import type { TrialLessonBookingDetailDto } from './dto/trial-lesson-booking-detail.dto'
 
 @Injectable()
 export class TrialLessonBookingService {
@@ -149,6 +155,70 @@ export class TrialLessonBookingService {
     }
   }
 
+  async getStudentBookingDetail(studentUserId: string, bookingId: string): Promise<TrialLessonBookingDetailDto> {
+    const booking = await this.prisma.trialLessonBooking.findFirst({
+      where: {
+        id: bookingId,
+        studentId: studentUserId,
+      },
+      include: {
+        tutor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            subject: true,
+            headline: true,
+            timezone: true,
+          },
+        },
+        student: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+            email: true,
+          },
+        },
+      },
+    })
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found')
+    }
+
+    const tutorName = `${booking.tutor.firstName} ${booking.tutor.lastName}`.trim()
+
+    return {
+      id: booking.id,
+      startAt: booking.startAt.toISOString(),
+      durationMinutes: booking.durationMinutes,
+      status: booking.status,
+      paymentStatus: booking.paymentStatus,
+      grossAmount: Number(booking.grossAmount),
+      platformFee: Number(booking.platformFee),
+      tutorAmount: Number(booking.tutorAmount),
+      currency: booking.currency,
+      paidAt: booking.paidAt?.toISOString() ?? null,
+      createdAt: booking.createdAt.toISOString(),
+      tutor: {
+        id: booking.tutor.id,
+        displayName: tutorName || booking.tutor.firstName,
+        avatarUrl: booking.tutor.avatar,
+        subject: booking.tutor.subject,
+        headline: booking.tutor.headline,
+        timezone: booking.tutor.timezone,
+      },
+      student: {
+        id: booking.student.id,
+        displayName: booking.student.username,
+        avatarUrl: booking.student.avatar,
+        email: booking.student.email,
+      },
+    }
+  }
+
   async getAcceptedByTutorAndDate(tutorId: string, date: string) {
     const tutor = await this.prisma.tutorProfile.findUnique({
       where: { id: tutorId },
@@ -194,7 +264,11 @@ export class TrialLessonBookingService {
     }
   }
 
-  async createTrialLessonBooking(studentId: string, dto: CreateTrialLessonBookingDto) {
+  async createTrialLessonBooking(
+    studentId: string,
+    dto: CreateTrialLessonBookingDto,
+    clientIp: string
+  ) {
     const bookingStatus = await this.hasStudentBookedTutor(studentId, dto.tutorId)
     if (bookingStatus.hasBooked) {
       if (bookingStatus.status === ETrialLessonStatus.PENDING) {
@@ -306,9 +380,6 @@ export class TrialLessonBookingService {
       throw new ServiceUnavailableException('VNPay is not configured; cannot create payment')
     }
 
-    const baseFrontend = this.appConfig.frontendUrl.replace(/\/$/, '')
-    const checkoutPath = ROUTES.CHECKOUT.TRIAL_LESSON
-
     const booking = await this.prisma.trialLessonBooking.create({
       data: {
         tutorId: dto.tutorId,
@@ -325,7 +396,8 @@ export class TrialLessonBookingService {
       select: { id: true },
     })
 
-    const returnUrl = `${baseFrontend}${checkoutPath}?tutorId=${dto.tutorId}&startAt=${dto.startAt}&durationMinutes=${dto.durationMinutes}&dayOfWeek=${dto.dayOfWeek}`
+    const publicApi = this.appConfig.publicApiBaseUrl.replace(/\/$/, '')
+    const returnUrl = `${publicApi}/api/webhook/vnpay/trial-lesson/return`
     const description = `Trial ${booking.id.slice(0, 8)}`
     const vnpTxnRef = booking.id.replaceAll('-', '').slice(0, 32)
 
@@ -334,7 +406,7 @@ export class TrialLessonBookingService {
       vnp_OrderInfo: description,
       vnp_TxnRef: vnpTxnRef,
       vnp_ReturnUrl: returnUrl,
-      vnp_IpAddr: '127.0.0.1',
+      vnp_IpAddr: clientIp.trim() || '127.0.0.1',
     })
 
     const updated = await this.prisma.trialLessonBooking.update({

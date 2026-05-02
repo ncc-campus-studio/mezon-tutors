@@ -78,6 +78,34 @@ export type TrialLessonBookingRequestsResponse = PaginatedData<TrialLessonBookin
 
 export type TrialLessonBookingRequestStatusFilter = 'PENDING' | 'CONFIRMED' | 'COMPLETED'
 
+export type TrialLessonBookingDetail = {
+  id: string
+  startAt: string
+  durationMinutes: number
+  status: string
+  paymentStatus: string
+  grossAmount: number
+  platformFee: number
+  tutorAmount: number
+  currency: string
+  paidAt: string | null
+  createdAt: string
+  tutor: {
+    id: string
+    displayName: string
+    avatarUrl: string
+    subject: string
+    headline: string
+    timezone: string
+  }
+  student: {
+    id: string
+    displayName: string
+    avatarUrl: string
+    email: string
+  }
+}
+
 export const trialLessonBookingApi = {
   getOccupiedByTutorAndDate(tutorId: string, date: string): Promise<OccupiedTrialLessonSlotsResponse> {
     return apiClient.get<ApiResponse<OccupiedTrialLessonSlotsResponse>, OccupiedTrialLessonSlotsResponse>(
@@ -112,6 +140,12 @@ export const trialLessonBookingApi = {
     return apiClient.post<ApiResponse<TrialLessonBooking>, TrialLessonBooking>(
       '/trial-lesson-bookings',
       payload
+    )
+  },
+
+  getBookingDetail(bookingId: string): Promise<TrialLessonBookingDetail> {
+    return apiClient.get<ApiResponse<TrialLessonBookingDetail>, TrialLessonBookingDetail>(
+      `/trial-lesson-bookings/${bookingId}`
     )
   },
 
@@ -186,5 +220,13 @@ export function useGetMyTrialLessonBookingRequests(
     queryKey: trialLessonBookingQueryKey.myRequests(params?.status, params?.page, params?.limit),
     queryFn: () => trialLessonBookingApi.getMyTrialLessonBookingRequests(params),
     enabled,
+  })
+}
+
+export function useGetTrialLessonBookingDetail(bookingId: string, enabled = true) {
+  return useQuery({
+    queryKey: trialLessonBookingQueryKey.detail(bookingId),
+    queryFn: () => trialLessonBookingApi.getBookingDetail(bookingId),
+    enabled: Boolean(bookingId) && enabled,
   })
 }

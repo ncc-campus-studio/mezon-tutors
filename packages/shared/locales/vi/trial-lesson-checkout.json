@@ -68,6 +68,155 @@
       "duration": "Thời lượng",
       "policy": "Chính sách",
       "freeCancellation": "Hủy miễn phí"
+    },
+    "Result": {
+      "success": {
+        "title": "Thanh toán thành công",
+        "description": "Cảm ơn bạn. Buổi học thử đã được ghi nhận sau thanh toán. Bạn sẽ nhận xác nhận trong thời gian ngắn.",
+        "primaryCta": "Xem danh sách gia sư",
+        "secondaryCta": "Về trang chủ"
+      },
+      "cancel": {
+        "primaryCta": "Xem danh sách gia sư",
+        "secondaryCta": "Về trang chủ",
+        "codes": {
+          "user_cancelled": {
+            "badge": "Thanh toán chưa hoàn tất",
+            "title": "Booking đã được hủy",
+            "description": "Bạn chưa thanh toán cho booking này, nên hệ thống đã tự động hủy để tránh giữ chỗ sai trạng thái.",
+            "nextStepsTitle": "Điều này có nghĩa là",
+            "nextSteps": {
+              "noCharge": "Bạn không bị trừ tiền cho booking vừa hủy.",
+              "retry": "Bạn có thể tạo booking mới và thanh toán lại bất cứ lúc nào.",
+              "mistake": "Việc hủy này không ảnh hưởng lịch sử tài khoản hoặc các booking khác của bạn."
+            }
+          },
+          "payment_declined": {
+            "badge": "Giao dịch bị từ chối",
+            "title": "Ngân hàng từ chối thanh toán",
+            "description": "Phát hành thẻ hoặc phương thức đã từ chối giao dịch (thiếu tiền, hạn mức, v.v.). Buổi học chưa được xác nhận.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Nếu tiền không được trừ thành công, bạn không cần thanh toán cho lần thử này.",
+              "retry": "Thử thẻ / tài khoản / phương thức khác từ trang thanh toán trên thẻ gia sư.",
+              "mistake": "Liên hệ ngân hàng nếu bạn cho rằng đây là nhầm lẫn, rồi thử lại."
+            }
+          },
+          "auth_failed": {
+            "badge": "Xác thực không thành công",
+            "title": "Chưa xác thực xong thanh toán",
+            "description": "Ngân hàng yêu cầu xác nhận (OTP, mật khẩu, v.v.) nhưng chưa hoàn tất.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Xác thực chưa xong thì thường không bị trừ tiền.",
+              "retry": "Thanh toán lại và hoàn thành từng bước từ ngân hàng hoặc VNPAY.",
+              "mistake": "Nếu không nhận OTP, kiểm tra tin nhắn hoặc thử thiết bị khác được đăng ký."
+            }
+          },
+          "session_expired": {
+            "badge": "Phiên hết hạn",
+            "title": "Phiên thanh toán đã hết thời gian",
+            "description": "Bạn chờ quá lâu trên trang thanh toán nên phiên bảo mật đã hết hạn.",
+            "nextStepsTitle": "Tiếp theo bạn có thể",
+            "nextSteps": {
+              "noCharge": "Phiên hết hạn không tương đương giao dịch thành công.",
+              "retry": "Mở lại luồng thanh toán từ thẻ gia sư để bắt đầu phiên mới.",
+              "mistake": "Giữ kết nối ổn định và hoàn tất luôn không tạm dừng lâu."
+            }
+          },
+          "gateway_error": {
+            "badge": "Có lỗi thanh toán",
+            "title": "Không thể hoàn tất thanh toán",
+            "description": "Có lỗi từ cổng thanh toán hoặc phía ngân hàng. Buổi học chưa được xác nhận.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Nếu tiền không được trừ thành công, bạn không cần thanh toán cho lần thử này.",
+              "retry": "Thử lại từ trang thanh toán trên thẻ gia sư, hoặc dùng thẻ / phương thức khác.",
+              "mistake": "Nếu tài khoản đã bị trừ nhưng trang vẫn báo lỗi, giữ mã tham chiếu ngân hàng và liên hệ hỗ trợ hoặc ngân hàng."
+            }
+          },
+          "invalid_signature": {
+            "badge": "Không kiểm tra được bảo mật",
+            "title": "Không xác minh được kết quả trả về",
+            "description": "Chúng tôi không xác thực được dữ liệu từ cổng thanh toán trả về. Vì an toàn, trang này không hiển thị trạng thái thành công.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Chưa có booking được xác nhận từ lần trả về này cho đến khi bạn thanh toán lại.",
+              "retry": "Bắt đầu thanh toán mới từ thẻ gia sư. Nếu lặp lại, liên hệ hỗ trợ.",
+              "mistake": "Tránh lưu bookmark hoặc chia sẻ URL thanh toán thô; luôn dùng nút thanh toán trong ứng dụng."
+            }
+          },
+          "order_not_found": {
+            "badge": "Không tìm thấy booking",
+            "title": "Không khớp giao dịch với booking",
+            "description": "Mã tham chiếu từ cổng thanh toán không khớp một đơn checkout đang mở trong hệ thống.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Nếu bạn chưa hoàn tất checkout, không phát sinh nghĩa vụ với chúng tôi.",
+              "retry": "Tạo lại đặt buổi học thử từ hồ sơ gia sư.",
+              "mistake": "Nếu tài khoản đã bị trừ tiền, giữ chứng từ ngân hàng và liên hệ hỗ trợ ngay."
+            }
+          },
+          "unknown": {
+            "badge": "Thanh toán không thành công",
+            "title": "Đã xảy ra lỗi",
+            "description": "Thanh toán không hoàn tất thành công. Buổi học thử chưa được xác nhận.",
+            "nextStepsTitle": "Bạn có thể làm gì",
+            "nextSteps": {
+              "noCharge": "Nếu ngân hàng không ghi có giao dịch trừ tiền, hãy thử thanh toán lại từ trang gia sư.",
+              "retry": "Thử phương thức khác hoặc đợi vài phút và thử lại.",
+              "mistake": "Nếu không chắc đã trừ tiền hay chưa, kiểm tra số dư và liên hệ hỗ trợ kèm chứng từ."
+            }
+          }
+        }
+      },
+      "successDetail": {
+        "loading": "Đang tải thông tin đặt lịch…",
+        "errorTitle": "Không tải được đơn đặt lịch",
+        "errorDescription": "Đã xảy ra lỗi. Vui lòng thử lại.",
+        "notFound": "Không tìm thấy booking hoặc bạn không có quyền xem.",
+        "unauthorizedTitle": "Đăng nhập để xem trang này",
+        "unauthorizedDescription": "Hãy đăng nhập cùng tài khoản bạn dùng để đặt buổi học thử.",
+        "retry": "Thử lại",
+        "headline": "Hoàn tất đặt lịch",
+        "subheadline": "Buổi học thử đã được ghi nhận. Dưới đây là đầy đủ thông tin quan trọng.",
+        "newBookingBadge": "Đã đặt buổi học thử",
+        "bookingRef": "Mã booking",
+        "copyRef": "Sao chép",
+        "copiedToast": "Đã sao chép mã booking",
+        "lessonSection": "Lịch học",
+        "paymentSection": "Thanh toán",
+        "tutorSection": "Gia sư của bạn",
+        "studentSection": "Đặt với tài khoản",
+        "durationLabel": "Học thử {minutes} phút",
+        "lessonTimezoneCaption": "Hiển thị theo múi giờ của gia sư ({timezone}).",
+        "amountPaid": "Số tiền thanh toán",
+        "paidAt": "Thời điểm thanh toán",
+        "pendingPaymentHint": "Giao dịch có thể đang xử lý — thường cập nhật trong vòng một phút sau khi ngân hàng xác nhận.",
+        "paymentStatus": {
+          "SUCCEEDED": "Đã thanh toán",
+          "PENDING": "Đang chờ",
+          "FAILED": "Thất bại",
+          "REFUNDED": "Đã hoàn tiền"
+        },
+        "bookingStatus": {
+          "PENDING": "Chờ xác nhận",
+          "CONFIRMED": "Đã xác nhận",
+          "COMPLETED": "Hoàn thành",
+          "CANCELLED": "Đã hủy"
+        },
+        "tipsTitle": "Lưu ý trước buổi học",
+        "tips": {
+          "checkEmail": "Kiểm tra email và thông báo trong app từ gia sư hoặc nền tảng.",
+          "dm": "Mở chat với gia sư để thống nhất tài liệu, link hoặc nền tảng học <brand>MEZON</brand>.",
+          "early": "Vào sớm 3–5 phút để kiểm tra camera và micro.",
+          "policy": "Nếu cần hủy hoặc đổi lịch, thông báo sớm và tuân theo chính sách của gia sư.",
+          "support": "Giữ mã booking khi liên hệ hỗ trợ."
+        },
+        "ctaTutors": "Xem thêm gia sư",
+        "ctaMyLessons": "Lớp học của tôi",
+        "ctaHome": "Trang chủ"
+      }
     }
   }
 }

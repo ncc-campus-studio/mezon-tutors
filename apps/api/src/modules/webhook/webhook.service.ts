@@ -6,7 +6,13 @@ import {
   EWalletTransactionType,
   Prisma,
 } from '@mezon-tutors/db';
+import {
+  mapVnpayResponseToTrialLessonCancelCode,
+  ROUTES,
+  type TrialLessonCheckoutCancelCode,
+} from '@mezon-tutors/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AppConfigService } from '../../shared/services/app-config.service';
 import { VnpayService } from '../vnpay/vnpay.service';
 
 type VnpayQuery = Record<string, string | string[] | undefined>;
@@ -15,8 +21,41 @@ type VnpayQuery = Record<string, string | string[] | undefined>;
 export class WebhookService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly vnpayService: VnpayService
+    private readonly vnpayService: VnpayService,
+    private readonly appConfig: AppConfigService
   ) {}
+
+  /** Absolute URL on the SPA (trial lesson success or cancel with ?code=). */
+  async buildTrialLessonVnpayReturnRedirectUrl(query: VnpayQuery): Promise<string> {
+    const frontend = this.appConfig.frontendUrl.replace(/\/$/, '');
+    const toCancel = (code: TrialLessonCheckoutCancelCode) =>
+      `${frontend}${ROUTES.CHECKOUT.TRIAL_LESSON_CANCEL_WITH_CODE(code)}`;
+
+    const verification = this.vnpayService.verifyReturnUrl(query);
+    if (!verification.isVerified) {
+      return toCancel('invalid_signature');
+    }
+
+    try {
+      const result = await this.applyVnpayPaymentResult(query);
+      if (result.paymentStatus === EPaymentStatus.SUCCEEDED) {
+        return `${frontend}${ROUTES.CHECKOUT.TRIAL_LESSON_SUCCESS(result.bookingId)}`;
+      }
+      const code = mapVnpayResponseToTrialLessonCancelCode(
+        result.responseCode,
+        result.transactionStatus
+      );
+      return toCancel(code);
+    } catch (e) {
+      if (e instanceof NotFoundException) {
+        return toCancel('order_not_found');
+      }
+      if (e instanceof BadRequestException) {
+        return toCancel('gateway_error');
+      }
+      throw e;
+    }
+  }
 
   async handleVnpayReturn(query: VnpayQuery) {
     const verification = this.vnpayService.verifyReturnUrl(query);
@@ -53,6 +92,7 @@ export class WebhookService {
       select: {
         id: true,
         paymentStatus: true,
+        grossAmount: true,
         tutorAmount: true,
         tutor: {
           select: {
@@ -122,7 +162,7 @@ export class WebhookService {
             bookingId: booking.id,
             type: EWalletTransactionType.BOOKING_PAYMENT,
             direction: EWalletTransactionDirection.CREDIT,
-            amount: booking.tutorAmount,
+            amount: booking.grossAmount,
             description: `Trial lesson payment settled for booking ${booking.id}`,
           },
         });
