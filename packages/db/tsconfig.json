@@ -25,7 +25,6 @@
   "include": [
     "index.ts",
     "prisma.config.ts",
-    "prisma/**/*.ts",
     "src/**/*.ts"
   ],
   "exclude": [
