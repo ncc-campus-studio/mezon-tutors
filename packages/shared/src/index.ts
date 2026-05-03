@@ -33,6 +33,7 @@ export * from './constants/header';
 export * from './constants/dashboard';
 export * from './constants/dashboard-booking-request';
 export * from './constants/payment';
+export * from './constants/trial-lesson-checkout-outcome';
 export * from './constants/my-schedule';
 export * from './constants/my-lesson';
 export * from './constants/cloudinary';

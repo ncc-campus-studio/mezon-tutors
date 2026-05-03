@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "@/components/ui";
 import { useCurrency } from "@/hooks";
 import {
@@ -16,9 +16,6 @@ import { ECurrency, formatToCurrency } from "@mezon-tutors/shared";
 import { PaymentMethodId, PaymentMethodSelection } from "@/components/common/PaymentMethodSelection";
 import { PaymentSummaryCard } from "./components/PaymentSummaryCard";
 import { TrialLessonDetailsCard } from "./components/TrialLessonDetailsCard";
-
-const PAYMENT_RESULT_CHECK_INTERVAL = 5000;
-const PAYMENT_RESULT_CHECK_TIMEOUT = 5 * 60 * 1000;
 
 export default function TrialLessonCheckoutPage() {
   const t = useTranslations("TrialLessonCheckout.Screen");
@@ -56,34 +53,16 @@ export default function TrialLessonCheckoutPage() {
   const {
     data: currentBooking,
     isPending: isCurrentBookingPending,
-    refetch: refetchCurrentBooking,
   } = useGetCurrentTrialLessonBooking(tutorId, shouldLoadCurrentBooking);
   const isCurrentBookingLoading = shouldLoadCurrentBooking && isCurrentBookingPending;
   const createBooking = useCreateTrialLessonBookingMutation();
-  const paymentWindowRef = useRef<Window | null>(null);
-  const [isWaitingPaymentResult, setIsWaitingPaymentResult] = useState(false);
 
-  const openPaymentWindow = useCallback(
-    (url: string) => {
-      if (typeof window === "undefined") {
-        return;
-      }
-      if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
-        paymentWindowRef.current.location.href = url;
-        paymentWindowRef.current.focus();
-        setIsWaitingPaymentResult(true);
-        return;
-      }
-      const paymentWindow = window.open(url, "trial-lesson-checkout", "width=1100,height=800");
-      if (!paymentWindow) {
-        toast.error(t("toast.popupBlockedTitle"), { description: t("toast.popupBlockedDescription") });
-        return;
-      }
-      paymentWindowRef.current = paymentWindow;
-      setIsWaitingPaymentResult(true);
-    },
-    [t],
-  );
+  const redirectToVnpay = useCallback((url: string) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.location.assign(url);
+  }, []);
 
   useEffect(() => {
     if (
@@ -97,47 +76,11 @@ export default function TrialLessonCheckoutPage() {
   }, [currentBooking]);
 
   useEffect(() => {
-    if (!shouldLoadCurrentBooking || !paymentLink || !isWaitingPaymentResult) {
-      return;
-    }
-    const intervalId = window.setInterval(() => {
-      void refetchCurrentBooking();
-    }, PAYMENT_RESULT_CHECK_INTERVAL);
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [isWaitingPaymentResult, paymentLink, refetchCurrentBooking, shouldLoadCurrentBooking]);
-
-  useEffect(() => {
-    if (!paymentLink || !isWaitingPaymentResult) {
-      return;
-    }
-    const timeoutId = window.setTimeout(() => {
-      if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
-        paymentWindowRef.current.close();
-      }
-      paymentWindowRef.current = null;
-      setIsWaitingPaymentResult(false);
-    }, PAYMENT_RESULT_CHECK_TIMEOUT);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [isWaitingPaymentResult, paymentLink]);
-
-  useEffect(() => {
     if (!currentBooking?.hasBooked || !currentBooking.paymentStatus) {
       return;
     }
-    if (currentBooking.paymentStatus !== "PENDING") {
-      if (paymentWindowRef.current && !paymentWindowRef.current.closed) {
-        paymentWindowRef.current.close();
-      }
-      paymentWindowRef.current = null;
-      setIsWaitingPaymentResult(false);
-      if (currentBooking.paymentStatus === "SUCCEEDED") {
-        setPaymentLink(null);
-      }
+    if (currentBooking.paymentStatus === "SUCCEEDED") {
+      setPaymentLink(null);
     }
   }, [currentBooking]);
 
@@ -148,7 +91,7 @@ export default function TrialLessonCheckoutPage() {
     if (currentBooking?.hasBooked && currentBooking.status !== "CANCELLED") {
       if (currentBooking.paymentStatus === "PENDING" && currentBooking.paymentUrl) {
         setPaymentLink(currentBooking.paymentUrl);
-        openPaymentWindow(currentBooking.paymentUrl);
+        redirectToVnpay(currentBooking.paymentUrl);
         return;
       }
       toast.error(t("toast.alreadyBookedTitle"), { description: t("toast.alreadyBookedDescription") });
@@ -164,13 +107,13 @@ export default function TrialLessonCheckoutPage() {
       });
       setPaymentLink(booking.paymentUrl);
       if (booking.paymentUrl) {
-        openPaymentWindow(booking.paymentUrl);
+        redirectToVnpay(booking.paymentUrl);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : t("toast.bookingFailedFallback");
       toast.error(t("toast.bookingFailedTitle"), { description: message });
     }
-  }, [createBooking, currency, currentBooking, openPaymentWindow, query, t, tutor]);
+  }, [createBooking, currency, currentBooking, redirectToVnpay, query, t, tutor]);
 
   const paymentMethodHandlers = useMemo<Record<PaymentMethodId, () => Promise<void>>>(
     () => ({
@@ -200,8 +143,8 @@ export default function TrialLessonCheckoutPage() {
     if (!paymentLink) {
       return;
     }
-    openPaymentWindow(paymentLink);
-  }, [openPaymentWindow, paymentLink]);
+    redirectToVnpay(paymentLink);
+  }, [redirectToVnpay, paymentLink]);
 
   if (!query) {
     return (

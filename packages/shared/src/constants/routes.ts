@@ -41,6 +41,10 @@ export const ROUTES = {
   },
   CHECKOUT: {
     TRIAL_LESSON: '/checkout/trial-lesson',
+    TRIAL_LESSON_SUCCESS: (bookingId: string) => `/checkout/trial-lesson/success/${bookingId}`,
+    TRIAL_LESSON_CANCEL: '/checkout/trial-lesson/cancel',
+    TRIAL_LESSON_CANCEL_WITH_CODE: (cancelCode: string) =>
+      `/checkout/trial-lesson/cancel?code=${encodeURIComponent(cancelCode)}`,
     SUBCRIPTION_PLAN: '/checkout/subcription-plan',
   },
 } as const;
