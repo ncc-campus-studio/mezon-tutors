@@ -1,4 +1,4 @@
-import TrialLessonCheckoutSuccessPage from '@/pages/main/checkout/trial-lesson/success';
+import TrialLessonCheckoutSuccessPage from '@/views/main/checkout/trial-lesson/success';
 
 type PageProps = {
   params: Promise<{ id: string }>;

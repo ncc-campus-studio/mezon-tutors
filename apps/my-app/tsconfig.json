@@ -24,7 +24,7 @@
       "hooks/*": ["./hooks/*"],
       "utils/*": ["./utils/*"],
       "components/*": ["./components/*"],
-      "pages/*": ["./pages/*"],
+      "views/*": ["./src/views/*"],
       "services/*": ["./services/*"],
       "providers/*": ["./providers/*"]
     }
