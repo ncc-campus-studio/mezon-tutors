@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import MezonlyLogo from "@/public/images/Mezonly-logo.png";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useAtomValue, useSetAtom } from "jotai";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { LoginButton } from "@/components/auth/LoginButton";
+import { HeaderNotification } from "@/components/common/HeaderNotification";
 import {
   Avatar,
   AvatarFallback,
@@ -18,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui";
-import { LoginButton } from "@/components/auth/LoginButton";
-import { initAuthAtom, isAuthenticatedAtom, userAtom } from "@/store/auth.atom";
 import { useCurrency } from "@/hooks";
+import MezonlyLogo from "@/public/images/Mezonly-logo.png";
+import { initAuthAtom, isAuthenticatedAtom, userAtom } from "@/store/auth.atom";
 
 export default function Header() {
   const t = useTranslations("Common.Header");
@@ -70,7 +71,11 @@ export default function Header() {
 
         <nav className="hidden items-center gap-6 md:flex">
           {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className="text-md font-medium text-slate-600 transition hover:text-violet-700">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-md font-medium text-slate-600 transition hover:text-violet-700"
+            >
               {item.label}
             </Link>
           ))}
@@ -101,11 +106,17 @@ export default function Header() {
           >
             {locale.toUpperCase()}
           </Button>
+          {mounted && isAuthenticated ? (
+            <HeaderNotification enabled={isAuthenticated} />
+          ) : null}
           {mounted ? <LoginButton label={t("login")} /> : null}
           {mounted && isAuthenticated && (
             <Avatar className="size-8 border border-violet-200">
               {user?.avatar ? (
-                <AvatarImage src={user.avatar} alt={user?.username ?? "User avatar"} />
+                <AvatarImage
+                  src={user.avatar}
+                  alt={user?.username ?? "User avatar"}
+                />
               ) : null}
               <AvatarFallback>{userInitials}</AvatarFallback>
             </Avatar>
