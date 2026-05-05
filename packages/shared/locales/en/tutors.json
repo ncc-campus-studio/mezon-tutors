@@ -339,6 +339,9 @@
     "videoIntroTitle": "Do you want to sound like a native speaker?",
     "languagesTitle": "I speak",
     "scheduleHint": "Times are shown in your local timezone: {timezone}",
+    "viewFullSchedule": "View full schedule",
+    "fullScheduleTitle": "Full Schedule",
+    "basedOnTimezone": "Based on your timezone ({timezone})",
     "mobileSchedule": {
       "seeMySchedule": "See My Schedule",
       "backToSchedule": "Back",

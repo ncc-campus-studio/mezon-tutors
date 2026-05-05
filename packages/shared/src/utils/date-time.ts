@@ -1,4 +1,9 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export function formatDateDMY(isoDateString: string): string {
   return dayjs(isoDateString).format('DD/MM/YYYY')
@@ -40,4 +45,57 @@ export function utcDateToHHmm(input: Date): string {
 
 export function utcDateToMinutes(input: Date): number {
   return input.getUTCHours() * 60 + input.getUTCMinutes()
+}
+
+export function formatWeekday(date: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { weekday: 'short' })
+    .format(date)
+    .toUpperCase()
+}
+
+export function formatWeekRange(weekDates: Date[], locale: string): string {
+  if (!weekDates.length) return ''
+  
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  
+  return `${formatter.format(weekDates[0])} - ${formatter.format(weekDates[weekDates.length - 1])}`
+}
+
+export function formatTimezoneToUTC(tz: string): string {
+  try {
+    const offset = dayjs().tz(tz).utcOffset()
+    const hours = Math.floor(Math.abs(offset) / 60)
+    const minutes = Math.abs(offset) % 60
+    const sign = offset >= 0 ? '+' : '-'
+    
+    return minutes > 0 
+      ? `UTC${sign}${hours}:${String(minutes).padStart(2, '0')}`
+      : `UTC${sign}${hours}`
+  } catch {
+    return tz
+  }
+}
+
+export function getWeekStartMonday(now = new Date()): Date {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const jsDay = today.getDay()
+  const distanceToMonday = jsDay === 0 ? 6 : jsDay - 1
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - distanceToMonday)
+  return monday
+}
+
+export function addDays(date: Date, days: number): Date {
+  const result = new Date(date)
+  result.setDate(result.getDate() + days)
+  return result
+}
+
+export function formatYmd(date: Date): string {
+  const pad2 = (num: number) => String(num).padStart(2, '0')
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }

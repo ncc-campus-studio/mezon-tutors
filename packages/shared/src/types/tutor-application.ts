@@ -1,6 +1,6 @@
 import { VerificationStatus } from '../enums/verification-status';
-import { ABOUT_COUNTRIES } from '../constants/tutor-profile';
 import { ECurrency } from '../enums/currency';
+import { ABOUT_COUNTRIES } from '../constants/tutor-profile';
 import {
   VALID_IDENTITY_VERIFICATION_STATUSES,
   VALID_PROFESSIONAL_DOCUMENT_STATUSES,
@@ -46,7 +46,7 @@ export interface SubmitTutorProfileDto {
 
   videoUrl: string;
 
-  price: number;
+  pricePerHour: number;
   currency: ECurrency;
   availability: TutorAvailabilitySlotDto[];
 }
@@ -119,12 +119,7 @@ export type TutorProfile = {
   experience: string;
   motivate: string;
   headline: string;
-  prices: {
-    baseCurrency: ECurrency;
-    usd: number;
-    vnd: number;
-    php: number;
-  };
+  pricePerHour: number;
   isProfessional: boolean;
   verificationStatus: VerificationStatus;
   totalLessonsTaught: number;
