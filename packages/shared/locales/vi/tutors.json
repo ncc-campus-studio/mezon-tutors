@@ -339,6 +339,9 @@
     "videoIntroTitle": "Bạn có muốn nói như người bản xứ?",
     "languagesTitle": "Ngôn ngữ tôi nói",
     "scheduleHint": "Khung giờ hiển thị theo múi giờ của bạn: {timezone}",
+    "viewFullSchedule": "Xem lịch đầy đủ",
+    "fullScheduleTitle": "Lịch đầy đủ",
+    "basedOnTimezone": "Dựa trên múi giờ của bạn ({timezone})",
     "mobileSchedule": {
       "seeMySchedule": "Xem lịch dạy",
       "backToSchedule": "Quay lại",

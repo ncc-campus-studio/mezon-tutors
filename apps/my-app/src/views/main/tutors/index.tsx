@@ -16,11 +16,11 @@ import { useGetVerifiedTutors } from "@/services/tutor-profile/tutor-profile.api
 import { useCurrency } from "@/hooks";
 import {
   ECountry,
-  ECurrency,
   ESubject,
   ETutorSortBy,
   MAX_PRICE,
   MIN_PRICE,
+  ROUTES,
   type VerifiedTutorProfileDto,
 } from "@mezon-tutors/shared";
 import TutorCard from "./components/TutorCard";
@@ -225,6 +225,10 @@ export default function TutorsPage() {
     [updatePreviewOffset]
   );
 
+const handleTutorCardClick = (tutor: VerifiedTutorProfileDto) => {
+    window.open(ROUTES.TUTOR.DETAIL(tutor.id), "_blank");
+  };
+
   useEffect(() => {
     if (!previewTutor) return;
     updatePreviewOffset(previewTutor.id);
@@ -364,7 +368,7 @@ export default function TutorsPage() {
                     tutor={tutor}
                     isActive={previewTutor?.id === tutor.id}
                     onHoverAction={handlePreviewTutorChange}
-                    onSelectAction={handlePreviewTutorChange}
+                    onSelectAction={handleTutorCardClick}
                   />
                 </div>
               ))}

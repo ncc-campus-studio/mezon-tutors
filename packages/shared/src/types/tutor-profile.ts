@@ -326,5 +326,6 @@ export type TimeSlot = {
 export type TutorProfileAvailabilityState = {
   selectedDayIndex: number
   hourlyRate: string
+  currency: ECurrency
   slotsByDay: Record<string, TimeSlot[]>
 }
