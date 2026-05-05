@@ -55,6 +55,25 @@ export class TutorProfileService {
     };
   }
 
+  async getMyTutorProfileStatus(userId: string): Promise<{ hasProfile: boolean; verificationStatus: VerificationStatus | null }> {
+    const profile = await this.prisma.tutorProfile.findUnique({
+      where: { userId },
+      select: { verificationStatus: true },
+    })
+
+    if (!profile) {
+      return {
+        hasProfile: false,
+        verificationStatus: null,
+      }
+    }
+
+    return {
+      hasProfile: true,
+      verificationStatus: profile.verificationStatus,
+    }
+  }
+
   async createReview(
     tutorId: string,
     reviewerId: string,

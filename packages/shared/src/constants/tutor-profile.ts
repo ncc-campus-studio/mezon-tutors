@@ -126,3 +126,32 @@ export const TUTOR_DETAIL_LAYOUT_CONFIG = {
   sidebarWidth: 320,
   bottomPadding: 24,
 } as const;
+
+export const VIDEO_PREVIEW_WIDTH = 420;
+
+export const YEAR_PICKER_CONFIG = {
+  minYear: 1950,
+  maxYear: new Date().getFullYear(),
+} as const;
+
+export const TEACHING_CERTIFICATES = [
+  'IELTS',
+  'TOEIC',
+  'TOEFL',
+  'TEFL',
+  'TESOL',
+  'CELTA',
+] as const;
+
+export const BECOME_TUTOR_STEPS = {
+  ABOUT: 1,
+  PHOTO: 2,
+  CERTIFICATION: 3,
+  VIDEO: 4,
+  AVAILABILITY: 5,
+  FINAL: 6,
+} as const;
+
+export function calculateStepProgress(currentStep: number): number {
+  return (currentStep - 1) * 20;
+}
