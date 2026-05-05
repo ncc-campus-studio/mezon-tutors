@@ -25,6 +25,11 @@ export const CALENDAR_CONFIG = {
     NORMAL: 136,
   },
   DAYS_PER_WEEK: 7,
+  SCHEDULE_VIEWER: {
+    SLOT_MINUTES: 30,
+    COMPACT_BLOCK_HOURS: 4,
+    MODAL_MAX_HEIGHT: 'calc(85vh - 240px)',
+  },
 } as const;
 
 export const MOBILE_CALENDAR_CONFIG = {
