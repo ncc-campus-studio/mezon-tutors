@@ -99,3 +99,7 @@ export function formatYmd(date: Date): string {
   const pad2 = (num: number) => String(num).padStart(2, '0')
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
+
+export function addMinutes(date: Date, minutes: number): Date {
+  return new Date(date.getTime() + minutes * 60 * 1000);
+}
